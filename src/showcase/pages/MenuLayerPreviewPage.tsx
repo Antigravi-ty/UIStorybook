@@ -7,7 +7,8 @@ import {
   Info,
   Gamepad2,
   Wrench,
-  Settings
+  Settings,
+  Ruler
 } from 'lucide-react';
 import { MorphContainer, ContainerTransitionMode } from '../../navigation/transitions';
 import { Badge } from '../../primitives/Badge';
@@ -108,40 +109,164 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           <h1 className="text-2xl font-bold tracking-tight">Menu Layer 实时预览</h1>
         </div>
 
-        {/* 右侧轻量控制项：动效模式切换 */}
-        <div className="flex items-center gap-2 text-xs">
-          <span className={`font-medium ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-            过渡动效:
-          </span>
-          <div className="flex items-center gap-1.5 p-1 rounded-xl border bg-neutral-100/70 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
-            <button
-              type="button"
-              onClick={() => setTransitionMode('fluid-morph')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                transitionMode === 'fluid-morph'
-                  ? 'bg-amber-500 text-white font-bold shadow-2xs'
-                  : isLight
-                  ? 'text-neutral-600 hover:text-neutral-900'
-                  : 'text-neutral-400 hover:text-neutral-200'
-              }`}
-              title="Apple HIG 0.28s 连续流体形变"
-            >
-              FluidMorph (连续流体)
-            </button>
-            <button
-              type="button"
-              onClick={() => setTransitionMode('sequenced-step')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                transitionMode === 'sequenced-step'
-                  ? 'bg-amber-500 text-white font-bold shadow-2xs'
-                  : isLight
-                  ? 'text-neutral-600 hover:text-neutral-900'
-                  : 'text-neutral-400 hover:text-neutral-200'
-              }`}
-              title="100ms 淡出 -> 150ms 尺寸形变 -> 100ms 淡入"
-            >
-              SequencedStep (三段分步)
-            </button>
+        {/* 右侧轻量控制项：动效模式切换与布局数据导出 */}
+        <div className="flex items-center gap-3 text-xs flex-wrap">
+          <button
+            type="button"
+            onClick={async () => {
+              const previewStage = document.getElementById('storybook-preview-stage');
+              if (!previewStage) return;
+
+              const winW = window.innerWidth;
+              const winH = window.innerHeight;
+              const shellEl = previewStage.querySelector<HTMLElement>('[data-morph-container="true"], [data-panel="container"]');
+              const headerEl = previewStage.querySelector<HTMLElement>('[data-ui-element="panel-header"]');
+              const tabsEl = previewStage.querySelector<HTMLElement>('[role="tablist"]');
+              const tabButtons = Array.from(previewStage.querySelectorAll<HTMLElement>('[role="tab"]'));
+              const contentEl = previewStage.querySelector<HTMLElement>('[data-ui-element="panel-content"]');
+              const footerEl = previewStage.querySelector<HTMLElement>('[data-ui-element="panel-footer"]');
+              const cards = Array.from(previewStage.querySelectorAll<HTMLElement>('button[data-ui-element="car-card"], .grid button'));
+              const colorItems = Array.from(previewStage.querySelectorAll<HTMLElement>('[data-ui-element="color-order-item"], .grid .rounded-lg'));
+
+              const getPadStr = (cs: CSSStyleDeclaration) => `top=${cs.paddingTop} right=${cs.paddingRight} bottom=${cs.paddingBottom} left=${cs.paddingLeft}`;
+              const getMarginStr = (cs: CSSStyleDeclaration) => `top=${cs.marginTop} right=${cs.marginRight} bottom=${cs.marginBottom} left=${cs.marginLeft}`;
+              const getRectStr = (r: DOMRect) => `${Math.round(r.width * 10) / 10}px × ${Math.round(r.height * 10) / 10}px (x: ${Math.round(r.x)}, y: ${Math.round(r.y)})`;
+
+              const lines: string[] = [];
+              lines.push('========================================================================');
+              lines.push(` [UI STORYBOOK SNAPSHOT] ROUTE: [${currentRoute.toUpperCase()}]`);
+              lines.push('========================================================================');
+              lines.push(`• Window Viewport: ${winW}px × ${winH}px`);
+
+              if (shellEl) {
+                const sRect = shellEl.getBoundingClientRect();
+                const sCs = window.getComputedStyle(shellEl);
+                lines.push('\n[1. MENU CONTAINER (OUTER SHELL)]');
+                lines.push(`  • Size:         ${getRectStr(sRect)}`);
+                lines.push(`  • Inline/CSS W: ${shellEl.style.width || sCs.width} (Max-W: ${sCs.maxWidth})`);
+                lines.push(`  • Padding:      ${getPadStr(sCs)}`);
+                lines.push(`  • Overflow:     ${sCs.overflow}`);
+              }
+
+              if (headerEl) {
+                const hRect = headerEl.getBoundingClientRect();
+                const hCs = window.getComputedStyle(headerEl);
+                lines.push('\n[2. PANEL HEADER]');
+                lines.push(`  • Size:         ${getRectStr(hRect)}`);
+                lines.push(`  • Padding:      ${getPadStr(hCs)}`);
+                lines.push(`  • Title:        "${headerEl.querySelector('h2')?.textContent?.trim() || ''}"`);
+              }
+
+              if (tabsEl) {
+                const tRect = tabsEl.getBoundingClientRect();
+                const tCs = window.getComputedStyle(tabsEl);
+                lines.push('\n[3. UNDERLINE TABS (NAVIGATION HEADER)]');
+                lines.push(`  • Tablist Size: ${getRectStr(tRect)}`);
+                lines.push(`  • Tablist Pad:  ${getPadStr(tCs)}`);
+                lines.push(`  • Tab Count:    ${tabButtons.length} tab(s)`);
+                tabButtons.forEach((btn, idx) => {
+                  const bRect = btn.getBoundingClientRect();
+                  const bCs = window.getComputedStyle(btn);
+                  const isSelected = btn.getAttribute('aria-selected') === 'true';
+                  const label = btn.textContent?.trim() || `Tab ${idx + 1}`;
+                  lines.push(`    [Tab #${idx + 1}] "${label}" (Active: ${isSelected})`);
+                  lines.push(`      Size: ${getRectStr(bRect)} | Padding: ${getPadStr(bCs)} | Margin: ${getMarginStr(bCs)}`);
+                });
+              }
+
+              if (contentEl) {
+                const cRect = contentEl.getBoundingClientRect();
+                const cCs = window.getComputedStyle(contentEl);
+                lines.push('\n[4. PANEL CONTENT (BODY)]');
+                lines.push(`  • Size:         ${getRectStr(cRect)}`);
+                lines.push(`  • Scroll Size:  scrollWidth=${contentEl.scrollWidth}px, scrollHeight=${contentEl.scrollHeight}px`);
+                lines.push(`  • Padding:      ${getPadStr(cCs)}`);
+                lines.push(`  • Overflow:     X=${cCs.overflowX}, Y=${cCs.overflowY}`);
+                lines.push(`  • Max-Height:   ${cCs.maxHeight}`);
+              }
+
+              if (cards.length > 0) {
+                lines.push(`\n[5. CAR / OPTION CARDS (${cards.length} items)]`);
+                cards.slice(0, 8).forEach((card, idx) => {
+                  const cdRect = card.getBoundingClientRect();
+                  const cdCs = window.getComputedStyle(card);
+                  const title = card.querySelector('span')?.textContent?.trim() || `Card ${idx + 1}`;
+                  lines.push(`    [Card #${idx + 1}] "${title}": ${getRectStr(cdRect)} | Pad: ${getPadStr(cdCs)}`);
+                });
+              }
+
+              if (colorItems.length > 0) {
+                lines.push(`\n[6. COLOR PALETTE ITEMS (${colorItems.length} items)]`);
+                colorItems.slice(0, 12).forEach((item, idx) => {
+                  const itemRect = item.getBoundingClientRect();
+                  const itemCs = window.getComputedStyle(item);
+                  const text = item.textContent?.replace(/\\s+/g, ' ').trim() || `Color ${idx + 1}`;
+                  lines.push(`    [Color #${idx + 1}] "${text}": ${getRectStr(itemRect)} | Pad: ${getPadStr(itemCs)}`);
+                });
+              }
+
+              if (footerEl) {
+                const fRect = footerEl.getBoundingClientRect();
+                const fCs = window.getComputedStyle(footerEl);
+                lines.push('\n[7. PANEL FOOTER]');
+                lines.push(`  • Size:         ${getRectStr(fRect)}`);
+                lines.push(`  • Padding:      ${getPadStr(fCs)}`);
+                lines.push(`  • Content:      "${footerEl.textContent?.replace(/\\s+/g, ' ').trim() || ''}"`);
+              }
+
+              lines.push('========================================================================\\n');
+              const report = lines.join('\\n');
+              console.log(report);
+              if (navigator.clipboard?.writeText) {
+                try {
+                  await navigator.clipboard.writeText(report);
+                  showToast('✓ 预览布局数据已输出至控制台并复制到剪贴板');
+                } catch (_) {
+                  showToast('✓ 预览布局数据已输出至控制台');
+                }
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono font-medium transition-all active:scale-95 cursor-pointer bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 border-neutral-300 dark:border-neutral-700 shadow-2xs"
+            title="打印并复制当前 Storybook 实时预览中元素的尺寸、外边距、内边距数据"
+          >
+            <Ruler className="h-3.5 w-3.5 text-amber-500" />
+            <span>导出当前预览布局数据</span>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <span className={`font-medium ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+              过渡动效:
+            </span>
+            <div className="flex items-center gap-1.5 p-1 rounded-xl border bg-neutral-100/70 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
+              <button
+                type="button"
+                onClick={() => setTransitionMode('fluid-morph')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  transitionMode === 'fluid-morph'
+                    ? 'bg-amber-500 text-white font-bold shadow-2xs'
+                    : isLight
+                    ? 'text-neutral-600 hover:text-neutral-900'
+                    : 'text-neutral-400 hover:text-neutral-200'
+                }`}
+                title="Apple HIG 0.28s 连续流体形变"
+              >
+                FluidMorph (连续流体)
+              </button>
+              <button
+                type="button"
+                onClick={() => setTransitionMode('sequenced-step')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  transitionMode === 'sequenced-step'
+                    ? 'bg-amber-500 text-white font-bold shadow-2xs'
+                    : isLight
+                    ? 'text-neutral-600 hover:text-neutral-900'
+                    : 'text-neutral-400 hover:text-neutral-200'
+                }`}
+                title="100ms 淡出 -> 150ms 尺寸形变 -> 100ms 淡入"
+              >
+                SequencedStep (三段分步)
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -382,6 +507,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
 
       {/* 核心单一预览引擎容器 (Single-Container Live Preview Stage) */}
       <div
+        id="storybook-preview-stage"
         className={`relative min-h-[580px] rounded-2xl border p-6 md:p-10 flex items-center justify-center overflow-hidden transition-colors ${
           isLight 
             ? 'bg-neutral-100/70 border-neutral-200/90 shadow-inner' 
