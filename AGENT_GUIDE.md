@@ -51,6 +51,18 @@
 - **侧边栏 Sidebar 固定在屏幕左侧**：不随内容滚动，尺寸固定为 100% 原始比例，自身具备独立滚动能力。
 - **Scaling 缩放仅应用于 Content 内容工作区**：无论 Scaling 滑块如何调整（50% ~ 200%），Header 和 Sidebar 绝不受缩放影响，确保控制条与导航始终可用。
 
+### 2.5 菜单内衬与呼吸间距标准 (Padding & Cushioning Standards — 对标 RLCleanWASM)
+为确保组件从 UIStorybook 拷贝至游戏端（如 `RLCleanWASM`）时实现**零适配直接生效**，所有原子与配方组件严格恪守以下间距与属性标准：
+- **容器物理内衬规则 (`menu.container: 'p-2'`)**：
+  - 严禁空内衬 (`p-0`) 裸菜单。`MenuItem` 具备 `focus-visible:ring-2` 聚焦环与 `active:scale-[0.985]` 点击缩放，在外层面板拥有 `overflow-hidden` 时，0 内衬会导致边缘按钮光晕被截断贴边。必须保持 `p-2`（8px）内衬缓冲。
+- **3-Stage Compound 面板垂直基线与光学居中**：
+  - **Header Padding**: `px-6 pt-5 pb-4`（左右 24px 对齐；上下 20px/16px 修正大写标题在 `border-b` 分割线之上的光学垂直居中）。
+  - **Content Padding**: `px-6 py-5`（左右严格统一 24px，杜绝与 Header 产生 4px 错位锯齿）。
+  - **Footer Padding**: `px-6 py-4`（左右 24px 严格对齐基准线，上下 16px 容纳状态与按键徽章）。
+- **样式回退层兼容双重属性选择器**：
+  - 所有核心面板与容器同时携带 `data-ui-element` 与 `data-panel-section` / `data-menu-container` 双重属性（如 `data-ui-element="panel-header" data-panel-section="header"`）。
+  - 在 CSS 基础层提供硬编码样式回退（`ui-next.css` / `index.css`），防止在宿主复杂层叠或多系统共存环境下边距坍缩贴边。
+
 ---
 
 ## 3. 标准容器过渡动效与统一执行引擎 (Animation & MorphContainer Engine)

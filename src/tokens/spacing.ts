@@ -21,12 +21,12 @@ export const UI_SPACING = {
   // Component Paddings (SimpleUI Standard)
   panel: {
     window: 'p-0',
-    header: 'px-6 py-4',      // 24px horizontal, 16px vertical
-    body: 'p-6',              // 24px uniform cushioned padding
-    footer: 'px-6 py-3.5',    // 24px horizontal, 14px vertical
+    header: 'px-6 pt-5 pb-4', // Clear, unhurried header
+    body: 'px-6 py-5',        // Content breathing room
+    footer: 'px-6 py-4',      // Grounded status & action footer
   },
   menu: {
-    container: 'p-0',
+    container: 'p-2',         // 8px cushioned inner boundary
     item: 'px-4 py-3',        // 16px horizontal, 12px vertical (min-h-[52px])
     gap: 'gap-2.5',           // 10px item separation
     iconGap: 'gap-3.5',       // 14px optical icon margin
@@ -61,3 +61,6 @@ export const UI_SPACING = {
     lg: 'px-2.5 py-1 text-sm min-w-[28px] min-h-[28px]',
   }
 } as const;
+
+export { UI_RADIUS } from './radius';
+export { UI_EASING } from './easing';

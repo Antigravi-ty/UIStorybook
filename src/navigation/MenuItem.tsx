@@ -83,6 +83,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       role="menuitem"
       disabled={disabled}
       onClick={onClick}
+      data-ui-element="menu-item"
       data-menu-item="true"
       className={`group relative flex items-center justify-between w-full min-h-[52px] ${UI_SPACING.menu.item} ${UI_RADIUS.lg} border font-medium text-sm transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 active:scale-[0.985] cursor-pointer select-none disabled:opacity-40 disabled:pointer-events-none ${getVariantStyles()} ${className}`}
     >

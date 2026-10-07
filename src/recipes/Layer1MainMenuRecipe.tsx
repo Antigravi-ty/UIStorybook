@@ -51,7 +51,9 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
     >
       {/* 1. TOP HEADER: Large Centered "MENU" */}
       <div
-        className={`px-6 py-5 border-b select-none text-center transition-colors ${
+        data-ui-element="panel-header"
+        data-panel-section="header"
+        className={`px-6 pt-5 pb-4 border-b select-none text-center transition-colors ${
           isLight
             ? 'border-neutral-200/90 bg-neutral-50/70 text-neutral-900'
             : 'border-neutral-800/80 bg-neutral-900/60 text-white'
@@ -63,7 +65,7 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
       </div>
 
       {/* 2. CENTER CONTENT: Resume, Play, Garage, Settings */}
-      <PanelContent scrollable={false} className="p-5">
+      <PanelContent scrollable={false} className="px-6 py-5">
         <MenuContainer ariaLabel="Main Game Menu">
           {/* Resume */}
           <MenuItem
@@ -113,7 +115,9 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
 
       {/* 3. BOTTOM FOOTER: Render Pause Indicator + Settings Shortcut Link */}
       <div
-        className={`px-5 py-3.5 border-t text-xs select-none flex items-center justify-between transition-colors ${
+        data-ui-element="panel-footer"
+        data-panel-section="footer"
+        className={`px-6 py-4 border-t text-xs select-none flex items-center justify-between transition-colors ${
           isLight
             ? 'border-neutral-200/90 text-neutral-600 bg-neutral-50/90'
             : 'border-neutral-800/80 text-neutral-400 bg-neutral-900/90'

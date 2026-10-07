@@ -114,6 +114,8 @@ export const MorphingShell: React.FC<MorphingShellProps> = ({
           >
             <MorphContainer
               ref={shellRef}
+              data-ui-element="menu-shell"
+              data-morph-container="true"
               currentKey={currentKey || (isLayer1 ? 'layer1' : 'layer2')}
               width={width}
               mode={transitionMode}

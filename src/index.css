@@ -33,3 +33,41 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.45);
 }
+
+
+/* Base resets & fallbacks for SimpleUI standard primitives */
+[data-ui-element="menu-shell"],
+[data-morph-container="true"] {
+  box-sizing: border-box;
+}
+
+[data-ui-element="panel-header"],
+[data-panel-section="header"] {
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="panel-content"],
+[data-panel-section="content"] {
+  padding: 1.25rem 1.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="panel-footer"],
+[data-panel-section="footer"] {
+  padding: 1rem 1.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="menu-container"],
+[data-menu-container="true"] {
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="menu-item"],
+[data-menu-item="true"] {
+  padding: 0.75rem 1rem;
+  min-height: 52px;
+  box-sizing: border-box;
+}

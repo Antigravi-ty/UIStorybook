@@ -27,6 +27,7 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
 }) => {
   return (
     <div
+      data-ui-element="panel-header"
       data-panel-section="header"
       className={`flex items-center justify-between ${UI_SPACING.panel.header} border-b select-none transition-colors duration-150 ${
         isLight
@@ -90,6 +91,7 @@ export const PanelContent: React.FC<PanelContentProps> = ({
 }) => {
   return (
     <div
+      data-ui-element="panel-content"
       data-panel-section="content"
       className={`flex flex-col ${UI_SPACING.panel.body} w-full box-border ${
         scrollable ? 'overflow-y-auto max-h-[540px]' : ''
@@ -119,6 +121,7 @@ export const PanelFooter: React.FC<PanelFooterProps> = ({
 }) => {
   return (
     <div
+      data-ui-element="panel-footer"
       data-panel-section="footer"
       className={`flex items-center justify-between ${UI_SPACING.panel.footer} border-t text-xs select-none transition-colors duration-150 ${
         isLight

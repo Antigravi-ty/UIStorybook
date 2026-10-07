@@ -53,6 +53,7 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({
       role="menu"
       aria-label={ariaLabel}
       onKeyDown={handleKeyDown}
+      data-ui-element="menu-container"
       data-menu-container="true"
       className={`flex flex-col ${UI_SPACING.menu.gap} ${UI_SPACING.menu.container} w-full transition-colors ${className}`}
     >
