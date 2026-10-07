@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *, [data-theme=dark], [data-theme=dark] *));
+
+:root {
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --ease-apple: cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+body {
+  font-family: var(--font-apple);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.45);
+}

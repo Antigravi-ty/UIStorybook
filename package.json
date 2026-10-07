@@ -1,0 +1,34 @@
+{
+  "name": "ui-storybook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standardized Agent-Friendly UI Component Reference & Storybook for Web and Game Applications",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-slider": "^1.4.7",
+    "@radix-ui/react-slot": "^1.3.3",
+    "@radix-ui/react-tabs": "^1.1.21",
+    "clsx": "^2.1.1",
+    "framer-motion": "^14.0.0",
+    "lucide-react": "^1.52.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.0",
+    "vite": "^5.4.0"
+  }
+}
