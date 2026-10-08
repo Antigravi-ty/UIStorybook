@@ -90,7 +90,7 @@ export const MatchHudContainer: React.FC<MatchHudContainerProps> = ({
       <div className="relative w-full flex items-start justify-between z-30">
         {/* Top-Left: Quick Chat */}
         <div className="w-1/4 flex justify-start">
-          {showQuickChat && <QuickChatHUD messages={chatMessages} />}
+          {showQuickChat && <QuickChatHUD messages={chatMessages} isLight={isLight} />}
         </div>
 
         {/* Top-Center: Scoreboard */}
@@ -110,6 +110,7 @@ export const MatchHudContainer: React.FC<MatchHudContainerProps> = ({
             <NetworkDiagnosticsHUD
               {...telemetry}
               themeStyle={themeStyle}
+              isLight={isLight}
             />
           )}
         </div>

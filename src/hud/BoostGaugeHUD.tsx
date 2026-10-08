@@ -23,10 +23,10 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
 
   // Color dynamics
   const getBoostColor = () => {
-    if (isInfinite) return '#38bdf8'; // sky
+    if (isInfinite) return '#0284c7'; // sky
     if (clampedAmount <= 20) return '#ef4444'; // red
     if (clampedAmount <= 50) return '#f59e0b'; // amber
-    return '#10b981'; // emerald
+    return isLight ? '#059669' : '#10b981'; // emerald
   };
 
   const color = getBoostColor();
@@ -48,7 +48,13 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
       {variant === 'circular' ? (
         <div
           className={`relative flex flex-col items-center justify-center p-3 rounded-full border transition-all duration-200 ${
-            themeStyle === 'tactile'
+            isLight
+              ? themeStyle === 'tactile'
+                ? 'bg-white border-neutral-300 shadow-2xl'
+                : themeStyle === 'minimal'
+                ? 'bg-white/85 border-neutral-300 shadow-md backdrop-blur-xs'
+                : 'bg-white/85 border-neutral-300/80 shadow-2xl backdrop-blur-md'
+              : themeStyle === 'tactile'
               ? 'bg-neutral-900/95 border-neutral-700 shadow-2xl'
               : themeStyle === 'minimal'
               ? 'bg-black/60 border-neutral-800 shadow-md backdrop-blur-xs'
@@ -78,7 +84,7 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
               fill="transparent"
               strokeDasharray={`${arcTotal} ${circumference}`}
               strokeLinecap="round"
-              className="text-neutral-800/80 dark:text-neutral-800/90"
+              className={isLight ? 'text-neutral-200/90' : 'text-neutral-800/80 dark:text-neutral-800/90'}
             />
 
             {/* Foreground Active Arc */}
@@ -111,18 +117,20 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
                 </motion.div>
               )}
               {isInfinite ? (
-                <InfinityIcon className="h-10 w-10 text-sky-400 stroke-[3]" />
+                <InfinityIcon className={`h-10 w-10 ${isLight ? 'text-sky-600' : 'text-sky-400'} stroke-[3]`} />
               ) : (
                 <span
                   className="text-4xl font-black font-mono tracking-tighter tabular-nums drop-shadow-md"
-                  style={{ color: isFiring ? '#ffffff' : color }}
+                  style={{ color: isFiring ? (isLight ? '#0f172a' : '#ffffff') : color }}
                 >
                   {clampedAmount}
                 </span>
               )}
             </div>
 
-            <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-neutral-400 -mt-1">
+            <span className={`text-[10px] font-mono font-bold tracking-widest uppercase -mt-1 ${
+              isLight ? 'text-neutral-500' : 'text-neutral-400'
+            }`}>
               BOOST
             </span>
 
@@ -132,7 +140,9 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
                 <div
                   key={tick}
                   className={`h-1 w-2 rounded-full transition-colors ${
-                    clampedAmount >= tick ? 'bg-white' : 'bg-neutral-700'
+                    clampedAmount >= tick
+                      ? isLight ? 'bg-neutral-800' : 'bg-white'
+                      : isLight ? 'bg-neutral-300' : 'bg-neutral-700'
                   }`}
                 />
               ))}
@@ -142,14 +152,18 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
       ) : (
         /* Linear Variant */
         <div
-          className={`flex flex-col gap-1.5 p-3 rounded-2xl border min-w-[200px] ${
-            themeStyle === 'tactile'
+          className={`flex flex-col gap-1.5 p-3 rounded-2xl border min-w-[200px] transition-colors ${
+            isLight
+              ? themeStyle === 'tactile'
+                ? 'bg-white border-neutral-300 shadow-xl'
+                : 'bg-white/85 border-neutral-300/80 shadow-xl backdrop-blur-md'
+              : themeStyle === 'tactile'
               ? 'bg-neutral-900/95 border-neutral-700 shadow-xl'
               : 'bg-neutral-950/80 border-neutral-800 shadow-xl backdrop-blur-md'
           }`}
         >
           <div className="flex items-center justify-between text-xs font-mono font-bold">
-            <div className="flex items-center gap-1.5 text-neutral-300">
+            <div className={`flex items-center gap-1.5 ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
               <Flame className="h-3.5 w-3.5" style={{ color }} />
               <span>BOOST</span>
             </div>
@@ -158,7 +172,9 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
             </span>
           </div>
 
-          <div className="relative w-full h-3 rounded-full bg-neutral-800 overflow-hidden">
+          <div className={`relative w-full h-3 rounded-full overflow-hidden ${
+            isLight ? 'bg-neutral-200' : 'bg-neutral-800'
+          }`}>
             <div
               className="h-full rounded-full transition-all duration-75"
               style={{

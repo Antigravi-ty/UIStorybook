@@ -40,7 +40,13 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
       {/* Game Mode Pill */}
       {gameMode && (
         <div className="mb-1">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-neutral-900/70 text-neutral-300 border border-neutral-700/60 shadow-xs backdrop-blur-md">
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border shadow-xs backdrop-blur-md transition-colors ${
+              isLight
+                ? 'bg-white/85 text-neutral-700 border-neutral-300/80 shadow-xs'
+                : 'bg-neutral-900/70 text-neutral-300 border-neutral-700/60'
+            }`}
+          >
             {gameMode}
           </span>
         </div>
@@ -49,7 +55,13 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
       {/* Main Scoreboard Banner */}
       <div
         className={`flex items-center overflow-hidden rounded-2xl border transition-all duration-200 ${
-          themeStyle === 'tactile'
+          isLight
+            ? themeStyle === 'tactile'
+              ? 'bg-white border-neutral-300 shadow-xl scale-105'
+              : themeStyle === 'minimal'
+              ? 'bg-white/90 border-neutral-300/80 shadow-md backdrop-blur-sm'
+              : 'bg-white/85 border-neutral-300/80 shadow-xl backdrop-blur-md'
+            : themeStyle === 'tactile'
             ? 'bg-neutral-900/95 border-neutral-700 shadow-2xl scale-105'
             : themeStyle === 'minimal'
             ? 'bg-black/60 border-neutral-800/80 shadow-md backdrop-blur-sm'
@@ -80,27 +92,33 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
         <div
           className={`flex flex-col items-center justify-center px-4 py-1.5 min-w-[100px] transition-colors ${
             isOvertime
-              ? 'bg-amber-950/60 text-amber-300'
+              ? isLight
+                ? 'bg-amber-100/90 text-amber-900 font-bold'
+                : 'bg-amber-950/60 text-amber-300'
               : isLowTime
-              ? 'bg-red-950/70 text-red-300 animate-pulse'
+              ? isLight
+                ? 'bg-red-100/90 text-red-900 animate-pulse font-bold'
+                : 'bg-red-950/70 text-red-300 animate-pulse'
+              : isLight
+              ? 'bg-neutral-100/90 text-neutral-900 font-medium'
               : 'text-neutral-100'
           }`}
         >
           <div className="flex items-center gap-1.5 font-mono text-lg font-bold tracking-wider tabular-nums">
             {isOvertime ? (
               <>
-                <Flame className="h-3.5 w-3.5 text-amber-400 animate-bounce" />
-                <span className="text-amber-400">+{formatTime(timeRemainingSec)}</span>
+                <Flame className="h-3.5 w-3.5 text-amber-500 animate-bounce" />
+                <span className={isLight ? 'text-amber-700' : 'text-amber-400'}>+{formatTime(timeRemainingSec)}</span>
               </>
             ) : (
               <>
-                {isLowTime && <ShieldAlert className="h-3.5 w-3.5 text-red-400 animate-ping" />}
+                {isLowTime && <ShieldAlert className="h-3.5 w-3.5 text-red-500 animate-ping" />}
                 <span>{formatTime(timeRemainingSec)}</span>
               </>
             )}
           </div>
 
-          <span className="text-[9px] font-bold tracking-widest uppercase opacity-75">
+          <span className={`text-[9px] font-bold tracking-widest uppercase ${isLight ? 'text-neutral-500' : 'opacity-75'}`}>
             {isOvertime ? 'OVERTIME' : isZeroTime ? 'FINAL TOUCH' : 'MATCH TIME'}
           </span>
         </div>

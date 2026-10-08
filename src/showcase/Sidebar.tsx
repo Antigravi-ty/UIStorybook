@@ -15,7 +15,8 @@ import {
   Palette,
   Eye,
   AppWindow,
-  Gauge
+  Gauge,
+  Loader2
 } from 'lucide-react';
 import { useAccentStore } from '../tokens';
 import { AccentColor } from '../tokens/colors';
@@ -29,6 +30,7 @@ export type ShowcaseTab =
   | 'panels' 
   | 'layer-preview'
   | 'hud-preview'
+  | 'loading-preview'
   | 'menus'
   | 'navigation' 
   | 'live-preview'
@@ -60,6 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'panels', label: '3-Stage Compound 面板', icon: <LayoutTemplate className="h-4 w-4" />, category: 'Compound Widgets' },
     { id: 'layer-preview', label: 'Menu Layer 实时预览', icon: <Layers className="h-4 w-4" />, category: 'Navigation & Motion' },
     { id: 'hud-preview', label: 'Match HUD 实时预览', icon: <Gauge className="h-4 w-4 text-emerald-500" />, category: 'Navigation & Motion' },
+    { id: 'loading-preview', label: 'Loading 加载与双层进度条', icon: <Loader2 className="h-4 w-4 text-sky-500" />, category: 'Navigation & Motion' },
     { id: 'menus', label: 'Menu 预留战报与候选规范', icon: <FolderTree className="h-4 w-4" />, category: 'Navigation & Motion' },
     { id: 'navigation', label: 'Navigation 导航与弹窗系统', icon: <Compass className="h-4 w-4" />, category: 'Navigation & Motion' },
     { id: 'live-preview', label: 'Live Preview 实时预览', icon: <Eye className="h-4 w-4 text-amber-500" />, category: 'Navigation & Motion' },

@@ -259,3 +259,33 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 | `<NetworkDiagnosticsHUD>` | 120Hz 物理时钟、Ping、Sub-tick 时延抖动遥测 | 右上角 | `src/hud/NetworkDiagnosticsHUD.tsx` |
 | `<MatchHudContainer>` | HUD 全局编排容器 (支持 Safe Area 与独立开关) | 全屏视口 | `src/hud/MatchHudContainer.tsx` |
 
+### 8.3 HUD 亮暗色调与球场光照自适应 (Daylight & Ambient Adaptation)
+- **球场光照控制器**：`<MatchHudPreviewPage>` 提供「日光球场 (Daylight · 亮色调)」、「黄昏晚霞 (Twilight)」与「夜间电竞 (Night · 暗色调)」三档预设及平滑亮度滑块，用于模拟高动态范围游戏场景。
+- **高对比描边与玻璃材质**：所有 HUD 控件均自带微描边与柔和投影，确保在亮色日光球场草皮与深色夜空背景下均保持极佳的辨识度。
+- **右上角遥测 HUD 亮色模式**：`<NetworkDiagnosticsHUD>` 支持 `isLight` 玻璃拟态，呈现晶莹白底、高对比文字与动态状态着色。
+
+---
+
+## 9. 加载界面与双层进度条规范 (Loading Pipeline Architecture)
+
+为了呈现符合 Apple 极简美学 (Simple Simplicity) 的资源初始化体验，系统引入解耦的加载子系统：
+
+### 9.1 双层进度推进模式 (Dual-Layer Progress Architecture)
+1. **全局步骤条 (Overall Pipeline Progress)**：
+   - 追踪宏观流程的推进阶段（如 `Step 3 of 6: Downloading Champions Field Geometry`）。
+   - 采用标准细扁圆角条（`h-1.5`）与柔和弹簧缓动。
+2. **微步骤进度条 (Micro-Step Progress)**：
+   - **确定态 (Determinate - 如资产/纹理下载)**：实时显示传输统计（已加载大小、文件总量、瞬时传输速率 `MB/s`、预估剩余秒数）。
+   - **不确定态 (Indeterminate - 如编译着色器 Compiling Shaders)**：采用 Apple 风格流光呼吸波（Shimmer Wave），并附带明确的状态文案（如 `Warming graphics pipeline cache (18/64 variants) · WebGPU active, not frozen`），消除假死焦虑。
+
+### 9.2 异常熔断与红色告警 (Throw Error & Failure Recovery)
+- 当异步管线抛出致命异常 (`Throw Error`) 时：
+  - 双层进度条即时熔断变为警告红色 (`bg-red-500` 与红色辉光)；
+  - 动态弹出手风琴式错误详情卡（包含错误代码、技术诊断堆栈与重试/重置操作按钮）；
+  - 允许点击「恢复并继续」重新回到就绪推进流。
+
+### 9.3 组件索引与预览
+- **组件路径**：`<DualProgressBar>` 与 `<LoadingScreen>` (`src/loading/`)
+- **唯一预览基准**：`<LoadingScreenPreviewPage>` (`src/showcase/pages/LoadingScreenPreviewPage.tsx`)，注册于主导航栏。
+
+

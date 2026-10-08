@@ -25,9 +25,6 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
   const isCurrentlySupersonic = isSupersonic || clampedSpeed >= supersonicThreshold;
 
   // Calculate non-linear percentage per RLCleanWASM mechanics:
-  // Segment 1: 0 <= v <= 1410 -> p = (v / 1410) * 40%
-  // Segment 2: 1410 < v < 2200 -> p = 40 + ((v - 1410) / 790) * 45%
-  // Segment 3: 2200 <= v <= 2300 -> p = 85 + ((v - 2200) / 100) * 15%
   let percent = 0;
   if (clampedSpeed <= 1410) {
     percent = (clampedSpeed / 1410) * 40;
@@ -41,7 +38,6 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
   // Converted value for display
   const getDisplaySpeed = () => {
     if (unit === 'km/h') {
-      // 1 uu/s ~= 0.036 km/h (Rocket League standard: 2300 uu/s = 82.8 km/h or ~83 km/h)
       return Math.round(clampedSpeed * 0.036);
     }
     if (unit === 'mph') {
@@ -52,9 +48,9 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
 
   // Color gradient
   const getBarColor = () => {
-    if (isCurrentlySupersonic) return '#c084fc'; // purple-400
-    if (clampedSpeed > 1410) return '#34d399'; // emerald-400
-    return '#fbbf24'; // amber-400
+    if (isCurrentlySupersonic) return isLight ? '#9333ea' : '#c084fc'; // purple
+    if (clampedSpeed > 1410) return isLight ? '#059669' : '#34d399'; // emerald
+    return isLight ? '#d97706' : '#fbbf24'; // amber
   };
 
   const barColor = getBarColor();
@@ -67,8 +63,8 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
       {/* Top telemetry pill: Digital readout + Supersonic badge */}
       <div className="flex items-center justify-between w-full px-2 text-xs font-mono font-bold">
         <div className="flex items-center gap-1.5">
-          <Gauge className="h-3.5 w-3.5 text-neutral-400" />
-          <span className="text-neutral-400 text-[10px] tracking-wider uppercase">VELOCITY</span>
+          <Gauge className={`h-3.5 w-3.5 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`} />
+          <span className={`text-[10px] tracking-wider uppercase ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>VELOCITY</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -77,9 +73,13 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: [1, 1.08, 1], opacity: 1 }}
               transition={{ repeat: Infinity, duration: 0.6 }}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-400/60 text-purple-300 text-[10px] font-black tracking-widest uppercase shadow-[0_0_12px_rgba(192,132,252,0.5)]"
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-black tracking-widest uppercase shadow-xs ${
+                isLight
+                  ? 'bg-purple-100 border-purple-400 text-purple-900 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                  : 'bg-purple-500/20 border-purple-400/60 text-purple-300 shadow-[0_0_12px_rgba(192,132,252,0.5)]'
+              }`}
             >
-              <Zap className="h-3 w-3 fill-purple-300 text-purple-300" />
+              <Zap className={`h-3 w-3 ${isLight ? 'text-purple-700 fill-purple-700' : 'text-purple-300 fill-purple-300'}`} />
               <span>SUPERSONIC</span>
             </motion.div>
           )}
@@ -95,12 +95,16 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
             title="点击切换速度单位 (uu/s, km/h, mph)"
           >
             <span
-              className="text-base font-black tracking-tight tabular-nums transition-colors"
-              style={{ color: isCurrentlySupersonic ? '#d8b4fe' : '#ffffff' }}
+              className="text-base font-black tracking-tight tabular-nums transition-colors drop-shadow-xs"
+              style={{
+                color: isCurrentlySupersonic
+                  ? isLight ? '#7e22ce' : '#d8b4fe'
+                  : isLight ? '#0f172a' : '#ffffff',
+              }}
             >
               {getDisplaySpeed()}
             </span>
-            <span className="text-[10px] text-neutral-400 uppercase">{unit}</span>
+            <span className={`text-[10px] uppercase ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>{unit}</span>
           </div>
         </div>
       </div>
@@ -108,14 +112,18 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
       {/* Progress Track with Notch at 85% (2200 uu/s) */}
       <div
         className={`relative w-full h-2.5 rounded-full overflow-hidden border transition-all duration-200 ${
-          isCurrentlySupersonic
+          isLight
+            ? isCurrentlySupersonic
+              ? 'bg-purple-50 border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+              : 'bg-neutral-200/90 border-neutral-300 shadow-inner'
+            : isCurrentlySupersonic
             ? 'bg-neutral-900 border-purple-500/70 shadow-[0_0_15px_rgba(168,85,247,0.4)]'
             : 'bg-neutral-900/90 border-neutral-700/80 shadow-inner'
         }`}
       >
         {/* Supersonic Threshold Notch at 85% */}
         <div
-          className="absolute top-0 bottom-0 w-0.5 bg-neutral-400/70 z-10"
+          className={`absolute top-0 bottom-0 w-0.5 z-10 ${isLight ? 'bg-neutral-500' : 'bg-neutral-400/70'}`}
           style={{ left: '85%' }}
           title="Supersonic Threshold (2200 uu/s)"
         />
@@ -132,10 +140,10 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
       </div>
 
       {/* Speedometer milestones */}
-      <div className="flex justify-between w-full px-1 text-[9px] font-mono text-neutral-500 font-semibold">
+      <div className={`flex justify-between w-full px-1 text-[9px] font-mono font-semibold ${isLight ? 'text-neutral-600' : 'text-neutral-500'}`}>
         <span>0</span>
         <span>1410 (CRUISE)</span>
-        <span className="text-purple-400/90">2200 (SUPERSONIC)</span>
+        <span className={isLight ? 'text-purple-700' : 'text-purple-400/90'}>2200 (SUPERSONIC)</span>
         <span>2300 MAX</span>
       </div>
     </div>

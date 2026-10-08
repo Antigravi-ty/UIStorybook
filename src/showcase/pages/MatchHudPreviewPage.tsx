@@ -15,7 +15,10 @@ import {
   Sliders,
   Settings2,
   Clock,
-  Layers
+  Layers,
+  Sun,
+  Moon,
+  Sunset
 } from 'lucide-react';
 import {
   MatchHudContainer,
@@ -39,6 +42,8 @@ export interface MatchHudPreviewPageProps {
   isLight?: boolean;
 }
 
+export type ArenaLightingPreset = 'daylight' | 'twilight' | 'night';
+
 export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
   isLight = false,
 }) => {
@@ -46,6 +51,11 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
   const [themeStyle, setThemeStyle] = useState<HudThemeStyle>('glass');
   const [boostVariant, setBoostVariant] = useState<'circular' | 'linear'>('circular');
   const [feedbackToast, setFeedbackToast] = useState<string | null>(null);
+
+  // Arena backdrop controls (亮色/暗色球场环境控制器)
+  const [arenaLighting, setArenaLighting] = useState<ArenaLightingPreset>('night');
+  const [arenaBrightness, setArenaBrightness] = useState<number>(30);
+  const [hudColorway, setHudColorway] = useState<'auto' | 'light' | 'dark'>('auto');
 
   // Match Score state
   const [score, setScore] = useState<MatchScoreState>({
@@ -117,6 +127,12 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
     setFeedbackToast(msg);
     setTimeout(() => setFeedbackToast(null), 2400);
   };
+
+  // Effective HUD light mode
+  const effectiveHudIsLight =
+    hudColorway === 'auto'
+      ? arenaLighting === 'daylight' || arenaBrightness >= 60
+      : hudColorway === 'light';
 
   // Flip Timer Tick interval
   const flipTimerRef = useRef<number | null>(null);
@@ -268,6 +284,43 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
     }
   };
 
+  // Compute stage style based on arena lighting and brightness
+  const getStageStyles = (): React.CSSProperties => {
+    const norm = arenaBrightness / 100;
+    if (arenaLighting === 'daylight') {
+      return {
+        backgroundImage: `
+          radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.8) 0%, transparent 60%),
+          radial-gradient(circle at 20% 85%, rgba(34, 197, 94, 0.35) 0%, transparent 50%),
+          radial-gradient(circle at 80% 85%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+          linear-gradient(to bottom, #7dd3fc 0%, #bae6fd 30%, #bbf7d0 65%, #22c55e 100%)
+        `,
+        filter: `brightness(${0.75 + norm * 0.45})`,
+      };
+    }
+    if (arenaLighting === 'twilight') {
+      return {
+        backgroundImage: `
+          radial-gradient(circle at 50% 25%, rgba(251, 146, 60, 0.35) 0%, transparent 60%),
+          radial-gradient(circle at 80% 80%, rgba(244, 63, 94, 0.3) 0%, transparent 50%),
+          radial-gradient(circle at 20% 90%, rgba(16, 185, 129, 0.25) 0%, transparent 50%),
+          linear-gradient(to bottom, #1e1b4b 0%, #4c1d95 35%, #831843 65%, #064e3b 100%)
+        `,
+        filter: `brightness(${0.65 + norm * 0.5})`,
+      };
+    }
+    // night
+    return {
+      backgroundImage: `
+        radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(245, 158, 11, 0.12) 0%, transparent 50%),
+        linear-gradient(to bottom, #09090b 0%, #111827 50%, #030712 100%)
+      `,
+      filter: `brightness(${0.5 + norm * 0.8})`,
+    };
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* 1. Header Toolbar */}
@@ -278,7 +331,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           </div>
           <div className="flex flex-col">
             <h1 className="text-2xl font-bold tracking-tight">Match HUD 实时预览</h1>
-            <span className="text-xs text-neutral-500 font-mono">
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
               对局平视显示层 (HUD Layer) · 与菜单系统层 (Menu Layer) 严格解耦
             </span>
           </div>
@@ -300,20 +353,23 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
               const ballCamEl = stage.querySelector<HTMLElement>('[data-ui-element="hud-ballcam-indicator"]');
               const speedEl = stage.querySelector<HTMLElement>('[data-ui-element="hud-speedometer"]');
               const flipEl = stage.querySelector<HTMLElement>('[data-ui-element="hud-flip-timer"]');
+              const netEl = stage.querySelector<HTMLElement>('[data-ui-element="hud-network-diagnostics"]');
 
-              const getRectStr = (r: DOMRect) => `${Math.round(r.width * 10) / 10}px × ${Math.round(r.height * 10) / 10}px (x: ${Math.round(r.x)}, y: ${Math.round(r.y)})`;
+              const getRectStr = (r: DOMRect) =>
+                `${Math.round(r.width * 10) / 10}px × ${Math.round(r.height * 10) / 10}px (x: ${Math.round(r.x)}, y: ${Math.round(r.y)})`;
 
               const lines: string[] = [];
               lines.push('========================================================================');
               lines.push(' [MATCH HUD LAYER TELEMETRY SNAPSHOT]');
               lines.push('========================================================================');
-              lines.push(`• Window Viewport: ${winW}px × ${winH}px`);
-              if (hudLayer) lines.push(`• HUD Root Layer:  ${getRectStr(hudLayer.getBoundingClientRect())}`);
-              if (scoreboard) lines.push(`• Scoreboard:      ${getRectStr(scoreboard.getBoundingClientRect())}`);
-              if (boostGauge) lines.push(`• Boost Gauge:     ${getRectStr(boostGauge.getBoundingClientRect())}`);
-              if (ballCamEl) lines.push(`• Ball Cam Pill:   ${getRectStr(ballCamEl.getBoundingClientRect())}`);
-              if (speedEl) lines.push(`• Speedometer:     ${getRectStr(speedEl.getBoundingClientRect())}`);
-              if (flipEl) lines.push(`• Flip Timer:      ${getRectStr(flipEl.getBoundingClientRect())}`);
+              lines.push(`• Window Viewport:   ${winW}px × ${winH}px`);
+              if (hudLayer) lines.push(`• HUD Root Layer:    ${getRectStr(hudLayer.getBoundingClientRect())}`);
+              if (scoreboard) lines.push(`• Scoreboard:        ${getRectStr(scoreboard.getBoundingClientRect())}`);
+              if (boostGauge) lines.push(`• Boost Gauge:       ${getRectStr(boostGauge.getBoundingClientRect())}`);
+              if (ballCamEl) lines.push(`• Ball Cam Pill:     ${getRectStr(ballCamEl.getBoundingClientRect())}`);
+              if (speedEl) lines.push(`• Speedometer:       ${getRectStr(speedEl.getBoundingClientRect())}`);
+              if (flipEl) lines.push(`• Flip Timer:        ${getRectStr(flipEl.getBoundingClientRect())}`);
+              if (netEl) lines.push(`• Network Diagnostics: ${getRectStr(netEl.getBoundingClientRect())}`);
               lines.push('========================================================================\n');
 
               const report = lines.join('\n');
@@ -335,12 +391,14 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           </button>
 
           {/* Theme Style Selector */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl border bg-neutral-100/70 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl border bg-neutral-100 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
             <button
               type="button"
               onClick={() => setThemeStyle('glass')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                themeStyle === 'glass' ? 'bg-emerald-500 text-white font-bold shadow-2xs' : 'text-neutral-400 hover:text-white'
+                themeStyle === 'glass'
+                  ? 'bg-emerald-500 text-white font-bold shadow-2xs'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
               Apple Glass (晶莹磨砂)
@@ -349,7 +407,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
               type="button"
               onClick={() => setThemeStyle('tactile')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                themeStyle === 'tactile' ? 'bg-emerald-500 text-white font-bold shadow-2xs' : 'text-neutral-400 hover:text-white'
+                themeStyle === 'tactile'
+                  ? 'bg-emerald-500 text-white font-bold shadow-2xs'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
               Nintendo Arcade (高对比电竞)
@@ -358,7 +418,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
               type="button"
               onClick={() => setThemeStyle('minimal')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                themeStyle === 'minimal' ? 'bg-emerald-500 text-white font-bold shadow-2xs' : 'text-neutral-400 hover:text-white'
+                themeStyle === 'minimal'
+                  ? 'bg-emerald-500 text-white font-bold shadow-2xs'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
               Minimal Pro (极简)
@@ -370,11 +432,11 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
       {/* 2. Preset Scenarios Quick Loader */}
       <div
         className={`p-4 rounded-2xl border flex flex-col gap-3 transition-colors ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
+          isLight ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
         }`}
       >
         <div className="flex items-center justify-between text-xs font-semibold">
-          <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+          <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
             <Sparkles className="h-4 w-4 text-emerald-500" />
             <span>快速情境预设 (Quick Scenarios)</span>
           </div>
@@ -390,97 +452,201 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           <button
             type="button"
             onClick={() => applyPreset('kickoff')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700 shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200 dark:border-neutral-700 shadow-xs"
           >
-            <Clock className="h-3.5 w-3.5 text-amber-400" />
+            <Clock className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
             <span>开球准备 (Kickoff 3-2-1)</span>
           </button>
 
           <button
             type="button"
             onClick={() => applyPreset('fast-break')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700 shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200 dark:border-neutral-700 shadow-xs"
           >
-            <Gauge className="h-3.5 w-3.5 text-sky-400" />
+            <Gauge className="h-3.5 w-3.5 text-sky-500 dark:text-sky-400" />
             <span>高速进攻 (Fast Attack)</span>
           </button>
 
           <button
             type="button"
             onClick={() => applyPreset('supersonic')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-purple-950/40 hover:bg-purple-900/50 text-purple-200 border-purple-700/60 shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-purple-50 hover:bg-purple-100 text-purple-900 border-purple-200 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 dark:text-purple-200 dark:border-purple-700/60 shadow-xs"
           >
-            <Zap className="h-3.5 w-3.5 text-purple-400" />
+            <Zap className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" />
             <span>超音速激波 (Supersonic Surge)</span>
           </button>
 
           <button
             type="button"
             onClick={() => applyPreset('aerial-flip')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700 shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200 dark:border-neutral-700 shadow-xs"
           >
-            <RefreshCw className="h-3.5 w-3.5 text-emerald-400" />
+            <RefreshCw className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>空中 1.5s 翻滚倒计时 (Dodge Window)</span>
           </button>
 
           <button
             type="button"
             onClick={() => applyPreset('flip-reset')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 border-amber-600/70 shadow-[0_0_12px_rgba(245,158,11,0.25)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 dark:text-amber-300 dark:border-amber-600/70 shadow-[0_0_12px_rgba(245,158,11,0.25)]"
           >
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            <Sparkles className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
             <span>四轮触球重置 (Flip Reset Active!)</span>
           </button>
 
           <button
             type="button"
             onClick={() => applyPreset('goal-event')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-200 border-emerald-700/60 shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 dark:text-emerald-200 dark:border-emerald-700/60 shadow-xs"
           >
-            <Trophy className="h-3.5 w-3.5 text-amber-400" />
+            <Trophy className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
             <span>进球结算横幅 (Goal Celebration)</span>
           </button>
 
           <button
             type="button"
             onClick={() => applyPreset('overtime')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-amber-950/40 hover:bg-amber-900/50 text-amber-200 border-amber-700/60 shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-orange-50 hover:bg-orange-100 text-orange-900 border-orange-300 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 dark:text-amber-200 dark:border-amber-700/60 shadow-xs"
           >
-            <Flame className="h-3.5 w-3.5 text-amber-400" />
+            <Flame className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
             <span>加时赛决胜 (Overtime Thriller)</span>
           </button>
+        </div>
+      </div>
+
+      {/* 2.5 Arena Backdrop Lighting Controller (场景背景亮度与亮色调控制器) */}
+      <div
+        className={`p-4 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
+          isLight ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+            <Sun className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
+              场景背景亮度与球场环境 (Arena Backdrop & Lighting)
+            </span>
+            <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+              测试 HUD 在亮色日间球场与暗色夜场之间的双模适应度
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap text-xs">
+          {/* Lighting Presets */}
+          <div className="flex items-center gap-1 p-1 rounded-xl border bg-neutral-100 dark:bg-neutral-800/80 border-neutral-200 dark:border-neutral-700">
+            <button
+              type="button"
+              onClick={() => {
+                setArenaLighting('daylight');
+                setArenaBrightness(85);
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                arenaLighting === 'daylight'
+                  ? 'bg-amber-500 text-white font-bold shadow-xs'
+                  : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              <Sun className="h-3 w-3" />
+              <span>日光球场 (Daylight)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setArenaLighting('twilight');
+                setArenaBrightness(55);
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                arenaLighting === 'twilight'
+                  ? 'bg-amber-500 text-white font-bold shadow-xs'
+                  : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              <Sunset className="h-3 w-3" />
+              <span>黄昏晚霞 (Twilight)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setArenaLighting('night');
+                setArenaBrightness(25);
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                arenaLighting === 'night'
+                  ? 'bg-amber-500 text-white font-bold shadow-xs'
+                  : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              <Moon className="h-3 w-3" />
+              <span>夜间电竞 (Night)</span>
+            </button>
+          </div>
+
+          {/* Brightness Slider */}
+          <div className="flex items-center gap-2 px-3 py-1 rounded-xl border bg-neutral-100 dark:bg-neutral-800/80 border-neutral-200 dark:border-neutral-700 min-w-[170px]">
+            <span className="text-[11px] text-neutral-600 dark:text-neutral-400 whitespace-nowrap">亮度:</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={arenaBrightness}
+              onChange={(e) => setArenaBrightness(Number(e.target.value))}
+              className="w-20 accent-amber-500 cursor-pointer"
+            />
+            <span className="font-mono text-[11px] font-bold text-neutral-700 dark:text-neutral-300 w-8 text-right">
+              {arenaBrightness}%
+            </span>
+          </div>
+
+          {/* HUD Colorway Mode */}
+          <div className="flex items-center gap-1 p-1 rounded-xl border bg-neutral-100 dark:bg-neutral-800/80 border-neutral-200 dark:border-neutral-700">
+            <span className="text-[11px] px-1 text-neutral-500 dark:text-neutral-400">HUD:</span>
+            {(['auto', 'light', 'dark'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setHudColorway(m)}
+                className={`px-2 py-0.5 rounded-md font-mono text-[10px] uppercase font-bold transition-all cursor-pointer ${
+                  hudColorway === m
+                    ? 'bg-neutral-800 text-white dark:bg-white dark:text-neutral-900 shadow-2xs'
+                    : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* 3. Live 18:9 Canvas Simulation Stage */}
       <div
         id="match-hud-viewport-stage"
-        className="relative w-full h-[540px] md:h-[620px] rounded-3xl border border-neutral-800 overflow-hidden shadow-2xl flex items-center justify-center bg-black"
-        style={{
-          // Realistic high-framerate stadium field simulation background
-          backgroundImage: `
-            radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
-            radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.10) 0%, transparent 50%),
-            radial-gradient(circle at 80% 50%, rgba(245, 158, 11, 0.10) 0%, transparent 50%),
-            linear-gradient(to bottom, #09090b 0%, #111827 50%, #030712 100%)
-          `,
-        }}
+        className="relative w-full h-[540px] md:h-[620px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl flex items-center justify-center transition-all duration-300"
+        style={getStageStyles()}
       >
         {/* Synthetic pitch markings */}
-        <div className="absolute inset-0 pointer-events-none opacity-20">
-          <div className="absolute top-1/2 left-0 right-0 h-px bg-white/40 -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-48 h-48 rounded-full border border-white/40 -translate-x-1/2 -translate-y-1/2" />
+        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${
+          arenaLighting === 'daylight' ? 'opacity-40' : 'opacity-25'
+        }`}>
+          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white shadow-xs -translate-y-1/2" />
+          <div className="absolute top-1/2 left-1/2 w-48 h-48 rounded-full border-2 border-white shadow-xs -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-1/2 left-1/2 w-4 h-4 rounded-full bg-white -translate-x-1/2 -translate-y-1/2 shadow-xs" />
         </div>
 
         {/* Dynamic Supersonic Speed Lines Ripple effect */}
         {(speed.speed >= 2200 || speed.isSupersonic) && (
           <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden opacity-60">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(168,85,247,0.25)_100%)] animate-pulse" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(168,85,247,0.3)_100%)] animate-pulse" />
           </div>
         )}
 
         {/* Game Viewport wrapping HUD Container */}
-        <GameViewport isLight={false} className="w-full h-full">
+        <GameViewport isLight={effectiveHudIsLight} className="w-full h-full">
           <MatchHudContainer
             score={score}
             kickoffCountdown={kickoffCount}
@@ -493,7 +659,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
             visibility={visibility}
             themeStyle={themeStyle}
             boostVariant={boostVariant}
-            isLight={false}
+            isLight={effectiveHudIsLight}
             onToggleBallCam={() =>
               setBallCam((prev) => ({ ...prev, isBallCam: !prev.isBallCam }))
             }
@@ -504,16 +670,22 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         </GameViewport>
       </div>
 
-      {/* 4. Telemetry & Parameter Tweakers (中文外部控制面板) */}
+      {/* 4. Telemetry & Parameter Tweakers (外部控制面板 - 全面适配亮色模式) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {/* Panel A: 推进量与喷射 (Boost Controls) */}
-        <div className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 flex flex-col gap-3">
+        <div
+          className={`p-4 rounded-2xl border transition-colors flex flex-col gap-3 shadow-2xs ${
+            isLight
+              ? 'bg-white border-neutral-200/90 text-neutral-800'
+              : 'bg-neutral-900/60 border-neutral-800 text-neutral-200'
+          }`}
+        >
           <div className="flex items-center justify-between text-xs font-bold border-b pb-2 border-neutral-200 dark:border-neutral-800">
             <div className="flex items-center gap-1.5 text-amber-500">
               <Flame className="h-4 w-4" />
               <span>推进量控制 (Boost Gauge)</span>
             </div>
-            <span className="font-mono text-neutral-400">{boost.amount}%</span>
+            <span className="font-mono text-neutral-500 dark:text-neutral-400">{boost.amount}%</span>
           </div>
 
           <SliderControl
@@ -527,13 +699,15 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           />
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-xs font-medium text-neutral-300">仪表形态 (Variant)</span>
+            <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">仪表形态 (Variant)</span>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setBoostVariant('circular')}
-                className={`px-2 py-0.5 rounded text-xs font-mono font-medium cursor-pointer ${
-                  boostVariant === 'circular' ? 'bg-amber-500 text-white font-bold' : 'bg-neutral-800 text-neutral-400'
+                className={`px-2 py-0.5 rounded text-xs font-mono font-medium cursor-pointer transition-colors ${
+                  boostVariant === 'circular'
+                    ? 'bg-amber-500 text-white font-bold'
+                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
                 }`}
               >
                 环形
@@ -541,8 +715,10 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
               <button
                 type="button"
                 onClick={() => setBoostVariant('linear')}
-                className={`px-2 py-0.5 rounded text-xs font-mono font-medium cursor-pointer ${
-                  boostVariant === 'linear' ? 'bg-amber-500 text-white font-bold' : 'bg-neutral-800 text-neutral-400'
+                className={`px-2 py-0.5 rounded text-xs font-mono font-medium cursor-pointer transition-colors ${
+                  boostVariant === 'linear'
+                    ? 'bg-amber-500 text-white font-bold'
+                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
                 }`}
               >
                 线性
@@ -551,7 +727,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           </div>
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-xs font-medium text-neutral-300">无限推进 (Infinite Boost)</span>
+            <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">无限推进 (Infinite Boost)</span>
             <ToggleSwitch
               checked={!!boost.isInfinite}
               onCheckedChange={(c) => setBoost((b) => ({ ...b, isInfinite: c }))}
@@ -568,6 +744,8 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
             className={`w-full py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md select-none ${
               boost.isFiring
                 ? 'bg-amber-500 text-black scale-98 shadow-[0_0_15px_#f59e0b]'
+                : isLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-300'
                 : 'bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700'
             }`}
           >
@@ -576,13 +754,19 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         </div>
 
         {/* Panel B: 速度与超音速 (Speed & Velocity Controls) */}
-        <div className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 flex flex-col gap-3">
+        <div
+          className={`p-4 rounded-2xl border transition-colors flex flex-col gap-3 shadow-2xs ${
+            isLight
+              ? 'bg-white border-neutral-200/90 text-neutral-800'
+              : 'bg-neutral-900/60 border-neutral-800 text-neutral-200'
+          }`}
+        >
           <div className="flex items-center justify-between text-xs font-bold border-b pb-2 border-neutral-200 dark:border-neutral-800">
-            <div className="flex items-center gap-1.5 text-sky-400">
+            <div className="flex items-center gap-1.5 text-sky-500 dark:text-sky-400">
               <Gauge className="h-4 w-4" />
               <span>速度与超音速 (Speedometer)</span>
             </div>
-            <span className="font-mono text-neutral-400">{speed.speed} uu/s</span>
+            <span className="font-mono text-neutral-500 dark:text-neutral-400">{speed.speed} uu/s</span>
           </div>
 
           <SliderControl
@@ -602,7 +786,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           />
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-xs font-medium text-neutral-300">强制超音速 (Supersonic Mode)</span>
+            <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">强制超音速 (Supersonic Mode)</span>
             <ToggleSwitch
               checked={speed.speed >= 2200 || !!speed.isSupersonic}
               onCheckedChange={(c) =>
@@ -617,15 +801,19 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           </div>
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-xs font-medium text-neutral-300">显示单位 (Unit)</span>
+            <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">显示单位 (Unit)</span>
             <div className="flex items-center gap-1 font-mono text-xs">
               {(['uu/s', 'km/h', 'mph'] as const).map((u) => (
                 <button
                   key={u}
                   type="button"
                   onClick={() => setSpeed((s) => ({ ...s, unit: u }))}
-                  className={`px-2 py-0.5 rounded cursor-pointer ${
-                    speed.unit === u ? 'bg-sky-500 text-white font-bold' : 'bg-neutral-800 text-neutral-400'
+                  className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                    speed.unit === u
+                      ? 'bg-sky-500 text-white font-bold'
+                      : isLight
+                      ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                      : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-400'
                   }`}
                 >
                   {u}
@@ -636,13 +824,19 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         </div>
 
         {/* Panel C: 空翻倒计时与翻滚重置 (Flip Timer & Reset Controls) */}
-        <div className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 flex flex-col gap-3">
+        <div
+          className={`p-4 rounded-2xl border transition-colors flex flex-col gap-3 shadow-2xs ${
+            isLight
+              ? 'bg-white border-neutral-200/90 text-neutral-800'
+              : 'bg-neutral-900/60 border-neutral-800 text-neutral-200'
+          }`}
+        >
           <div className="flex items-center justify-between text-xs font-bold border-b pb-2 border-neutral-200 dark:border-neutral-800">
-            <div className="flex items-center gap-1.5 text-emerald-400">
+            <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
               <RefreshCw className="h-4 w-4" />
               <span>翻滚与重置 (Flip Timer & Reset)</span>
             </div>
-            <span className="font-mono text-xs font-bold text-amber-400 uppercase">
+            <span className="font-mono text-xs font-bold text-amber-500 uppercase">
               {flipTimer.status}
             </span>
           </div>
@@ -651,7 +845,11 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
             <button
               type="button"
               onClick={startFlipCooldown}
-              className="px-3 py-2 rounded-xl text-xs font-bold bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 active:scale-95 transition-all cursor-pointer shadow-xs"
+              className={`px-3 py-2 rounded-xl text-xs font-bold border active:scale-95 transition-all cursor-pointer shadow-xs ${
+                isLight
+                  ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300'
+                  : 'bg-neutral-800 hover:bg-neutral-700 text-white border-neutral-700'
+              }`}
             >
               模拟空中跳跃 (1.5s 倒计时)
             </button>
@@ -668,23 +866,33 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           <button
             type="button"
             onClick={resetToGrounded}
-            className="w-full py-1.5 rounded-xl text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 active:scale-95 transition-all cursor-pointer"
+            className={`w-full py-1.5 rounded-xl text-xs font-medium border active:scale-95 transition-all cursor-pointer ${
+              isLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-300'
+                : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border-neutral-700'
+            }`}
           >
             着地重置 (Reset Grounded)
           </button>
         </div>
 
         {/* Panel D: 摄像机与对局事件 (Camera & Match Events) */}
-        <div className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 flex flex-col gap-3">
+        <div
+          className={`p-4 rounded-2xl border transition-colors flex flex-col gap-3 shadow-2xs ${
+            isLight
+              ? 'bg-white border-neutral-200/90 text-neutral-800'
+              : 'bg-neutral-900/60 border-neutral-800 text-neutral-200'
+          }`}
+        >
           <div className="flex items-center justify-between text-xs font-bold border-b pb-2 border-neutral-200 dark:border-neutral-800">
-            <div className="flex items-center gap-1.5 text-amber-400">
+            <div className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400">
               <Eye className="h-4 w-4" />
               <span>球相机与事件 (Camera & Events)</span>
             </div>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-neutral-300">Ball Cam (球心追踪)</span>
+            <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">Ball Cam (球心追踪)</span>
             <ToggleSwitch
               checked={ballCam.isBallCam}
               onCheckedChange={(c) => setBallCam((b) => ({ ...b, isBallCam: c }))}
@@ -708,21 +916,33 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
             <button
               type="button"
               onClick={() => triggerAccolade('goal', 'GOAL!', 'SCORE!')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 cursor-pointer"
+              className={`px-2 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors ${
+                isLight
+                  ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300'
+                  : 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+              }`}
             >
               进球 (Goal)
             </button>
             <button
               type="button"
               onClick={() => triggerAccolade('epic-save', 'EPIC SAVE!', 'DEFENSE!')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30 cursor-pointer"
+              className={`px-2 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors ${
+                isLight
+                  ? 'bg-purple-50 hover:bg-purple-100 text-purple-800 border-purple-300'
+                  : 'bg-purple-500/20 text-purple-300 border-purple-500/40 hover:bg-purple-500/30'
+              }`}
             >
               救球 (Save)
             </button>
             <button
               type="button"
               onClick={() => triggerAccolade('demo', 'DEMOLITION!', 'BOOM!')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 cursor-pointer"
+              className={`px-2 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors ${
+                isLight
+                  ? 'bg-red-50 hover:bg-red-100 text-red-800 border-red-300'
+                  : 'bg-red-500/20 text-red-300 border-red-500/40 hover:bg-red-500/30'
+              }`}
             >
               爆破 (Demo)
             </button>
@@ -730,9 +950,15 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         </div>
 
         {/* Panel E: 战术聊天与开球 (Chat & Kickoff) */}
-        <div className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 flex flex-col gap-3">
+        <div
+          className={`p-4 rounded-2xl border transition-colors flex flex-col gap-3 shadow-2xs ${
+            isLight
+              ? 'bg-white border-neutral-200/90 text-neutral-800'
+              : 'bg-neutral-900/60 border-neutral-800 text-neutral-200'
+          }`}
+        >
           <div className="flex items-center justify-between text-xs font-bold border-b pb-2 border-neutral-200 dark:border-neutral-800">
-            <div className="flex items-center gap-1.5 text-indigo-400">
+            <div className="flex items-center gap-1.5 text-indigo-500 dark:text-indigo-400">
               <MessageSquare className="h-4 w-4" />
               <span>快捷聊天 (Tactical Quick Chat)</span>
             </div>
@@ -742,28 +968,44 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
             <button
               type="button"
               onClick={() => triggerChatMessage('I got it!', 'blue')}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-sky-300 border border-neutral-700 cursor-pointer text-left truncate"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border cursor-pointer text-left truncate transition-colors ${
+                isLight
+                  ? 'bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-200'
+                  : 'bg-neutral-800 hover:bg-neutral-700 text-sky-300 border-neutral-700'
+              }`}
             >
               [Team] I got it!
             </button>
             <button
               type="button"
               onClick={() => triggerChatMessage('Defending...', 'blue')}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-sky-300 border border-neutral-700 cursor-pointer text-left truncate"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border cursor-pointer text-left truncate transition-colors ${
+                isLight
+                  ? 'bg-sky-50 hover:bg-sky-100 text-sky-800 border-sky-200'
+                  : 'bg-neutral-800 hover:bg-neutral-700 text-sky-300 border-neutral-700'
+              }`}
             >
               [Team] Defending...
             </button>
             <button
               type="button"
               onClick={() => triggerChatMessage('Nice shot!', 'orange')}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-orange-300 border border-neutral-700 cursor-pointer text-left truncate"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border cursor-pointer text-left truncate transition-colors ${
+                isLight
+                  ? 'bg-orange-50 hover:bg-orange-100 text-orange-800 border-orange-200'
+                  : 'bg-neutral-800 hover:bg-neutral-700 text-orange-300 border-neutral-700'
+              }`}
             >
               [All] Nice shot!
             </button>
             <button
               type="button"
               onClick={() => triggerChatMessage('What a save!', 'orange')}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-neutral-800 hover:bg-neutral-700 text-orange-300 border border-neutral-700 cursor-pointer text-left truncate"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border cursor-pointer text-left truncate transition-colors ${
+                isLight
+                  ? 'bg-orange-50 hover:bg-orange-100 text-orange-800 border-orange-200'
+                  : 'bg-neutral-800 hover:bg-neutral-700 text-orange-300 border-neutral-700'
+              }`}
             >
               [All] What a save!
             </button>
@@ -772,16 +1014,26 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           <button
             type="button"
             onClick={triggerKickoffSequence}
-            className="w-full mt-1 py-1.5 rounded-xl text-xs font-bold bg-neutral-800 hover:bg-neutral-700 text-amber-400 border border-neutral-700 active:scale-95 transition-all cursor-pointer"
+            className={`w-full mt-1 py-1.5 rounded-xl text-xs font-bold border active:scale-95 transition-all cursor-pointer ${
+              isLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 text-amber-700 border-neutral-300'
+                : 'bg-neutral-800 hover:bg-neutral-700 text-amber-400 border-neutral-700'
+            }`}
           >
             触发开球倒计时 (3-2-1-GO!)
           </button>
         </div>
 
         {/* Panel F: 组件独立显示开关 (HUD Module Visibility) */}
-        <div className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 flex flex-col gap-2">
+        <div
+          className={`p-4 rounded-2xl border transition-colors flex flex-col gap-2 shadow-2xs ${
+            isLight
+              ? 'bg-white border-neutral-200/90 text-neutral-800'
+              : 'bg-neutral-900/60 border-neutral-800 text-neutral-200'
+          }`}
+        >
           <div className="flex items-center justify-between text-xs font-bold border-b pb-2 border-neutral-200 dark:border-neutral-800">
-            <div className="flex items-center gap-1.5 text-neutral-400">
+            <div className="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
               <Layers className="h-4 w-4" />
               <span>HUD 组件可见性 (Module Visibility)</span>
             </div>
@@ -793,9 +1045,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 type="checkbox"
                 checked={visibility.showScoreboard}
                 onChange={(e) => setVisibility((v) => ({ ...v, showScoreboard: e.target.checked }))}
-                className="rounded accent-emerald-500"
+                className="rounded accent-emerald-500 cursor-pointer"
               />
-              <span className="text-neutral-300">积分板 (Score)</span>
+              <span className="text-neutral-700 dark:text-neutral-300">积分板 (Score)</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer py-0.5">
@@ -803,9 +1055,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 type="checkbox"
                 checked={visibility.showBoostGauge}
                 onChange={(e) => setVisibility((v) => ({ ...v, showBoostGauge: e.target.checked }))}
-                className="rounded accent-emerald-500"
+                className="rounded accent-emerald-500 cursor-pointer"
               />
-              <span className="text-neutral-300">推进仪表 (Boost)</span>
+              <span className="text-neutral-700 dark:text-neutral-300">推进仪表 (Boost)</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer py-0.5">
@@ -813,9 +1065,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 type="checkbox"
                 checked={visibility.showBallCamIndicator}
                 onChange={(e) => setVisibility((v) => ({ ...v, showBallCamIndicator: e.target.checked }))}
-                className="rounded accent-emerald-500"
+                className="rounded accent-emerald-500 cursor-pointer"
               />
-              <span className="text-neutral-300">球相机 (Ball Cam)</span>
+              <span className="text-neutral-700 dark:text-neutral-300">球相机 (Ball Cam)</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer py-0.5">
@@ -823,9 +1075,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 type="checkbox"
                 checked={visibility.showSpeedometer}
                 onChange={(e) => setVisibility((v) => ({ ...v, showSpeedometer: e.target.checked }))}
-                className="rounded accent-emerald-500"
+                className="rounded accent-emerald-500 cursor-pointer"
               />
-              <span className="text-neutral-300">速度表 (Speed)</span>
+              <span className="text-neutral-700 dark:text-neutral-300">速度表 (Speed)</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer py-0.5">
@@ -833,9 +1085,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 type="checkbox"
                 checked={visibility.showFlipTimer}
                 onChange={(e) => setVisibility((v) => ({ ...v, showFlipTimer: e.target.checked }))}
-                className="rounded accent-emerald-500"
+                className="rounded accent-emerald-500 cursor-pointer"
               />
-              <span className="text-neutral-300">翻滚倒计时 (Flip)</span>
+              <span className="text-neutral-700 dark:text-neutral-300">翻滚倒计时 (Flip)</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer py-0.5">
@@ -843,9 +1095,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 type="checkbox"
                 checked={visibility.showQuickChat}
                 onChange={(e) => setVisibility((v) => ({ ...v, showQuickChat: e.target.checked }))}
-                className="rounded accent-emerald-500"
+                className="rounded accent-emerald-500 cursor-pointer"
               />
-              <span className="text-neutral-300">战术聊天 (Chat)</span>
+              <span className="text-neutral-700 dark:text-neutral-300">战术聊天 (Chat)</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer py-0.5">
@@ -853,9 +1105,9 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 type="checkbox"
                 checked={visibility.showNetworkDiagnostics}
                 onChange={(e) => setVisibility((v) => ({ ...v, showNetworkDiagnostics: e.target.checked }))}
-                className="rounded accent-emerald-500"
+                className="rounded accent-emerald-500 cursor-pointer"
               />
-              <span className="text-neutral-300">遥测状态 (FPS/Ping)</span>
+              <span className="text-neutral-700 dark:text-neutral-300">遥测状态 (FPS/Ping)</span>
             </label>
           </div>
         </div>
