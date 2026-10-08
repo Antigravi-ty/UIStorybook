@@ -8,6 +8,7 @@ import { CardsPage } from './showcase/pages/CardsPage';
 import { PanelsPage } from './showcase/pages/PanelsPage';
 import { MenusPage } from './showcase/pages/MenusPage';
 import { MenuLayerPreviewPage } from './showcase/pages/MenuLayerPreviewPage';
+import { HudLayerPreviewPage } from './showcase/pages/HudLayerPreviewPage';
 import { NavigationPage } from './showcase/pages/NavigationPage';
 import { AnimationPage } from './showcase/pages/AnimationPage';
 import { RecipesPage } from './showcase/pages/RecipesPage';
@@ -141,6 +142,9 @@ export const App: React.FC = () => {
                   isLight={isLight} 
                   onNavigateToReserved={() => setActiveTab('menus')} 
                 />
+              )}
+              {activeTab === 'hud-preview' && (
+                <HudLayerPreviewPage isLight={isLight} />
               )}
               {activeTab === 'menus' && (
                 <MenusPage 

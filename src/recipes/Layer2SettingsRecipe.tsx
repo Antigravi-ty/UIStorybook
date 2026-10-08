@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as SliderPrimitive from '@radix-ui/react-slider';
 import { 
   Gamepad2, 
   Video, 
@@ -17,11 +18,12 @@ import {
   PlayCircle,
   Plus,
   Activity,
-  Target
+  Target,
+  Info,
+  RotateCcw
 } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { UnderlineTabs, TabItem } from '../primitives/UnderlineTabs';
-import { SliderControl } from '../primitives/SliderControl';
 import { SegmentedSwitch } from '../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../primitives/ToggleSwitch';
 import { VStack } from '../layout/VStack';
@@ -37,7 +39,6 @@ export interface Layer2SettingsRecipeProps {
   initialTab?: string;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
-  // Background render indicator state & trigger
   backgroundRenderPaused?: boolean;
   onToggleBackgroundRender?: (paused: boolean) => void;
 }
@@ -54,19 +55,120 @@ export type SettingsTabId =
   | 'advanced' 
   | 'developer';
 
+interface SettingSliderRowProps {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  unit?: string;
+  onChange: (val: number) => void;
+  onHover: () => void;
+  onLeave: () => void;
+  isLight?: boolean;
+}
+
+const SettingSliderRow: React.FC<SettingSliderRowProps> = ({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  unit = '',
+  onChange,
+  onHover,
+  onLeave,
+  isLight = false,
+}) => {
+  return (
+    <div
+      className="flex items-center gap-4 w-full py-1.5 px-2 rounded-lg transition-colors hover:bg-neutral-500/10 select-none cursor-pointer"
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+    >
+      <span className={`w-36 sm:w-44 shrink-0 text-xs font-semibold truncate ${
+        isLight ? 'text-neutral-800' : 'text-neutral-200'
+      }`}>
+        {label}
+      </span>
+
+      <SliderPrimitive.Root
+        value={[value]}
+        min={min}
+        max={max}
+        step={step}
+        onValueChange={(vals) => onChange(vals[0])}
+        className="relative flex items-center select-none touch-none grow h-5 cursor-pointer"
+      >
+        <SliderPrimitive.Track className={`relative grow rounded-full h-1.5 overflow-hidden ${
+          isLight ? 'bg-neutral-200' : 'bg-neutral-800'
+        }`}>
+          <SliderPrimitive.Range className={`absolute h-full rounded-full ${
+            isLight ? 'bg-neutral-900' : 'bg-white'
+          }`} />
+        </SliderPrimitive.Track>
+        <SliderPrimitive.Thumb className={`block h-3.5 w-3.5 rounded-full border shadow-sm transition-transform hover:scale-110 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 ${
+          isLight ? 'bg-white border-neutral-300' : 'bg-neutral-100 border-neutral-400'
+        }`} />
+      </SliderPrimitive.Root>
+
+      <span className={`font-mono text-[11px] w-14 shrink-0 text-center py-0.5 rounded border select-none ${
+        isLight
+          ? 'bg-neutral-100 text-neutral-700 border-neutral-300'
+          : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+      }`}>
+        {value}{unit}
+      </span>
+    </div>
+  );
+};
+
+interface SettingToggleRowProps {
+  label: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  onHover: () => void;
+  onLeave: () => void;
+  isLight?: boolean;
+}
+
+const SettingToggleRow: React.FC<SettingToggleRowProps> = ({
+  label,
+  checked,
+  onCheckedChange,
+  onHover,
+  onLeave,
+  isLight = false,
+}) => {
+  return (
+    <div
+      className="flex items-center justify-between w-full py-1.5 px-2 rounded-lg transition-colors hover:bg-neutral-500/10 cursor-pointer select-none"
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+      onClick={() => onCheckedChange(!checked)}
+    >
+      <span className={`text-xs font-semibold truncate ${
+        isLight ? 'text-neutral-800' : 'text-neutral-200'
+      }`}>
+        {label}
+      </span>
+      <ToggleSwitch
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        isLight={isLight}
+        variant="neutral"
+      />
+    </div>
+  );
+};
+
 /**
  * [Recipe] Layer 2 Settings Menu (Width: 680px)
  * Complete Settings system featuring 9+1 UnderlineTabs:
- * - Gameplay
- * - Camera
- * - Controls (Embeds keybinding and gamepad mappings directly)
- * - Interface
- * - Video (Includes Render Disable / Background Pause tuning)
- * - Audio (Includes 3-Band quick levels + Layer 3 DSP Audio Equalizer entrance)
- * - Chat
- * - Extra
- * - Advanced (Contains 'Enable Developer Settings' switch)
- * - Developer (Dynamic tab unlocked via Advanced)
+ * - Minimalist single header title without badge clutter
+ * - Clean single-row layout for sliders and switches
+ * - Dynamic English description in panel footer responsive to hovered items
+ * - Zero Chinese text residue inside menu items
  */
 export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   isLight = false,
@@ -88,6 +190,9 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
     onTabChange?.(valid);
   };
 
+  // Hover description state for footer
+  const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
+
   // Advanced: Enable Developer Settings switch
   const [developerUnlocked, setDeveloperUnlocked] = useState(false);
 
@@ -106,6 +211,21 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   const [fov, setFov] = useState(110);
   const [cameraDistance, setCameraDistance] = useState(280);
   const [cameraHeight, setCameraHeight] = useState(110);
+  const [cameraAngle, setCameraAngle] = useState(-3);
+  const [cameraStiffness, setCameraStiffness] = useState(0.45);
+  const [cameraSwivelSpeed, setCameraSwivelSpeed] = useState(2.5);
+  const [cameraTransitionSpeed, setCameraTransitionSpeed] = useState(1.2);
+  const [cameraShake, setCameraShake] = useState(false);
+  const [invertSwivel, setInvertSwivel] = useState(false);
+  const [isConfirmingResetCamera, setIsConfirmingResetCamera] = useState(false);
+
+  // Auto reset camera confirmation timeout
+  useEffect(() => {
+    if (isConfirmingResetCamera) {
+      const timer = setTimeout(() => setIsConfirmingResetCamera(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmingResetCamera]);
 
   // Gameplay states
   const [ballCamIndicator, setBallCamIndicator] = useState(true);
@@ -115,11 +235,14 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   const [quickChatEnabled, setQuickChatEnabled] = useState(true);
   const [hudScale, setHudScale] = useState(100);
 
+  // Extra states
+  const [autoSaveReplay, setAutoSaveReplay] = useState(true);
+  const [telemetryRecord, setTelemetryRecord] = useState(false);
+
   // Developer states
   const [showWireframe, setShowWireframe] = useState(false);
   const [wasmProfiling, setWasmProfiling] = useState(true);
 
-  // Build tabs dynamically: append 'developer' when unlocked
   const baseTabs: TabItem[] = [
     { id: 'gameplay', label: 'Gameplay' },
     { id: 'camera', label: 'Camera' },
@@ -147,18 +270,12 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
     <PanelContainer isLight={isLight} className="w-full max-w-[680px]">
       <PanelHeader
         title="SETTINGS"
-        subtitle="Game preferences, controls, acoustics & engine diagnostics"
-        badge={
-          <Badge variant="primary" size="sm" isLight={isLight}>
-            Preferences
-          </Badge>
-        }
         onBack={onBack}
         isLight={isLight}
       />
 
-      {/* Underline Tabs: Horizontal scrolling enabled for extensive tabs */}
-      <div className="px-6 pt-2 overflow-x-auto no-scrollbar">
+      {/* Underline Tabs */}
+      <div className="px-6 pt-2 overflow-x-auto no-scrollbar" data-ui-element="tabs-wrapper">
         <UnderlineTabs
           items={tabs}
           activeId={currentTab}
@@ -172,38 +289,45 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
       <PanelContent scrollable className="p-6 h-[400px] overflow-y-auto">
         {/* 1. GAMEPLAY */}
         {currentTab === 'gameplay' && (
-          <VStack gap="lg" isLight={isLight}>
-            <ToggleSwitch
-              label="Ball Cam Indicator (球相机指向器)"
-              description="在屏幕中心渲染箭头提示当前来球方位"
+          <VStack gap="md" isLight={isLight}>
+            <SettingToggleRow
+              label="Ball Cam Indicator"
               checked={ballCamIndicator}
               onCheckedChange={setBallCamIndicator}
-              isLight={isLight}
-            />
-            <ToggleSwitch
-              label="120Hz Sub-Tick Simulation (高频物理循环)"
-              description="启用 SIMD 硬件加速的超高帧率物理循环"
-              checked={highTickrate}
-              onCheckedChange={setHighTickrate}
+              onHover={() => setHoveredDesc('Displays on-screen directional arrow pointing toward the ball.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
 
-            {/* Layer 3 独立三级菜单入口: Ball Trajectory Predictor Configuration Panel */}
-            <div className={`mt-2 p-3.5 rounded-xl border flex items-center justify-between transition-colors ${
-              isLight ? 'bg-amber-50/60 border-amber-200/90' : 'bg-amber-950/20 border-amber-900/50'
-            }`}>
+            <SettingToggleRow
+              label="120Hz Sub-Tick Simulation"
+              checked={highTickrate}
+              onCheckedChange={setHighTickrate}
+              onHover={() => setHoveredDesc('Enables SIMD hardware-accelerated 120Hz high-precision physics loop.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            {/* Layer 3 Entrance */}
+            <div
+              className={`mt-2 p-3.5 rounded-xl border flex items-center justify-between transition-colors select-none ${
+                isLight ? 'bg-amber-50/60 border-amber-200/90' : 'bg-amber-950/20 border-amber-900/50'
+              }`}
+              onMouseEnter={() => setHoveredDesc('Configure flight lookahead horizon, impact wave halos and Magnus aerodynamic spin in Layer 3.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
                   <Target className="h-4 w-4 text-amber-500" />
                   <span className="font-bold text-xs text-amber-600 dark:text-amber-400">
-                    Ball Trajectory Predictor Configuration (弹道预测器面板)
+                    Ball Trajectory Predictor Configuration
                   </span>
                   <Badge variant="warning" size="sm" isLight={isLight}>
-                    Layer 3 · Live Preview
+                    Layer 3
                   </Badge>
                 </div>
                 <span className={`text-[11px] ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                  配置球体飞行轨线预测时长、碰撞波环与马格努斯自旋。支持 Tab 键收起至右侧中心 Live Preview。
+                  Advanced real-time ballistic curve simulation and impact predictions.
                 </span>
               </div>
 
@@ -212,7 +336,7 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
                 onClick={() => onNavigateTrajectoryDetail?.()}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-white shadow-xs cursor-pointer transition-colors shrink-0 ml-3"
               >
-                <span>配置参数</span>
+                <span>Configure</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -221,49 +345,178 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
 
         {/* 2. CAMERA */}
         {currentTab === 'camera' && (
-          <VStack gap="lg" isLight={isLight}>
-            <SliderControl
-              label="Field of View (FOV)"
+          <VStack gap="md" isLight={isLight}>
+            <SettingSliderRow
+              label="Field of View"
               value={fov}
               min={60}
               max={120}
               step={1}
               unit="°"
-              description="水平视野广角范围"
               onChange={setFov}
+              onHover={() => setHoveredDesc('Adjusts horizontal field of view angle in degrees.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
-            <SliderControl
-              label="Camera Distance (相机距车身距离)"
+
+            <SettingSliderRow
+              label="Distance"
               value={cameraDistance}
-              min={200}
+              min={100}
               max={400}
               step={10}
               unit="uu"
-              description="第三人称追踪相机距离"
               onChange={setCameraDistance}
+              onHover={() => setHoveredDesc('Sets tracking camera follow distance behind your vehicle.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
-            <SliderControl
-              label="Camera Height (相机垂直高度)"
+
+            <SettingSliderRow
+              label="Height"
               value={cameraHeight}
-              min={60}
-              max={180}
-              step={5}
+              min={40}
+              max={200}
+              step={10}
               unit="uu"
-              description="俯视跟踪相机离地高度"
               onChange={setCameraHeight}
+              onHover={() => setHoveredDesc('Controls vertical elevation of camera above car chassis.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
+
+            <SettingSliderRow
+              label="Angle"
+              value={cameraAngle}
+              min={-15}
+              max={0}
+              step={1}
+              unit="°"
+              onChange={setCameraAngle}
+              onHover={() => setHoveredDesc('Adjusts downward pitch angle pointing toward your vehicle.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            <SettingSliderRow
+              label="Stiffness"
+              value={cameraStiffness}
+              min={0}
+              max={1}
+              step={0.05}
+              onChange={setCameraStiffness}
+              onHover={() => setHoveredDesc('Controls how rigidly camera follows vehicle orientation (0 = loose, 1 = locked).')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            <SettingSliderRow
+              label="Swivel Speed"
+              value={cameraSwivelSpeed}
+              min={1}
+              max={10}
+              step={0.1}
+              onChange={setCameraSwivelSpeed}
+              onHover={() => setHoveredDesc('Rotation speed when orbiting view with right stick or keys.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            <SettingSliderRow
+              label="Transition Speed"
+              value={cameraTransitionSpeed}
+              min={1}
+              max={2}
+              step={0.1}
+              onChange={setCameraTransitionSpeed}
+              onHover={() => setHoveredDesc('Determines how quickly the view blends between Ball Cam and Car Cam.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            <SettingToggleRow
+              label="Camera Shake"
+              checked={cameraShake}
+              onCheckedChange={setCameraShake}
+              onHover={() => setHoveredDesc('Toggles impact vibrations on ball hits, demolitions and landings.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            <SettingToggleRow
+              label="Invert Swivel"
+              checked={invertSwivel}
+              onCheckedChange={setInvertSwivel}
+              onHover={() => setHoveredDesc('Inverts vertical swivel pitch axis when looking around.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            {/* Reset Camera Action */}
+            <div
+              className="pt-3 mt-1 border-t border-neutral-200 dark:border-neutral-800/80 flex items-center justify-between px-2 select-none"
+              onMouseEnter={() => setHoveredDesc('Resets all camera parameters back to factory standard presets.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
+              <span className={`text-xs font-semibold ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                Reset Camera Parameters
+              </span>
+
+              {isConfirmingResetCamera ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFov(110);
+                      setCameraDistance(280);
+                      setCameraHeight(110);
+                      setCameraAngle(-3);
+                      setCameraStiffness(0.45);
+                      setCameraSwivelSpeed(2.5);
+                      setCameraTransitionSpeed(1.2);
+                      setCameraShake(false);
+                      setInvertSwivel(false);
+                      setIsConfirmingResetCamera(false);
+                    }}
+                    className="px-3 py-1 text-xs font-bold rounded-lg border border-red-600 bg-red-600 text-white hover:bg-red-700 active:scale-95 transition-all cursor-pointer shadow-sm animate-pulse"
+                  >
+                    Confirm Reset?
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingResetCamera(false)}
+                    className={`px-2.5 py-1 text-xs rounded-lg border active:scale-95 transition-all cursor-pointer ${
+                      isLight
+                        ? 'border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700'
+                        : 'border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-300'
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingResetCamera(true)}
+                  className="px-3 py-1 text-xs font-semibold rounded-lg border border-red-500/50 text-red-500 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
+                >
+                  Reset Camera
+                </button>
+              )}
+            </div>
           </VStack>
         )}
 
-        {/* 3. CONTROLS: Embedded Key Controls table */}
+        {/* 3. CONTROLS */}
         {currentTab === 'controls' && (
-          <div className="flex flex-col gap-3">
+          <div
+            className="flex flex-col gap-3"
+            onMouseEnter={() => setHoveredDesc('Rebind keycaps and controller gamepad inputs directly.')}
+            onMouseLeave={() => setHoveredDesc(null)}
+          >
             <div className="flex items-center justify-between text-xs pb-1 border-b border-neutral-200 dark:border-neutral-800">
               <span className={`font-semibold ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
-                Keyboard & Controller Remapping (按键与手柄映射)
+                Keyboard & Controller Remapping
               </span>
               <span className="text-[11px] font-mono opacity-70">Unified Controls Layer</span>
             </div>
@@ -273,81 +526,71 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
 
         {/* 4. INTERFACE */}
         {currentTab === 'interface' && (
-          <VStack gap="lg" isLight={isLight}>
-            <SliderControl
+          <VStack gap="md" isLight={isLight}>
+            <SettingSliderRow
               label="HUD Interface Scale"
               value={hudScale}
               min={70}
               max={130}
               step={5}
               unit="%"
-              description="调整主屏幕战况与仪表盘缩放比"
               onChange={setHudScale}
+              onHover={() => setHoveredDesc('Scales main screen scoreboard, boost meter and speedometer dimensions.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
-            <div className={`p-4 rounded-xl border text-xs leading-relaxed ${
-              isLight ? 'bg-neutral-50/80 border-neutral-200' : 'bg-neutral-850 border-neutral-700/80'
-            }`}>
-              <span className="font-bold block mb-1">Safe Area Margin / 屏幕安全区边距：</span>
-              <span className="opacity-80">支持全局 -5% ~ +10% 物理显示区域适配，可通过右上方遥测工具条实时微调。</span>
+
+            <div
+              className={`p-4 rounded-xl border text-xs leading-relaxed select-none ${
+                isLight ? 'bg-neutral-50/80 border-neutral-200' : 'bg-neutral-850 border-neutral-700/80'
+              }`}
+              onMouseEnter={() => setHoveredDesc('Safe area supports -5% to +10% viewport insets via the top-right toolbar.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
+              <span className="font-bold block mb-1">Safe Area Margin Buffer:</span>
+              <span className="opacity-80">
+                Supports global -5% tight overscan to +10% protective buffer for curved or notched displays.
+              </span>
             </div>
           </VStack>
         )}
 
-        {/* 5. VIDEO: Contains Render Disable / Background Pause Settings */}
+        {/* 5. VIDEO */}
         {currentTab === 'video' && (
-          <VStack gap="lg" isLight={isLight}>
-            {/* Background Render Disable Option */}
-            <div className={`p-4 rounded-xl border flex flex-col gap-3 ${
-              isLight ? 'bg-amber-50/80 border-amber-200' : 'bg-amber-500/10 border-amber-500/30'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-amber-500">
-                      Background Render Pause (暂停时抑制背景渲染)
-                    </span>
-                    <Badge variant="amber" size="sm" isLight={isLight}>
-                      Instant FPS Saver
-                    </Badge>
-                  </div>
-                  <span className={`text-[11px] ${isLight ? 'text-neutral-600' : 'text-neutral-300'}`}>
-                    菜单处于展开状态时，暂停 Three.js 场景渲染以节省 GPU 算力并保持低发热。
-                  </span>
-                </div>
-                <ToggleSwitch
-                  checked={bgRenderDisabled}
-                  onCheckedChange={(val) => {
-                    setBgRenderDisabled(val);
-                    onToggleBackgroundRender?.(val);
-                  }}
-                  variant="orange"
-                  isLight={isLight}
-                />
-              </div>
-            </div>
+          <VStack gap="md" isLight={isLight}>
+            <SettingToggleRow
+              label="Pause Rendering on Menu"
+              checked={bgRenderDisabled}
+              onCheckedChange={(val) => {
+                setBgRenderDisabled(val);
+                onToggleBackgroundRender?.(val);
+              }}
+              onHover={() => setHoveredDesc('Suspends WebGL canvas redraws while pause menu is open to conserve battery and GPU resources.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
 
-            <SliderControl
-              label="Render Scale (渲染分辨率比例)"
+            <SettingSliderRow
+              label="Render Scale"
               value={renderScale}
               min={50}
               max={150}
               step={5}
               unit="%"
-              description="调整 3D Canvas 缓冲区物理像素采样率"
               onChange={setRenderScale}
+              onHover={() => setHoveredDesc('Adjusts 3D canvas buffer physical pixel sampling scale dynamically.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
 
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex flex-col gap-0.5">
-                <span className={`font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
-                  Max Framerate Limit
-                </span>
-                <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                  限制渲染循环最大刷新频率
-                </span>
-              </div>
+            <div
+              className="flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-neutral-500/10 transition-colors select-none cursor-pointer"
+              onMouseEnter={() => setHoveredDesc('Limits maximum refresh rate of the 3D render loop.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
+              <span className={`font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
+                Max Framerate Limit
+              </span>
               <SegmentedSwitch
                 value={fpsLimit}
                 onValueChange={setFpsLimit}
@@ -361,72 +604,78 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
               />
             </div>
 
-            <ToggleSwitch
-              label="Vertical Sync (VSync 垂直同步)"
-              description="使刷新率与显示器物理扫描同步，消除画面撕裂"
+            <SettingToggleRow
+              label="Vertical Sync (VSync)"
               checked={vsync}
               onCheckedChange={setVsync}
+              onHover={() => setHoveredDesc('Locks frame presentation to monitor vertical refresh, eliminating tearing.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
           </VStack>
         )}
 
-        {/* 6. AUDIO: Quick Levels + Layer 3 DSP Entrance */}
+        {/* 6. AUDIO */}
         {currentTab === 'audio' && (
-          <VStack gap="lg" isLight={isLight}>
-            <SliderControl
+          <VStack gap="md" isLight={isLight}>
+            <SettingSliderRow
               label="Master Volume"
               value={masterVol}
               min={0}
               max={100}
               step={5}
               unit="%"
-              description="主混音总音量输出"
               onChange={setMasterVol}
+              onHover={() => setHoveredDesc('Controls overall mixed master audio output gain.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
 
-            <SliderControl
+            <SettingSliderRow
               label="SFX & Engine Audio"
               value={sfxVol}
               min={0}
               max={100}
               step={5}
               unit="%"
-              description="轮胎抓地音、火箭推进与球体碰撞声"
               onChange={setSFXVol}
+              onHover={() => setHoveredDesc('Acoustics for tire screech, supersonic boom, rocket boost and ball impact.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
 
-            <SliderControl
+            <SettingSliderRow
               label="Ambient & Crowd Reverb"
               value={ambientVol}
               min={0}
               max={100}
               step={5}
               unit="%"
-              description="球场观众欢呼声与场馆混响"
               onChange={setAmbientVol}
+              onHover={() => setHoveredDesc('Arena spectator cheers, stadium horns and environmental acoustic reflections.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
 
             {/* Layer 3 Sub-Menu Entrance */}
             <div
-              className={`p-4 rounded-xl border flex items-center justify-between transition-colors ${
+              className={`p-4 rounded-xl border flex items-center justify-between transition-colors select-none ${
                 isLight ? 'bg-neutral-50/90 border-neutral-200' : 'bg-neutral-850 border-neutral-700/80'
               }`}
+              onMouseEnter={() => setHoveredDesc('Open dedicated 480px 3-band parametric equalizer and HRTF spatial acoustics panel.')}
+              onMouseLeave={() => setHoveredDesc(null)}
             >
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-1.5">
                   <span className={`text-xs font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
-                    音频高级均衡器与声场 (Acoustics & EQ)
+                    Acoustics & Equalizer (DSP)
                   </span>
                   <Badge variant="primary" size="sm" isLight={isLight}>
                     Layer 3
                   </Badge>
                 </div>
                 <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                  进入独立 480px 三段频响均衡器、动态压缩比与 HRTF 空间环绕调节面板
+                  3-Band frequency equalizer, dynamic range compression and 3D spatial field.
                 </span>
               </div>
 
@@ -434,13 +683,9 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
                 <button
                   type="button"
                   onClick={onNavigateAudioDetail}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border transition-all ${
-                    isLight
-                      ? 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-2xs'
-                      : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-2xs'
-                  }`}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer bg-amber-500 hover:bg-amber-600 text-white shadow-2xs transition-all"
                 >
-                  <span>进入 Layer 3</span>
+                  <span>Open EQ</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               )}
@@ -450,57 +695,75 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
 
         {/* 7. CHAT */}
         {currentTab === 'chat' && (
-          <VStack gap="lg" isLight={isLight}>
-            <ToggleSwitch
-              label="Quick Chat (十字键快速短语)"
-              description="支持在对局中使用手柄十字键快速发送预设战术指令"
+          <VStack gap="md" isLight={isLight}>
+            <SettingToggleRow
+              label="Quick Chat Phrases"
               checked={quickChatEnabled}
               onCheckedChange={setQuickChatEnabled}
+              onHover={() => setHoveredDesc('Enables D-pad / number key tactical phrase transmission during matches.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
-            <div className={`p-4 rounded-xl border text-xs text-neutral-400 ${
-              isLight ? 'bg-neutral-50/80 border-neutral-200' : 'bg-neutral-850 border-neutral-700/80'
-            }`}>
-              预设短语与快捷输入槽位配置已预留，可在后续版本中无缝挂载。
+            <div
+              className={`p-4 rounded-xl border text-xs text-neutral-400 select-none ${
+                isLight ? 'bg-neutral-50/80 border-neutral-200' : 'bg-neutral-850 border-neutral-700/80'
+              }`}
+            >
+              Custom preset slots and quick chat binding tables are preserved for next engine release.
             </div>
           </VStack>
         )}
 
         {/* 8. EXTRA */}
         {currentTab === 'extra' && (
-          <div className="flex flex-col gap-3">
-            <div className={`p-4 rounded-xl border text-xs leading-relaxed ${
-              isLight ? 'bg-neutral-50/80 border-neutral-200' : 'bg-neutral-850 border-neutral-700/80'
-            }`}>
-              <span className="font-bold block mb-1">Extra Features (扩展选项)：</span>
-              <span>包含游戏回放自动保存、遥测指标录制等辅助功能（占位待填充）。</span>
-            </div>
-          </div>
+          <VStack gap="md" isLight={isLight}>
+            <SettingToggleRow
+              label="Auto-Save Match Replay"
+              checked={autoSaveReplay}
+              onCheckedChange={setAutoSaveReplay}
+              onHover={() => setHoveredDesc('Automatically exports high-tickrate replay binary upon match conclusion.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+
+            <SettingToggleRow
+              label="Telemetry State Recording"
+              checked={telemetryRecord}
+              onCheckedChange={setTelemetryRecord}
+              onHover={() => setHoveredDesc('Logs sub-tick vehicle transform matrices to local debug buffer.')}
+              onLeave={() => setHoveredDesc(null)}
+              isLight={isLight}
+            />
+          </VStack>
         )}
 
-        {/* 9. ADVANCED: Contains 'Enable Developer Settings' */}
+        {/* 9. ADVANCED */}
         {currentTab === 'advanced' && (
-          <VStack gap="lg" isLight={isLight}>
-            <div className={`p-4 rounded-xl border flex items-center justify-between ${
-              developerUnlocked
-                ? isLight
-                  ? 'bg-red-50/70 border-red-200'
-                  : 'bg-red-950/20 border-red-800/60'
-                : isLight
-                ? 'bg-neutral-50 border-neutral-200'
-                : 'bg-neutral-850 border-neutral-700/80'
-            }`}>
+          <VStack gap="md" isLight={isLight}>
+            <div
+              className={`p-4 rounded-xl border flex items-center justify-between select-none ${
+                developerUnlocked
+                  ? isLight
+                    ? 'bg-red-50/70 border-red-200'
+                    : 'bg-red-950/20 border-red-800/60'
+                  : isLight
+                  ? 'bg-neutral-50 border-neutral-200'
+                  : 'bg-neutral-850 border-neutral-700/80'
+              }`}
+              onMouseEnter={() => setHoveredDesc('Unlocks top-level Developer tab for physics wireframes and WASM runtime profilers.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-xs text-red-500">
-                    Enable Developer Settings (启用开发者设置)
+                    Enable Developer Settings
                   </span>
                   <Badge variant="danger" size="sm" isLight={isLight}>
                     Diagnostics
                   </Badge>
                 </div>
                 <span className={`text-[11px] ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                  解锁顶部的【Developer】专用调试选项卡，用于物理管线、线框图与 WASM 性能剖析。
+                  Reveals experimental physics sub-tick monitors and collision wireframe views.
                 </span>
               </div>
 
@@ -518,22 +781,26 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
               />
             </div>
 
-            {/* Diagnostic Floating Window (F10) Spawner with '+' Button */}
-            <div className={`p-4 rounded-xl border flex items-center justify-between ${
-              isLight ? 'bg-sky-50/60 border-sky-200' : 'bg-sky-950/20 border-sky-800/60'
-            }`}>
+            {/* Diagnostic Floating Window Spawner */}
+            <div
+              className={`p-4 rounded-xl border flex items-center justify-between select-none ${
+                isLight ? 'bg-sky-50/60 border-sky-200' : 'bg-sky-950/20 border-sky-800/60'
+              }`}
+              onMouseEnter={() => setHoveredDesc('Spawns independent diagnostic windows dockable into the top-right tray.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
                   <Activity className="h-4 w-4 text-sky-500" />
                   <span className="font-bold text-xs text-sky-600 dark:text-sky-400">
-                    F10 Diagnostic Floating Window (诊断悬浮窗口)
+                    F10 Diagnostic Floating Window
                   </span>
                   <Badge variant="primary" size="sm" isLight={isLight}>
                     Floating Window
                   </Badge>
                 </div>
                 <span className={`text-[11px] ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                  生成独立于主菜单层级的悬浮诊断窗口。点击最小化收缩进入右上角 Stack 托盘。
+                  Independent floating overlay window with minimize-to-stack tray dock.
                 </span>
               </div>
 
@@ -550,45 +817,50 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
                   useFloatingStore.getState().spawnWindow(randomTitle);
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white shadow-xs cursor-pointer transition-colors shrink-0 ml-3"
-                title="添加诊断窗口并收缩至右上角 Stack 托盘"
               >
                 <Plus className="h-4 w-4 stroke-[2.5]" />
-                <span>新建窗口</span>
+                <span>New Window</span>
               </button>
             </div>
           </VStack>
         )}
 
-        {/* 10. DEVELOPER (Dynamic unlocked tab) */}
+        {/* 10. DEVELOPER */}
         {currentTab === 'developer' && (
-          <VStack gap="lg" isLight={isLight}>
-            <div className={`p-3 rounded-lg border text-xs ${
-              isLight ? 'bg-red-50 text-red-900 border-red-200' : 'bg-red-950/30 text-red-300 border-red-800/80'
-            }`}>
-              ⚠️ 开发者模式已激活：以下选项仅供内核调优使用。
-            </div>
-
-            <ToggleSwitch
-              label="Three.js Physics Wireframe (刚体线框渲染)"
-              description="显示车身 OBB / 球体碰撞箱物理网格"
+          <VStack gap="md" isLight={isLight}>
+            <SettingToggleRow
+              label="Three.js Physics Wireframe"
               checked={showWireframe}
               onCheckedChange={setShowWireframe}
+              onHover={() => setHoveredDesc('Overlays 3D collision bounding boxes and OBB vehicle chassis geometry.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
 
-            <ToggleSwitch
-              label="WASM SIMD Profiler (微秒级遥测监控)"
-              description="在 HUD 顶部实时打印 Sub-tick 时延与字节码执行耗时"
+            <SettingToggleRow
+              label="WASM SIMD Profiler"
               checked={wasmProfiling}
               onCheckedChange={setWasmProfiling}
+              onHover={() => setHoveredDesc('Prints microsecond bytecode execution times in real-time HUD telemetry.')}
+              onLeave={() => setHoveredDesc(null)}
               isLight={isLight}
             />
           </VStack>
         )}
       </PanelContent>
 
-      <PanelFooter hint="ESC to Back" isLight={isLight}>
-        <span>Active Tab: {currentTab.toUpperCase()}</span>
+      {/* Dynamic Inspector Footer displaying English description of hovered item */}
+      <PanelFooter isLight={isLight}>
+        <div className="flex items-center gap-2 w-full text-xs truncate">
+          <Info className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
+          <span className={`truncate transition-all duration-150 ${
+            hoveredDesc
+              ? (isLight ? 'text-neutral-900 font-medium' : 'text-neutral-100 font-medium')
+              : 'text-neutral-500 italic'
+          }`}>
+            {hoveredDesc || 'Hover over any item to view more details.'}
+          </span>
+        </div>
       </PanelFooter>
     </PanelContainer>
   );

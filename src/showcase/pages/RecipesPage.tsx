@@ -5,6 +5,7 @@ import { Layer2PlayRecipe } from '../../recipes/Layer2PlayRecipe';
 import { Layer2SettingsRecipe } from '../../recipes/Layer2SettingsRecipe';
 import { Layer2GarageRecipe } from '../../recipes/Layer2GarageRecipe';
 import { KeybindingRecipe } from '../../recipes/KeybindingRecipe';
+import { MatchHudRecipe } from '../../hud';
 
 export const RecipesPage: React.FC<{ isLight?: boolean }> = ({ isLight = true }) => {
   return (
@@ -110,6 +111,30 @@ export const MainMenuPanel = ({ isLight, onResume, onPlay, onGarage, onSettings 
           }`}
         >
           <Layer2SettingsRecipe isLight={isLight} />
+        </div>
+      </div>
+
+      {/* Recipe 5: In-Game Match HUD */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <span className="h-6 w-6 rounded-md bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold text-xs">
+            5
+          </span>
+          <h2 className="text-base font-bold">HUD Layer 对局平视显示层全景配方 (Match HUD / 18:9)</h2>
+        </div>
+        <div
+          className="relative w-full aspect-[18/9] rounded-2xl overflow-hidden border border-neutral-700 shadow-xl"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 120%, #1a365d 0%, #0f172a 60%, #020617 100%)',
+          }}
+        >
+          <MatchHudRecipe
+            scoreState={{ blueScore: 3, orangeScore: 1, clockSeconds: 180, isOvertime: false }}
+            boostState={{ amount: 75, isSpending: false, isUnlimited: false }}
+            speedState={{ speedUu: 1450, isSupersonic: false }}
+            flipState={{ phase: 'grounded', remainingMs: 1250, maxMs: 1250 }}
+            cameraMode="ball"
+          />
         </div>
       </div>
     </div>

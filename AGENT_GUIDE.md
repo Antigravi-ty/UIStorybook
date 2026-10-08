@@ -168,6 +168,15 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 | 二级按键手柄映射 | `<KeybindingRecipe>` | `src/recipes/KeybindingRecipe.tsx` |
 | 一级预留赛后战报菜单 | `<Layer1MatchPostRecipe>` | `src/recipes/Layer1MatchPostRecipe.tsx` |
 | 二级预留赛后统计面板 | `<Layer2MatchStatsRecipe>` | `src/recipes/Layer2MatchStatsRecipe.tsx` |
+| HUD Layer 实时预览引擎 | `<HudLayerPreviewPage>` | `src/showcase/pages/HudLayerPreviewPage.tsx` |
+| 顶栏比分板与对局时钟 | `<MatchScoreboardHUD>` | `src/hud/MatchScoreboardHUD.tsx` |
+| 推进器与氮气量表 (环状/线形) | `<BoostGaugeHUD>` | `src/hud/BoostGaugeHUD.tsx` |
+| 球相机视角指示胶囊 | `<BallCamIndicatorHUD>` | `src/hud/BallCamIndicatorHUD.tsx` |
+| 非线性车速表与超音速标记 | `<SpeedometerHUD>` | `src/hud/SpeedometerHUD.tsx` |
+| 空翻二段跳倒计时与重置指示器 | `<FlipTimerHUD>` | `src/hud/FlipTimerHUD.tsx` |
+| 进球与战局通告横幅 | `<MatchAccoladeBannerHUD>` | `src/hud/MatchAccoladeBannerHUD.tsx` |
+| 战局快捷短语聊天流 | `<QuickChatFeedHUD>` | `src/hud/QuickChatFeedHUD.tsx` |
+| 战局平视复合全景配方 | `<MatchHudRecipe>` | `src/hud/MatchHudRecipe.tsx` |
 | 扁平按键徽章 (ESC, W, RT, A) | `<KeycapBadge>` | `src/primitives/KeycapBadge.tsx` |
 | 状态与指标徽章 | `<Badge>` | `src/primitives/Badge.tsx` |
 | 现代滑动下划线 Tab | `<UnderlineTabs>` | `src/primitives/UnderlineTabs.tsx` |
@@ -204,4 +213,39 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 
 ### 6.5 全局视觉基调 (Global Visual & Accent Theme)
 - 系统优先使用 **Neutral (无饱和度黑白)** 与 **Warm Amber (暖橙黄色)** 作为核心视觉主色调，相比原蓝色更柔和舒适，并内置视觉基调切换器供全局实时切换。
+
+---
+
+## 7. HUD Layer (战斗平视显示层) 架构规范与 Nintendo / Apple 设计哲学
+
+### 7.1 层级权责划分：Menu Layer vs HUD Layer
+为确保开发与沟通无歧义，系统严格在架构上解耦两大视觉层级：
+1. **Menu Layer (菜单交互层)**：
+   - **载体**：`<MenuLayerPreviewPage>`
+   - **范畴**：全局暂停菜单、车库配装、音画与键位设置、赛后结算。
+   - **交互模型**：全模态独占交互，统一由 `MorphContainer` 调度流体形变与分步时序过渡。
+   - **文字规范**：菜单内部所有操作条目、标签与按键统一采用干净精炼的国际化英文（如 `SETTINGS`, `Field of View`, `Distance`），严禁夹带中英文混杂残留括号（如禁止 `(球相机指向器)`）；详细说明统一在 `PanelFooter` 中通过悬浮 Tooltip 动态输出。
+2. **HUD Layer (战斗平视显示层)**：
+   - **载体**：`<HudLayerPreviewPage>`
+   - **范畴**：比赛进行中的全景平视覆盖层（Heads-Up Display），常驻锚定在视口四周边缘与中心。
+   - **组件矩阵**：
+     - `MatchScoreboardHUD` (顶栏比分板与对局主时钟)
+     - `BoostGaugeHUD` (右下角推进器仪表)
+     - `BallCamIndicatorHUD` (左下角球相机追踪胶囊)
+     - `SpeedometerHUD` (底端中置 0~2300 uu/s 非线性速度表与超音速标记)
+     - `FlipTimerHUD` (二段跳 1.25s 倒计时与 4 轮触球 Flip Reset 刷新提示)
+     - `MatchAccoladeBannerHUD` (正中进球横幅、开球 3-2-1 与扑救高光播报)
+     - `QuickChatFeedHUD` (左上角快捷战术短语流)
+     - `MatchHudRecipe` (全景自适应平视组合配方)
+
+### 7.2 现代设计哲学：Nintendo 与 Apple 如何重构电竞 UI
+Rocket League 原版 HUD 诞生于 2015 年代，充斥厚重拟物、粗笨渐变与视觉噪点。现代游戏 UI 必须兼顾竞技功能性与工业设计美学：
+- **Nintendo 哲学 (启发自 Splatoon 3 与 Mario Kart 8)**：
+  - **Glanceability (余光一瞥即知)**：在 120Hz 高速赛车对抗中，视线焦点在球与车上。HUD 元素采用鲜明的几何剪影与高辨识度双色（蓝 vs 橙），零多余修饰。
+  - **Tactile Feedback & Spring Motion (触觉弹簧回弹)**：得分数字增长、开球 3-2-1 弹动跳秒、超音速紫光突破时，均具备轻快有力的弹簧微动效（Spring Physics），正向回馈强烈。
+  - **竞技状态直观化 (Flip Reset & Cooldowns)**：起跳后以平滑圆弧倒计时直观展现 1.25s 二段跳窗口；四轮触球触发 `FLIP RESET!` 时弹出专属柔和发光徽章，极大提升高阶微操体验。
+- **Apple 哲学 (启发自 Apple HIG、watchOS 与 VisionOS)**：
+  - **超纯净磨砂玻璃材质 (`backdrop-blur-md bg-neutral-950/80 border-white/15`)**：在动态 3D 球场背景上既有完美文字对比度，又绝不遮挡视野。
+  - **SF Pro / 等宽 Tabular Numbers**：时钟、比分与推进器数值采用等宽排版，跳动时绝不引发文字抖动或重排抖晃。
+  - **双主题对比度**：在 Light 纯白白昼球场与 Dark 黑夜球场均具备光学自适应对比度。
 

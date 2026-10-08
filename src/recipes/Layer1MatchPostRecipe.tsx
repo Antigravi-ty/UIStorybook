@@ -30,7 +30,7 @@ export const Layer1MatchPostRecipe: React.FC<Layer1MatchPostRecipeProps> = ({
   return (
     <PanelContainer isLight={isLight} className="w-full max-w-[420px]">
       <PanelHeader
-        title="MATCH POST / 赛后战报"
+        title="MATCH POST"
         subtitle="Ranked 3v3 • Champion Arena"
         badge={
           <Badge variant="success" size="sm" dot isLight={isLight}>
@@ -44,7 +44,7 @@ export const Layer1MatchPostRecipe: React.FC<Layer1MatchPostRecipeProps> = ({
         <MenuContainer ariaLabel="Match Post Menu">
           <MenuItem
             icon={<Play className="h-5 w-5" />}
-            title="Next Match / 再来一局"
+            title="Next Match"
             subtitle="Search for next competitive queue"
             shortcut="ENTER"
             variant="primary"
@@ -55,7 +55,7 @@ export const Layer1MatchPostRecipe: React.FC<Layer1MatchPostRecipeProps> = ({
 
           <MenuItem
             icon={<Trophy className="h-5 w-5" />}
-            title="Match Stats / 表现详情"
+            title="Match Stats"
             subtitle="Goals, saves, MVPs & player telemetry"
             hasArrow
             onClick={onNavigateStats}
@@ -67,7 +67,7 @@ export const Layer1MatchPostRecipe: React.FC<Layer1MatchPostRecipeProps> = ({
 
           <MenuItem
             icon={<Car className="h-5 w-5" />}
-            title="Garage Loadout / 车辆改装"
+            title="Garage Loadout"
             subtitle="Change chassis, decals, wheels & boost"
             hasArrow
             onClick={onNavigateGarage}
@@ -76,7 +76,7 @@ export const Layer1MatchPostRecipe: React.FC<Layer1MatchPostRecipeProps> = ({
 
           <MenuItem
             icon={<Settings className="h-5 w-5" />}
-            title="Game Settings / 选项设置"
+            title="Game Settings"
             subtitle="Audio equalizer, graphics & camera"
             hasArrow
             onClick={onNavigateSettings}
@@ -85,7 +85,7 @@ export const Layer1MatchPostRecipe: React.FC<Layer1MatchPostRecipeProps> = ({
 
           <MenuItem
             icon={<Keyboard className="h-5 w-5" />}
-            title="Key Controls / 键位映射"
+            title="Key Controls"
             subtitle="Keyboard bindings & gamepad sensitivity"
             hasArrow
             onClick={onNavigateKeybindings}
@@ -96,7 +96,7 @@ export const Layer1MatchPostRecipe: React.FC<Layer1MatchPostRecipeProps> = ({
 
           <MenuItem
             icon={<LogOut className="h-5 w-5" />}
-            title="Return to Lobby / 返回主界面"
+            title="Return to Lobby"
             subtitle="Leave current server to arena lobby"
             variant="danger"
             onClick={onExitLobby}

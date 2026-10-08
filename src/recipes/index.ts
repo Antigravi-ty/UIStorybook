@@ -7,3 +7,4 @@ export * from './Layer2MatchStatsRecipe';
 export * from './Layer3AudioDetailRecipe';
 export * from './Layer3BallTrajectoryRecipe';
 export * from './KeybindingRecipe';
+export * from '../hud';

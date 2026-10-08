@@ -198,8 +198,8 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
             <div className={`p-3 rounded-xl border text-xs leading-relaxed ${
               isLight ? 'bg-amber-50/70 border-amber-200/80 text-amber-950' : 'bg-amber-500/10 border-amber-500/30 text-amber-200'
             }`}>
-              <strong>颜色顺位机制 (Colour Preference Order)：</strong>
-              比赛最多 3v3，双方队伍各设置有优先级顺位（1st → 2nd → 3rd ...）。若第一意向颜色在对局中已被队友占用，系统将自动回退（Fallback）至下一个预设顺位，彻底避免同队撞色。
+              <strong>Colour Preference Order:</strong>
+              In matches up to 3v3, team car palettes follow ranked priorities (1st → 2nd → 3rd). If your primary color is chosen by a teammate, the system automatically falls back to your next preset rank.
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -210,9 +210,9 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-blue-500 flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                    蓝方顺位表 (Blue Team Order)
+                    Blue Team Palette Ranks
                   </span>
-                  <span className="text-[10px] font-mono opacity-70">Top 1 优先</span>
+                  <span className="text-[10px] font-mono opacity-70">Top 1 Priority</span>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   {blueOrder.map((cId, idx) => {
@@ -248,9 +248,9 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-orange-500 flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-orange-500" />
-                    橙方顺位表 (Orange Team Order)
+                    Orange Team Palette Ranks
                   </span>
-                  <span className="text-[10px] font-mono opacity-70">Top 1 优先</span>
+                  <span className="text-[10px] font-mono opacity-70">Top 1 Priority</span>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   {orangeOrder.map((cId, idx) => {
@@ -287,7 +287,7 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between text-xs">
               <span className={`font-semibold ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
-                进球/MVP 赛场专属赞歌 (Goal Anthem)
+                Goal & MVP Celebration Anthem
               </span>
               <Badge variant="primary" size="sm" isLight={isLight}>
                 Audio Preview Ready

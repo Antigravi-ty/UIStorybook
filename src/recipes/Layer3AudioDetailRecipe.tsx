@@ -29,7 +29,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
   return (
     <PanelContainer isLight={isLight} className="w-full max-w-[480px]">
       <PanelHeader
-        title="ACOUSTICS & EQ / 音频高级"
+        title="ACOUSTICS & EQ"
         subtitle="Layer 3 Sub-Menu • 32-bit DSP Engine"
         onBack={onBack}
         badge={
@@ -44,7 +44,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
         {/* Dynamic Range Switcher */}
         <div className="flex flex-col gap-1.5">
           <label className={`text-xs font-semibold ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
-            Dynamic Range Profile (动态范围)
+            Dynamic Range Profile
           </label>
           <SegmentedSwitch
             options={[
@@ -62,11 +62,11 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
         <Card isLight={isLight} variant="outlined" className="p-4 flex flex-col gap-3">
           <div className="flex items-center gap-2 mb-1">
             <Sliders className="h-4 w-4 text-amber-500" />
-            <span className="text-xs font-bold tracking-tight">3-Band Acoustic EQ (三段均衡器)</span>
+            <span className="text-xs font-bold tracking-tight">3-Band Parametric EQ</span>
           </div>
 
           <SliderControl
-            label="Bass / 低频增益 (100Hz)"
+            label="Bass Gain (100Hz)"
             value={lows}
             onChange={setLows}
             min={0}
@@ -76,7 +76,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
           />
 
           <SliderControl
-            label="Midrange / 中频人声 (1kHz)"
+            label="Midrange Voice (1kHz)"
             value={mids}
             onChange={setMids}
             min={0}
@@ -86,7 +86,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
           />
 
           <SliderControl
-            label="Treble / 高频细节 (10kHz)"
+            label="Treble Brilliance (10kHz)"
             value={highs}
             onChange={setHighs}
             min={0}
@@ -101,8 +101,8 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
           <ToggleSwitch
             checked={spatialAudio}
             onCheckedChange={setSpatialAudio}
-            label="HRTF 3D Spatial Audio (空间环绕定位)"
-            description="模拟全景 HRTF 双耳渲染，精准定位球场来球与引擎方位"
+            label="HRTF 3D Spatial Audio"
+            description="Binaural head-related transfer function for 3D vehicle & ball location."
             isLight={isLight}
           />
         </Card>

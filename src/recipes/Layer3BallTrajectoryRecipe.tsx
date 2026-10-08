@@ -90,20 +90,20 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
           >
             <div className="flex items-center gap-2">
               <Eye className="h-4 w-4 text-amber-500 shrink-0" />
-              <span>按键盘 <strong>TAB</strong> 可将此窗口快速折叠至右侧边栏并恢复游戏背景渲染</span>
+              <span>Press <strong>TAB</strong> to fold this window into the Live Preview dock and resume arena rendering.</span>
             </div>
             <KeycapBadge shortcut="TAB" size="sm" isLight={isLight} />
           </div>
 
           {/* 1. Trajectory Draw Duration */}
           <SliderControl
-            label="Trajectory Horizon (预测时长)"
+            label="Trajectory Horizon"
             value={trajectoryDuration}
             min={0.5}
             max={5.0}
             step={0.1}
             unit="s"
-            description="前瞻模拟计算绘制球体未来飞行轨迹秒数"
+            description="Lookahead horizon seconds for ballistic projectile curve rendering."
             onChange={setTrajectoryDuration}
             colorScheme="amber"
             isLight={isLight}
@@ -113,7 +113,7 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className={`font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
-                Trajectory Glow Color (轨迹弧光色调)
+                Trajectory Arc Color
               </span>
               <span className="text-[11px] font-mono text-neutral-400">Neutral & Soft</span>
             </div>
@@ -132,11 +132,11 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
 
           {/* 3. Bounce Markers & Spin Simulation */}
           <Card isLight={isLight} variant="outlined" className="p-4 flex flex-col gap-3">
-            <span className="text-xs font-bold tracking-tight mb-1">物理触地与微操辅助 (Physics Markers)</span>
+            <span className="text-xs font-bold tracking-tight mb-1">Physics Markers & Flight Assist</span>
             
             <ToggleSwitch
-              label="Bounce Impact Rings (球体弹跳落点环)"
-              description="在地面与球门框标出即将发生反弹的高光预测光圈"
+              label="Bounce Impact Rings"
+              description="Visualizes predicted ground and goalpost contact reflection halos."
               checked={showBounceMarkers}
               onCheckedChange={setShowBounceMarkers}
               variant="orange"
@@ -144,8 +144,8 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
             />
 
             <ToggleSwitch
-              label="Magnus Spin Vector (马格努斯旋转向量)"
-              description="可视化空气阻力与自旋对弧线落点的真实偏移修正"
+              label="Magnus Spin Vector"
+              description="Simulates aerodynamic Magnus deflection based on ball angular spin."
               checked={showSpinVector}
               onCheckedChange={setShowSpinVector}
               variant="orange"
@@ -153,8 +153,8 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
             />
 
             <ToggleSwitch
-              label="Decay Fade-Out (远端轨迹透明衰减)"
-              description="避免远端轨迹遮挡前方视线"
+              label="Decay Fade-Out"
+              description="Gradually fades distant trajectory line to prevent visual obstruction."
               checked={decayFade}
               onCheckedChange={setDecayFade}
               variant="orange"
@@ -165,7 +165,7 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
           {/* 4. Sub-Tick Precision */}
           <div className="flex flex-col gap-1.5">
             <span className={`text-xs font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
-              Physics Solver Steps (解算细分精度)
+              Physics Solver Steps
             </span>
             <SegmentedSwitch
               value={subTickPrecision}

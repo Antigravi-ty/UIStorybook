@@ -25,18 +25,18 @@ export const Layer2MatchStatsRecipe: React.FC<Layer2MatchStatsRecipeProps> = ({
   onRematch,
 }) => {
   const stats = [
-    { label: 'Goals (进球)', value: '3', icon: <Target className="h-4 w-4 text-emerald-500" /> },
-    { label: 'Assists (助攻)', value: '1', icon: <Award className="h-4 w-4 text-amber-500" /> },
-    { label: 'Saves (扑救)', value: '4', icon: <Shield className="h-4 w-4 text-amber-500" /> },
-    { label: 'Shots (射门)', value: '6', icon: <Flame className="h-4 w-4 text-rose-500" /> },
-    { label: 'Shot Accuracy (命中率)', value: '50.0%', icon: <Target className="h-4 w-4 text-emerald-400" /> },
-    { label: 'Boost Consumed (氮气消耗)', value: '412 L', icon: <Zap className="h-4 w-4 text-amber-500" /> },
+    { label: 'Goals', value: '3', icon: <Target className="h-4 w-4 text-emerald-500" /> },
+    { label: 'Assists', value: '1', icon: <Award className="h-4 w-4 text-amber-500" /> },
+    { label: 'Saves', value: '4', icon: <Shield className="h-4 w-4 text-amber-500" /> },
+    { label: 'Shots', value: '6', icon: <Flame className="h-4 w-4 text-rose-500" /> },
+    { label: 'Shot Accuracy', value: '50.0%', icon: <Target className="h-4 w-4 text-emerald-400" /> },
+    { label: 'Boost Consumed', value: '412 L', icon: <Zap className="h-4 w-4 text-amber-500" /> },
   ];
 
   return (
     <PanelContainer isLight={isLight} className="w-full max-w-[580px]">
       <PanelHeader
-        title="MATCH SUMMARY / 表现详情"
+        title="MATCH SUMMARY"
         subtitle="Match Duration 05:00 • Urban Arena"
         onBack={onBack}
         badge={
@@ -86,7 +86,7 @@ export const Layer2MatchStatsRecipe: React.FC<Layer2MatchStatsRecipeProps> = ({
           <div className={`text-[11px] font-bold uppercase tracking-wider mb-2 px-1 ${
             isLight ? 'text-neutral-500' : 'text-neutral-400'
           }`}>
-            Individual Player Telemetry (个人战术遥测)
+            Individual Player Telemetry
           </div>
 
           <GridStack cols={2} gap="sm">

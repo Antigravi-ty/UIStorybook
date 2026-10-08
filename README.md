@@ -67,8 +67,23 @@ UIStorybook 是针对 [RLCleanWASM](https://github.com/Antigravi-ty/RLCleanWASM)
   - `KeybindingRecipe` (按键与手柄映射, `560px`)：键盘/手柄键位重映射。
 - **Layer 3: 深度参数三级面板 (Granular Detail Sub-Menus)**
   - `Layer3AudioDetailRecipe` (音频高级均衡器与声场, `480px`)：3-Band EQ、动态范围、HRTF 3D 空间环绕声。
+  - `Layer3BallTrajectoryRecipe` (弹道预测器面板, `480px`)：飞行时域、自旋向量与落点环。
 
-所有菜单均为低耦合纯呈现组件，支持单行直接调用或放入 `MorphingShell` 自由切换。
+---
+
+## 🎯 HUD Layer: 对局平视显示层 (In-Game HUD Overlay)
+
+与模态交互的 **Menu Layer (菜单交互层)** 清晰解耦，**HUD Layer (对局平视显示层)** 专为高速 120Hz 3D 赛车足球场景设计，融合 Nintendo 竞技感知与 Apple 极简工业质感：
+- `<MatchScoreboardHUD>`：顶栏对局比分板、5 分钟时钟、加时赛脉冲与开球 3-2-1 倒计时。
+- `<BoostGaugeHUD>`：右下角推进器仪表（支持现代化 Apple Arc Ring 弧环与 RLCleanWASM Linear 刻度双模），含喷气发光与无限氮气（∞）。
+- `<BallCamIndicatorHUD>`：左下角球相机视角指示胶囊，带瞄准环光晕与按键快捷键徽章。
+- `<SpeedometerHUD>`：底端中置 0~2300 uu/s 非线性速度计，2200 刻度线触发紫光超音速突破拖尾。
+- `<FlipTimerHUD>`：空翻二段跳 1.25s 倒计时与 4 轮触球 `FLIP RESET!` 刷新提示，解决高阶微操盲区。
+- `<MatchAccoladeBannerHUD>`：正中进球高光庆祝横幅、开球 3-2-1 与史诗扑救播报。
+- `<QuickChatFeedHUD>`：左上角快捷战术短语流与队伍颜色条。
+- `<MatchHudRecipe>`：全景自适应平视组合配方，单行直接嵌入游戏视口。
+
+所有 HUD 组件均为纯表现层无引擎依赖设计，支持单行独立引入或在 `<HudLayerPreviewPage>` 中实时调测交互。
 
 ---
 
