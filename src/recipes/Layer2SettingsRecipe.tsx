@@ -28,7 +28,7 @@ import { ToggleSwitch } from '../primitives/ToggleSwitch';
 import { VStack } from '../layout/VStack';
 import { Badge } from '../primitives/Badge';
 import { KeybindingRecipe } from './KeybindingRecipe';
-import { useFloatingStore } from '../tokens/floatingStore';
+import { floatingStore } from '../tokens/floatingStore';
 
 export interface Layer2SettingsRecipeProps {
   isLight?: boolean;
@@ -685,7 +685,13 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
                     'Ball Angular Velocity & Magnus Vector',
                   ];
                   const randomTitle = titles[Math.floor(Math.random() * titles.length)];
-                  useFloatingStore.getState().spawnWindow(randomTitle);
+                  floatingStore.spawnWindow({
+                    id: `diag-${Date.now()}`,
+                    title: randomTitle,
+                    category: 'Diagnostic',
+                    width: 440,
+                    height: 260,
+                  });
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white shadow-xs cursor-pointer transition-colors shrink-0 ml-3"
               >

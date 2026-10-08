@@ -1,8 +1,7 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { UI_SPACING, UI_RADIUS } from '../tokens';
+import { UI_SPACING, UI_RADIUS, useInMorphContainer } from '../tokens';
 import { KeycapBadge } from '../primitives/KeycapBadge';
-import { useInMorphContainer } from '../navigation/transitions';
 
 export interface PanelHeaderProps {
   title: string;

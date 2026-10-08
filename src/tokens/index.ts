@@ -5,3 +5,4 @@ export * from './colors';
 export * from './themeStore';
 export * from './livePreviewStore';
 export * from './floatingStore';
+export * from './morphContext';

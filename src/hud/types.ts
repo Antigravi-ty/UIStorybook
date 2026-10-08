@@ -57,6 +57,7 @@ export interface QuickChatMessage {
   id: string;
   sender: string;
   team: 'blue' | 'orange';
+  channel?: 'team' | 'all' | 'party' | string;
   text: string;
   timestamp: number;
 }

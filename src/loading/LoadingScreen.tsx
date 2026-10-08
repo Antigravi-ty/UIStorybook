@@ -7,12 +7,18 @@ import { Sparkles, Gamepad2 } from 'lucide-react';
 export interface LoadingScreenProps {
   steps: LoadingStep[];
   currentStepIndex: number;
-  overallProgressPct: number;
+  overallProgressPct?: number;
   error?: LoadingError | null;
   isLight?: boolean;
   appTitle?: string;
   appSubtitle?: string;
-  gameplayTip?: string;
+  logo?: React.ReactNode;
+  gameplayTip?: React.ReactNode;
+  tips?: string[];
+  showTips?: boolean;
+  footer?: React.ReactNode;
+  retryLabel?: string;
+  resetLabel?: string;
   onRetry?: () => void;
   onReset?: () => void;
   className?: string;
@@ -33,7 +39,13 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   isLight = false,
   appTitle = 'RLCleanWASM',
   appSubtitle = 'UIStorybook In-Game Runtime',
-  gameplayTip = DEFAULT_TIPS[0],
+  logo,
+  gameplayTip,
+  tips = DEFAULT_TIPS,
+  showTips = true,
+  footer,
+  retryLabel,
+  resetLabel,
   onRetry,
   onReset,
   className = '',
@@ -75,9 +87,13 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
           transition={{ duration: 0.4 }}
           className="flex items-center gap-3"
         >
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-black flex items-center justify-center font-black text-xl shadow-lg shadow-amber-500/20">
-            RL
-          </div>
+          {logo !== undefined ? (
+            logo
+          ) : (
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-black flex items-center justify-center font-black text-xl shadow-lg shadow-amber-500/20">
+              RL
+            </div>
+          )}
           <div className="flex flex-col text-left">
             <h2 className="text-xl sm:text-2xl font-black tracking-tight font-mono">
               {appTitle}
@@ -97,24 +113,30 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
           overallProgressPct={overallProgressPct}
           error={error}
           isLight={isLight}
+          retryLabel={retryLabel}
+          resetLabel={resetLabel}
           onRetry={onRetry}
           onReset={onReset}
         />
       </div>
 
-      {/* 3. BOTTOM FOOTER: Pro Tip / Hint */}
-      <div className="relative z-10 flex flex-col items-center text-center pb-2 max-w-[500px]">
-        <div
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs backdrop-blur-md border transition-colors ${
-            isLight
-              ? 'bg-white/80 border-neutral-200/80 text-neutral-600 shadow-xs'
-              : 'bg-neutral-900/60 border-neutral-800 text-neutral-400 shadow-lg'
-          }`}
-        >
-          <Gamepad2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-          <span className="truncate">{gameplayTip}</span>
+      {/* 3. BOTTOM FOOTER: Pro Tip / Hint or Custom Footer */}
+      {footer !== undefined ? (
+        footer
+      ) : showTips ? (
+        <div className="relative z-10 flex flex-col items-center text-center pb-2 max-w-[500px]">
+          <div
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs backdrop-blur-md border transition-colors ${
+              isLight
+                ? 'bg-white/80 border-neutral-200/80 text-neutral-600 shadow-xs'
+                : 'bg-neutral-900/60 border-neutral-800 text-neutral-400 shadow-lg'
+            }`}
+          >
+            <Gamepad2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            <span className="truncate">{gameplayTip || (tips && tips[0]) || ''}</span>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 };

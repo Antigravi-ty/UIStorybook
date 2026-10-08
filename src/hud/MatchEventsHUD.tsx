@@ -7,6 +7,7 @@ export interface MatchEventsHUDProps {
   events: AccoladeEvent[];
   themeStyle?: HudThemeStyle;
   isLight?: boolean;
+  positioning?: 'absolute' | 'fixed';
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export const MatchEventsHUD: React.FC<MatchEventsHUDProps> = ({
   events = [],
   themeStyle = 'glass',
   isLight = false,
+  positioning = 'absolute',
   className = '',
 }) => {
   const getEventIcon = (type: AccoladeEvent['type']) => {
@@ -54,10 +56,15 @@ export const MatchEventsHUD: React.FC<MatchEventsHUDProps> = ({
     }
   };
 
+  const positionClass =
+    positioning === 'fixed'
+      ? 'fixed top-20 left-1/2 -translate-x-1/2'
+      : 'absolute top-16 sm:top-20 left-1/2 -translate-x-1/2';
+
   return (
     <div
       data-ui-element="hud-match-events"
-      className={`fixed top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none z-40 select-none ${className}`}
+      className={`${positionClass} flex flex-col items-center gap-2 pointer-events-none z-40 select-none ${className}`}
     >
       <AnimatePresence>
         {events.map((event) => (

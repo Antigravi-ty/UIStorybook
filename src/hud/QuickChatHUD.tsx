@@ -32,19 +32,28 @@ export const QuickChatHUD: React.FC<QuickChatHUDProps> = ({
                 : 'bg-neutral-950/75 border-neutral-800/80 text-white'
             }`}
           >
-            <span
-              className={`font-mono text-[10px] font-bold uppercase tracking-wider px-1 rounded ${
-                msg.team === 'blue'
-                  ? isLight
-                    ? 'bg-sky-100 text-sky-800 border border-sky-300'
-                    : 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
-                  : isLight
-                  ? 'bg-orange-100 text-orange-800 border border-orange-300'
-                  : 'bg-orange-500/20 text-orange-300 border border-orange-500/40'
-              }`}
-            >
-              {msg.team === 'blue' ? 'TEAM' : 'ALL'}
-            </span>
+            {(() => {
+              const channelLabel = msg.channel ? msg.channel.toUpperCase() : msg.team === 'blue' ? 'TEAM' : 'ALL';
+              const isTeamChannel = msg.channel === 'team' || (!msg.channel && msg.team === 'blue');
+              const isPartyChannel = msg.channel === 'party';
+              const badgeStyle = isPartyChannel
+                ? isLight
+                  ? 'bg-purple-100 text-purple-800 border border-purple-300'
+                  : 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                : isTeamChannel
+                ? isLight
+                  ? 'bg-sky-100 text-sky-800 border border-sky-300'
+                  : 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
+                : isLight
+                ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                : 'bg-orange-500/20 text-orange-300 border border-orange-500/40';
+
+              return (
+                <span className={`font-mono text-[10px] font-bold uppercase tracking-wider px-1 rounded ${badgeStyle}`}>
+                  {channelLabel}
+                </span>
+              );
+            })()}
 
             <span className={`font-semibold truncate max-w-[90px] ${isLight ? 'text-neutral-600' : 'text-neutral-300'}`}>
               {msg.sender}:

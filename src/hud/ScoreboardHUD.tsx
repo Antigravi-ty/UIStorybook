@@ -6,6 +6,8 @@ import { Clock, Flame, ShieldAlert } from 'lucide-react';
 export interface ScoreboardHUDProps extends MatchScoreState {
   themeStyle?: HudThemeStyle;
   isLight?: boolean;
+  blueTeamColor?: string;
+  orangeTeamColor?: string;
   className?: string;
 }
 
@@ -19,6 +21,8 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
   orangeTeamName = 'ORANGE',
   themeStyle = 'glass',
   isLight = false,
+  blueTeamColor = 'bg-gradient-to-r from-sky-600/90 to-blue-700/80 border-sky-400/30 text-sky-200',
+  orangeTeamColor = 'bg-gradient-to-r from-orange-600/90 to-amber-600/80 border-orange-400/30 text-orange-200',
   className = '',
 }) => {
   // Format MM:SS
@@ -69,9 +73,9 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
         }`}
       >
         {/* Blue Team Score Block */}
-        <div className="relative flex items-center justify-between gap-3 px-4 py-2 bg-gradient-to-r from-sky-600/90 to-blue-700/80 text-white min-w-[96px] border-r border-sky-400/30">
+        <div className={`relative flex items-center justify-between gap-3 px-4 py-2 text-white min-w-[96px] border-r ${blueTeamColor}`}>
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-sky-200">
+            <span className="text-[10px] font-bold tracking-wider uppercase opacity-90">
               {blueTeamName}
             </span>
           </div>
@@ -124,7 +128,7 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
         </div>
 
         {/* Orange Team Score Block */}
-        <div className="relative flex items-center justify-between gap-3 px-4 py-2 bg-gradient-to-r from-orange-600/90 to-amber-600/80 text-white min-w-[96px] border-l border-orange-400/30">
+        <div className={`relative flex items-center justify-between gap-3 px-4 py-2 text-white min-w-[96px] border-l ${orangeTeamColor}`}>
           <AnimatePresence mode="popLayout">
             <motion.span
               key={`orange-${orangeScore}`}
@@ -137,7 +141,7 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
             </motion.span>
           </AnimatePresence>
           <div className="flex flex-col items-end">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-orange-200">
+            <span className="text-[10px] font-bold tracking-wider uppercase opacity-90">
               {orangeTeamName}
             </span>
           </div>

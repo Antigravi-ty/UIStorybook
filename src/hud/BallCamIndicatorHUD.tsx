@@ -7,6 +7,9 @@ import { KeycapBadge } from '../primitives/KeycapBadge';
 export interface BallCamIndicatorHUDProps extends BallCamState {
   themeStyle?: HudThemeStyle;
   isLight?: boolean;
+  shortcut?: string | null;
+  showKeycap?: boolean;
+  renderKeycap?: (shortcut: string) => React.ReactNode;
   onToggle?: () => void;
   className?: string;
 }
@@ -17,6 +20,9 @@ export const BallCamIndicatorHUD: React.FC<BallCamIndicatorHUDProps> = ({
   distanceToBallMeters = 24.5,
   themeStyle = 'glass',
   isLight = false,
+  shortcut = 'SPACE',
+  showKeycap = true,
+  renderKeycap,
   onToggle,
   className = '',
 }) => {
@@ -78,10 +84,16 @@ export const BallCamIndicatorHUD: React.FC<BallCamIndicatorHUDProps> = ({
           </span>
         </div>
 
-        {/* Keycap Badge */}
-        <div className="ml-1 opacity-90">
-          <KeycapBadge keyLabel="SPACE" size="sm" isLight={isLight} />
-        </div>
+        {/* Keycap Badge (Optional & Configurable) */}
+        {showKeycap && shortcut && (
+          <div className="ml-1 opacity-90">
+            {renderKeycap ? (
+              renderKeycap(shortcut)
+            ) : (
+              <KeycapBadge shortcut={shortcut} size="sm" isLight={isLight} />
+            )}
+          </div>
+        )}
       </button>
 
       {/* Off-screen Ball Locator Arrow (Nintendo-style directional compass pill when in Car Cam) */}

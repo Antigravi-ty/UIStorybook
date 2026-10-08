@@ -21,6 +21,7 @@ import {
   LoadingError,
   DualProgressBar,
   LoadingScreen,
+  calculateOverallProgress,
   formatBytes,
   formatSpeed
 } from '../../loading';
@@ -113,27 +114,8 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
     setTimeout(() => setFeedbackToast(null), 2400);
   };
 
-  // Compute overall progress percentage cleanly without erratic indeterminate jumping
-  const calculateOverallProgress = (): number => {
-    if (steps.length === 0) return 0;
-    let completedRatio = 0;
-    steps.forEach((step, idx) => {
-      if (idx < currentStepIndex || step.status === 'completed') {
-        completedRatio += 1.0;
-      } else if (idx === currentStepIndex && step.status === 'active') {
-        if (step.type === 'determinate') {
-          const subFraction = Math.max(0, Math.min(1, (step.progressPct || 0) / 100));
-          completedRatio += subFraction;
-        } else {
-          // Indeterminate step: sits stably at step baseline without arbitrary +0.5 jumping
-          completedRatio += 0;
-        }
-      }
-    });
-    return Math.min(100, Math.max(0, (completedRatio / steps.length) * 100));
-  };
-
-  const overallProgressPct = calculateOverallProgress();
+  // Compute overall progress percentage cleanly using decoupled loading engine helper
+  const overallProgressPct = calculateOverallProgress(steps, currentStepIndex);
   const currentStep = steps[currentStepIndex] || steps[0];
 
   // Adjust a specific determinate step's progress percentage (0 - 100) via slider

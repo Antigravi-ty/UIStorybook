@@ -9,3 +9,4 @@ export * from './MatchEventsHUD';
 export * from './QuickChatHUD';
 export * from './NetworkDiagnosticsHUD';
 export * from './MatchHudContainer';
+export * from './ArenaBackdrop';

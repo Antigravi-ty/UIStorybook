@@ -56,8 +56,8 @@ export interface MorphContainerProps {
  *    - Phase 3: Fade In (新内容透明度从 0% 平滑显现淡入至 100%)
  *    - 严格时序解耦，杜绝整体变灰与半透明残留问题。
  */
-export const MorphContainerContext = React.createContext<boolean>(false);
-export const useInMorphContainer = () => React.useContext(MorphContainerContext);
+import { MorphContainerContext, useInMorphContainer } from '../tokens/morphContext';
+export { MorphContainerContext, useInMorphContainer };
 
 export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
   (

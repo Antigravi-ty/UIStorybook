@@ -4,22 +4,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 export interface KickoffCountdownHUDProps {
   countdown: number; // 3, 2, 1, 0 (0 = GO!), or negative when hidden
   active?: boolean;
+  positioning?: 'absolute' | 'fixed';
   className?: string;
 }
 
 export const KickoffCountdownHUD: React.FC<KickoffCountdownHUDProps> = ({
   countdown,
   active = true,
+  positioning = 'absolute',
   className = '',
 }) => {
   if (!active || countdown < 0 || countdown > 3) return null;
 
   const isGo = countdown === 0;
+  const positionClass = positioning === 'fixed' ? 'fixed inset-0' : 'absolute inset-0';
 
   return (
     <div
       data-ui-element="hud-kickoff-countdown"
-      className={`fixed inset-0 pointer-events-none flex items-center justify-center select-none z-50 ${className}`}
+      className={`${positionClass} pointer-events-none flex items-center justify-center select-none z-50 ${className}`}
     >
       <AnimatePresence mode="wait">
         <motion.div

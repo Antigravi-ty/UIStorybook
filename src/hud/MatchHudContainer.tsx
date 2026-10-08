@@ -46,6 +46,11 @@ export interface MatchHudContainerProps {
   themeStyle?: HudThemeStyle;
   boostVariant?: 'circular' | 'linear';
   isLight?: boolean;
+  showSupersonicVFX?: boolean;
+  blueTeamColor?: string;
+  orangeTeamColor?: string;
+  ballCamShortcut?: string | null;
+  showBallCamKeycap?: boolean;
   onToggleBallCam?: () => void;
   onSpeedUnitChange?: (unit: 'uu/s' | 'km/h' | 'mph') => void;
   className?: string;
@@ -65,6 +70,11 @@ export const MatchHudContainer: React.FC<MatchHudContainerProps> = ({
   themeStyle = 'glass',
   boostVariant = 'circular',
   isLight = false,
+  showSupersonicVFX = true,
+  blueTeamColor,
+  orangeTeamColor,
+  ballCamShortcut = 'SPACE',
+  showBallCamKeycap = true,
   onToggleBallCam,
   onSpeedUnitChange,
   className = '',
@@ -81,11 +91,20 @@ export const MatchHudContainer: React.FC<MatchHudContainerProps> = ({
     showNetworkDiagnostics = true,
   } = visibility;
 
+  const isSupersonicActive = speed.isSupersonic || speed.speed >= 2200;
+
   return (
     <div
       data-ui-layer="match-hud"
       className={`relative w-full h-full pointer-events-none select-none overflow-hidden flex flex-col justify-between p-4 sm:p-6 ${className}`}
     >
+      {/* 0. DYNAMIC SUPERSONIC SPEED LINES RIPPLE EFFECT (Encapsulated Fullscreen VFX) */}
+      {showSupersonicVFX && isSupersonicActive && (
+        <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden opacity-60">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(168,85,247,0.3)_100%)] animate-pulse" />
+        </div>
+      )}
+
       {/* 1. TOP ANCHOR: Left (Quick Chat), Center (Scoreboard & Kickoff), Right (Network Telemetry) */}
       <div className="relative w-full flex items-start justify-between z-30">
         {/* Top-Left: Quick Chat */}
@@ -100,6 +119,8 @@ export const MatchHudContainer: React.FC<MatchHudContainerProps> = ({
               {...score}
               themeStyle={themeStyle}
               isLight={isLight}
+              blueTeamColor={blueTeamColor}
+              orangeTeamColor={orangeTeamColor}
             />
           )}
         </div>
@@ -134,6 +155,8 @@ export const MatchHudContainer: React.FC<MatchHudContainerProps> = ({
               {...ballCam}
               themeStyle={themeStyle}
               isLight={isLight}
+              shortcut={ballCamShortcut}
+              showKeycap={showBallCamKeycap}
               onToggle={onToggleBallCam}
             />
           )}

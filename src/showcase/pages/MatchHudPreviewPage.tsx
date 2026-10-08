@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import {
   MatchHudContainer,
+  ArenaBackdrop,
   HudThemeStyle,
   MatchScoreState,
   BoostState,
@@ -276,43 +277,6 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         showToast('已加载预设: 加时赛决胜 (Overtime Match)');
         break;
     }
-  };
-
-  // Compute backdrop layer style ONLY (brightness filter applied exclusively to background)
-  const getBackdropStyles = (): React.CSSProperties => {
-    const norm = arenaBrightness / 100;
-    if (arenaLighting === 'daylight') {
-      return {
-        backgroundImage: `
-          radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.8) 0%, transparent 60%),
-          radial-gradient(circle at 20% 85%, rgba(34, 197, 94, 0.35) 0%, transparent 50%),
-          radial-gradient(circle at 80% 85%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
-          linear-gradient(to bottom, #7dd3fc 0%, #bae6fd 30%, #bbf7d0 65%, #22c55e 100%)
-        `,
-        filter: `brightness(${0.75 + norm * 0.45})`,
-      };
-    }
-    if (arenaLighting === 'twilight') {
-      return {
-        backgroundImage: `
-          radial-gradient(circle at 50% 25%, rgba(251, 146, 60, 0.35) 0%, transparent 60%),
-          radial-gradient(circle at 80% 80%, rgba(244, 63, 94, 0.3) 0%, transparent 50%),
-          radial-gradient(circle at 20% 90%, rgba(16, 185, 129, 0.25) 0%, transparent 50%),
-          linear-gradient(to bottom, #1e1b4b 0%, #4c1d95 35%, #831843 65%, #064e3b 100%)
-        `,
-        filter: `brightness(${0.65 + norm * 0.5})`,
-      };
-    }
-    // night
-    return {
-      backgroundImage: `
-        radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
-        radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 80% 50%, rgba(245, 158, 11, 0.12) 0%, transparent 50%),
-        linear-gradient(to bottom, #09090b 0%, #111827 50%, #030712 100%)
-      `,
-      filter: `brightness(${0.5 + norm * 0.8})`,
-    };
   };
 
   return (
@@ -622,32 +586,8 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         id="match-hud-viewport-stage"
         className="relative w-full h-[540px] md:h-[620px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl flex items-center justify-center bg-black"
       >
-        {/* Isolated Background Layer: 亮度仅影响背景自身 */}
-        <div
-          className="absolute inset-0 pointer-events-none transition-all duration-300"
-          style={getBackdropStyles()}
-        />
-
-        {/* Synthetic pitch markings */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${
-            arenaLighting === 'daylight' ? 'opacity-40' : 'opacity-25'
-          }`}
-          style={{
-            filter: `brightness(${0.7 + (arenaBrightness / 100) * 0.6})`,
-          }}
-        >
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white shadow-xs -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-48 h-48 rounded-full border-2 border-white shadow-xs -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-4 h-4 rounded-full bg-white -translate-x-1/2 -translate-y-1/2 shadow-xs" />
-        </div>
-
-        {/* Dynamic Supersonic Speed Lines Ripple effect */}
-        {(speed.speed >= 2200 || speed.isSupersonic) && (
-          <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden opacity-60">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(168,85,247,0.3)_100%)] animate-pulse" />
-          </div>
-        )}
+        {/* Reusable Arena Backdrop Component */}
+        <ArenaBackdrop preset={arenaLighting} brightness={arenaBrightness} />
 
         {/* Game Viewport wrapping HUD Container - 恒定 100% 原始高保真亮度 (无父级 filter: brightness 影响) */}
         <div className="relative z-20 w-full h-full" style={{ filter: 'none', opacity: 1 }}>

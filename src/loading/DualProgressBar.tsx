@@ -6,13 +6,40 @@ import { AlertCircle, RefreshCw, AlertTriangle, ShieldAlert, Check, Copy } from 
 export interface DualProgressBarProps {
   steps: LoadingStep[];
   currentStepIndex: number;
-  overallProgressPct: number;
+  overallProgressPct?: number;
   error?: LoadingError | null;
   isLight?: boolean;
   onRetry?: () => void;
   onReset?: () => void;
+  retryLabel?: string;
+  resetLabel?: string;
   className?: string;
 }
+
+/**
+ * Standard overall progress calculation algorithm.
+ * Integrates determinate ratios with stable indeterminate anchors to prevent erratic jumping.
+ */
+export const calculateOverallProgress = (
+  steps: LoadingStep[],
+  currentStepIndex: number
+): number => {
+  if (!steps || steps.length === 0) return 0;
+  let completedRatio = 0;
+  steps.forEach((step, idx) => {
+    if (idx < currentStepIndex || step.status === 'completed') {
+      completedRatio += 1.0;
+    } else if (idx === currentStepIndex && step.status === 'active') {
+      if (step.type === 'determinate') {
+        const subFraction = Math.max(0, Math.min(1, (step.progressPct || 0) / 100));
+        completedRatio += subFraction;
+      } else {
+        completedRatio += 0;
+      }
+    }
+  });
+  return Math.min(100, Math.max(0, (completedRatio / steps.length) * 100));
+};
 
 export const formatBytes = (bytes?: number): string => {
   if (bytes === undefined || bytes === null || isNaN(bytes)) return '0 B';
@@ -39,13 +66,19 @@ export const formatTimeRemaining = (seconds?: number): string => {
 export const DualProgressBar: React.FC<DualProgressBarProps> = ({
   steps = [],
   currentStepIndex = 0,
-  overallProgressPct = 0,
+  overallProgressPct,
   error = null,
   isLight,
   onRetry,
   onReset,
+  retryLabel = '重试当前步骤 (Retry Step)',
+  resetLabel = '从头重试 (Restart Pipeline)',
   className = '',
 }) => {
+  const effectiveOverallProgressPct =
+    overallProgressPct !== undefined
+      ? overallProgressPct
+      : calculateOverallProgress(steps, currentStepIndex);
   const resolvedIsLight =
     isLight !== undefined
       ? isLight
@@ -116,7 +149,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
                 : 'text-neutral-200'
             }`}
           >
-            {Math.round(overallProgressPct)}%
+            {Math.round(effectiveOverallProgressPct)}%
           </span>
         </div>
 
@@ -140,7 +173,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
                 : 'bg-neutral-200'
             }`}
             initial={false}
-            animate={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+            animate={{ width: `${Math.min(100, Math.max(0, effectiveOverallProgressPct))}%` }}
             style={{ originX: 0, left: 0, transform: 'none' }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           />
@@ -339,7 +372,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
                       : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-700'
                   }`}
                 >
-                  从头重试 (Restart Pipeline)
+                  {resetLabel}
                 </button>
               )}
 
@@ -350,7 +383,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
                   className="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white shadow-md active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                 >
                   <RefreshCw className="h-3 w-3" />
-                  <span>重试当前步骤 (Retry Step)</span>
+                  <span>{retryLabel}</span>
                 </button>
               )}
             </div>
