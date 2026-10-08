@@ -2,7 +2,7 @@ import React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { Minus, Plus } from 'lucide-react';
 
-export type SliderColorScheme = 'neutral' | 'amber' | 'orange';
+export type SliderColorScheme = 'neutral' | 'amber' | 'orange' | 'sky' | 'emerald';
 
 export interface SliderControlProps {
   label: string;
@@ -42,11 +42,19 @@ export const SliderControl: React.FC<SliderControlProps> = ({
   onChange,
   description,
   showStepper = true,
-  isLight = false,
+  isLight,
   disabled = false,
   colorScheme = 'neutral',
   className = '',
 }) => {
+  // Automatically resolve light mode from prop or document element
+  const resolvedIsLight =
+    isLight !== undefined
+      ? isLight
+      : typeof document !== 'undefined'
+      ? document.documentElement.classList.contains('light') || document.documentElement.dataset.theme === 'light'
+      : false;
+
   const handleDecrement = () => {
     const next = Math.max(min, Math.round((value - step) * 100) / 100);
     onChange(next);
@@ -61,8 +69,10 @@ export const SliderControl: React.FC<SliderControlProps> = ({
   const getRangeColorClass = () => {
     if (colorScheme === 'amber') return 'bg-amber-500';
     if (colorScheme === 'orange') return 'bg-orange-500';
+    if (colorScheme === 'sky') return 'bg-sky-500';
+    if (colorScheme === 'emerald') return 'bg-emerald-500';
     // 'neutral' (default monochrome black-and-white scheme)
-    return isLight ? 'bg-neutral-900' : 'bg-white';
+    return resolvedIsLight ? 'bg-neutral-900' : 'bg-white';
   };
 
   return (
@@ -71,13 +81,13 @@ export const SliderControl: React.FC<SliderControlProps> = ({
       className={`flex flex-col gap-2 w-full select-none ${disabled ? 'opacity-40 pointer-events-none' : ''} ${className}`}
     >
       <div className="flex items-center justify-between text-xs">
-        <span className={`font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
+        <span className={`font-semibold ${resolvedIsLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
           {label}
         </span>
         <span
-          className={`font-mono text-[11px] px-2 py-0.5 rounded border ${
-            isLight
-              ? 'bg-neutral-100 text-neutral-700 border-neutral-300'
+          className={`font-mono text-[11px] px-2 py-0.5 rounded border transition-colors ${
+            resolvedIsLight
+              ? 'bg-neutral-100 text-neutral-800 border-neutral-300 shadow-2xs'
               : 'bg-neutral-900 text-neutral-300 border-neutral-700'
           }`}
         >
@@ -87,7 +97,7 @@ export const SliderControl: React.FC<SliderControlProps> = ({
       </div>
 
       {description && (
-        <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+        <span className={`text-[11px] ${resolvedIsLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
           {description}
         </span>
       )}
@@ -99,8 +109,8 @@ export const SliderControl: React.FC<SliderControlProps> = ({
             aria-label="Decrement"
             onClick={handleDecrement}
             className={`inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 ${
-              isLight
-                ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-700'
+              resolvedIsLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
                 : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
             }`}
           >
@@ -117,15 +127,15 @@ export const SliderControl: React.FC<SliderControlProps> = ({
           className="relative flex items-center select-none touch-none w-full h-5 cursor-pointer"
         >
           <SliderPrimitive.Track
-            className={`relative grow rounded-full h-2 overflow-hidden ${
-              isLight ? 'bg-neutral-200' : 'bg-neutral-800'
+            className={`relative grow rounded-full h-2 overflow-hidden transition-colors ${
+              resolvedIsLight ? 'bg-neutral-200' : 'bg-neutral-800'
             }`}
           >
             <SliderPrimitive.Range className={`absolute h-full rounded-full transition-colors ${getRangeColorClass()}`} />
           </SliderPrimitive.Track>
           <SliderPrimitive.Thumb
             className={`block h-4 w-4 rounded-full border shadow-sm transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 ${
-              isLight ? 'bg-white border-neutral-300' : 'bg-neutral-100 border-neutral-400'
+              resolvedIsLight ? 'bg-white border-neutral-400 shadow-xs' : 'bg-neutral-100 border-neutral-300'
             }`}
           />
         </SliderPrimitive.Root>
@@ -136,8 +146,8 @@ export const SliderControl: React.FC<SliderControlProps> = ({
             aria-label="Increment"
             onClick={handleIncrement}
             className={`inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all active:scale-95 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 ${
-              isLight
-                ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-700'
+              resolvedIsLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
                 : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
             }`}
           >

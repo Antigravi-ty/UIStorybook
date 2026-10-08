@@ -10,10 +10,6 @@ import {
   MessageSquare,
   Ruler,
   Check,
-  Play,
-  RotateCcw,
-  Sliders,
-  Settings2,
   Clock,
   Layers,
   Sun,
@@ -33,10 +29,8 @@ import {
   MatchHudVisibilityConfig
 } from '../../hud';
 import { GameViewport } from '../../viewport/GameViewport';
-import { Badge } from '../../primitives/Badge';
 import { SliderControl } from '../../primitives/SliderControl';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';
-import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
 
 export interface MatchHudPreviewPageProps {
   isLight?: boolean;
@@ -52,7 +46,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
   const [boostVariant, setBoostVariant] = useState<'circular' | 'linear'>('circular');
   const [feedbackToast, setFeedbackToast] = useState<string | null>(null);
 
-  // Arena backdrop controls (亮色/暗色球场环境控制器)
+  // Arena backdrop controls (亮色/暗色球场环境控制器 - 仅影响背景，HUD 亮度恒定 100%)
   const [arenaLighting, setArenaLighting] = useState<ArenaLightingPreset>('night');
   const [arenaBrightness, setArenaBrightness] = useState<number>(30);
   const [hudColorway, setHudColorway] = useState<'auto' | 'light' | 'dark'>('auto');
@@ -128,7 +122,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
     setTimeout(() => setFeedbackToast(null), 2400);
   };
 
-  // Effective HUD light mode
+  // Effective HUD light mode styling (Auto/Light/Dark) - 影响配色样式，不影响亮度 (HUD 恒定 100%)
   const effectiveHudIsLight =
     hudColorway === 'auto'
       ? arenaLighting === 'daylight' || arenaBrightness >= 60
@@ -284,8 +278,8 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
     }
   };
 
-  // Compute stage style based on arena lighting and brightness
-  const getStageStyles = (): React.CSSProperties => {
+  // Compute backdrop layer style ONLY (brightness filter applied exclusively to background)
+  const getBackdropStyles = (): React.CSSProperties => {
     const norm = arenaBrightness / 100;
     if (arenaLighting === 'daylight') {
       return {
@@ -431,8 +425,8 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
 
       {/* 2. Preset Scenarios Quick Loader */}
       <div
-        className={`p-4 rounded-2xl border flex flex-col gap-3 transition-colors ${
-          isLight ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
+        className={`p-4 rounded-2xl border flex flex-col gap-3 transition-colors shadow-2xs ${
+          isLight ? 'bg-white border-neutral-200/90 text-neutral-800' : 'bg-neutral-900/70 border-neutral-800 text-neutral-200'
         }`}
       >
         <div className="flex items-center justify-between text-xs font-semibold">
@@ -514,10 +508,10 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         </div>
       </div>
 
-      {/* 2.5 Arena Backdrop Lighting Controller (场景背景亮度与亮色调控制器) */}
+      {/* 2.5 Arena Backdrop Lighting Controller (场景背景亮度与球场环境控制器 - 仅影响背景) */}
       <div
-        className={`p-4 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
-          isLight ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
+        className={`p-4 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors shadow-2xs ${
+          isLight ? 'bg-white border-neutral-200/90 text-neutral-800' : 'bg-neutral-900/70 border-neutral-800 text-neutral-200'
         }`}
       >
         <div className="flex items-center gap-3">
@@ -526,10 +520,10 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-neutral-800 dark:text-neutral-200">
-              场景背景亮度与球场环境 (Arena Backdrop & Lighting)
+              场景背景亮度与球场环境 (Arena Backdrop Lighting - 背景独立调节，HUD恒定100%)
             </span>
             <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
-              测试 HUD 在亮色日间球场与暗色夜场之间的双模适应度
+              测试 HUD 在日光球场与暗色夜场之间的双模适应度 (HUD不受滤镜亮度衰减)
             </span>
           </div>
         </div>
@@ -588,7 +582,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
 
           {/* Brightness Slider */}
           <div className="flex items-center gap-2 px-3 py-1 rounded-xl border bg-neutral-100 dark:bg-neutral-800/80 border-neutral-200 dark:border-neutral-700 min-w-[170px]">
-            <span className="text-[11px] text-neutral-600 dark:text-neutral-400 whitespace-nowrap">亮度:</span>
+            <span className="text-[11px] text-neutral-600 dark:text-neutral-400 whitespace-nowrap">背景亮度:</span>
             <input
               type="range"
               min={0}
@@ -623,16 +617,26 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
         </div>
       </div>
 
-      {/* 3. Live 18:9 Canvas Simulation Stage */}
+      {/* 3. Live 18:9 Canvas Simulation Stage (HUD 亮度恒定 100%，亮度调节仅作用于独立背景层) */}
       <div
         id="match-hud-viewport-stage"
-        className="relative w-full h-[540px] md:h-[620px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl flex items-center justify-center transition-all duration-300"
-        style={getStageStyles()}
+        className="relative w-full h-[540px] md:h-[620px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl flex items-center justify-center bg-black"
       >
+        {/* Isolated Background Layer: 亮度仅影响背景自身 */}
+        <div
+          className="absolute inset-0 pointer-events-none transition-all duration-300"
+          style={getBackdropStyles()}
+        />
+
         {/* Synthetic pitch markings */}
-        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${
-          arenaLighting === 'daylight' ? 'opacity-40' : 'opacity-25'
-        }`}>
+        <div
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${
+            arenaLighting === 'daylight' ? 'opacity-40' : 'opacity-25'
+          }`}
+          style={{
+            filter: `brightness(${0.7 + (arenaBrightness / 100) * 0.6})`,
+          }}
+        >
           <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white shadow-xs -translate-y-1/2" />
           <div className="absolute top-1/2 left-1/2 w-48 h-48 rounded-full border-2 border-white shadow-xs -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute top-1/2 left-1/2 w-4 h-4 rounded-full bg-white -translate-x-1/2 -translate-y-1/2 shadow-xs" />
@@ -645,29 +649,31 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
           </div>
         )}
 
-        {/* Game Viewport wrapping HUD Container */}
-        <GameViewport isLight={effectiveHudIsLight} className="w-full h-full">
-          <MatchHudContainer
-            score={score}
-            kickoffCountdown={kickoffCount}
-            boost={boost}
-            ballCam={ballCam}
-            speed={speed}
-            flipTimer={flipTimer}
-            events={events}
-            chatMessages={chatMessages}
-            visibility={visibility}
-            themeStyle={themeStyle}
-            boostVariant={boostVariant}
-            isLight={effectiveHudIsLight}
-            onToggleBallCam={() =>
-              setBallCam((prev) => ({ ...prev, isBallCam: !prev.isBallCam }))
-            }
-            onSpeedUnitChange={(unit) =>
-              setSpeed((prev) => ({ ...prev, unit }))
-            }
-          />
-        </GameViewport>
+        {/* Game Viewport wrapping HUD Container - 恒定 100% 原始高保真亮度 (无父级 filter: brightness 影响) */}
+        <div className="relative z-20 w-full h-full" style={{ filter: 'none', opacity: 1 }}>
+          <GameViewport isLight={effectiveHudIsLight} className="w-full h-full">
+            <MatchHudContainer
+              score={score}
+              kickoffCountdown={kickoffCount}
+              boost={boost}
+              ballCam={ballCam}
+              speed={speed}
+              flipTimer={flipTimer}
+              events={events}
+              chatMessages={chatMessages}
+              visibility={visibility}
+              themeStyle={themeStyle}
+              boostVariant={boostVariant}
+              isLight={effectiveHudIsLight}
+              onToggleBallCam={() =>
+                setBallCam((prev) => ({ ...prev, isBallCam: !prev.isBallCam }))
+              }
+              onSpeedUnitChange={(unit) =>
+                setSpeed((prev) => ({ ...prev, unit }))
+              }
+            />
+          </GameViewport>
+        </div>
       </div>
 
       {/* 4. Telemetry & Parameter Tweakers (外部控制面板 - 全面适配亮色模式) */}
@@ -695,6 +701,8 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
             max={100}
             step={1}
             unit="%"
+            colorScheme="amber"
+            isLight={isLight}
             onChange={(val) => setBoost((b) => ({ ...b, amount: val }))}
           />
 
@@ -732,6 +740,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
               checked={!!boost.isInfinite}
               onCheckedChange={(c) => setBoost((b) => ({ ...b, isInfinite: c }))}
               variant="neutral"
+              isLight={isLight}
             />
           </div>
 
@@ -776,6 +785,8 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
             max={2300}
             step={25}
             unit="uu"
+            colorScheme="sky"
+            isLight={isLight}
             onChange={(val) =>
               setSpeed((s) => ({
                 ...s,
@@ -797,6 +808,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
                 }))
               }
               variant="neutral"
+              isLight={isLight}
             />
           </div>
 
@@ -897,6 +909,7 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
               checked={ballCam.isBallCam}
               onCheckedChange={(c) => setBallCam((b) => ({ ...b, isBallCam: c }))}
               variant="neutral"
+              isLight={isLight}
             />
           </div>
 
@@ -908,6 +921,8 @@ export const MatchHudPreviewPage: React.FC<MatchHudPreviewPageProps> = ({
               max={360}
               step={5}
               unit="°"
+              colorScheme="amber"
+              isLight={isLight}
               onChange={(v) => setBallCam((b) => ({ ...b, ballAngleDeg: v }))}
             />
           )}

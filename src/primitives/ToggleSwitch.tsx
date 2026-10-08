@@ -36,20 +36,28 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   label,
   description,
   disabled = false,
-  isLight = false,
+  isLight,
   variant = 'green',
   className = '',
 }) => {
+  // Automatically resolve light mode from prop or document element
+  const resolvedIsLight =
+    isLight !== undefined
+      ? isLight
+      : typeof document !== 'undefined'
+      ? document.documentElement.classList.contains('light') || document.documentElement.dataset.theme === 'light'
+      : false;
+
   // Compute background and thumb styles based on variant & light mode
   const getCheckedStyles = () => {
     switch (variant) {
       case 'black':
       case 'neutral':
         return {
-          track: isLight
+          track: resolvedIsLight
             ? 'bg-neutral-900 border-neutral-900'
             : 'bg-white border-white',
-          thumb: isLight
+          thumb: resolvedIsLight
             ? 'bg-white shadow-md'
             : 'bg-neutral-900 shadow-md',
         };
@@ -85,12 +93,12 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       {(label || description) && (
         <div className="flex flex-col text-left leading-tight min-w-0">
           {label && (
-            <span className={`text-sm font-semibold truncate ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
+            <span className={`text-sm font-semibold truncate ${resolvedIsLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
               {label}
             </span>
           )}
           {description && (
-            <span className={`text-xs mt-0.5 truncate ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+            <span className={`text-xs mt-0.5 truncate ${resolvedIsLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
               {description}
             </span>
           )}
@@ -106,7 +114,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 cursor-pointer ${
           checked
             ? checkedTrack
-            : isLight
+            : resolvedIsLight
             ? 'bg-neutral-300 border-neutral-300'
             : 'bg-neutral-800 border-neutral-700'
         }`}

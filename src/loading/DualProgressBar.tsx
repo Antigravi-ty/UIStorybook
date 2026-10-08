@@ -41,11 +41,18 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
   currentStepIndex = 0,
   overallProgressPct = 0,
   error = null,
-  isLight = false,
+  isLight,
   onRetry,
   onReset,
   className = '',
 }) => {
+  const resolvedIsLight =
+    isLight !== undefined
+      ? isLight
+      : typeof document !== 'undefined'
+      ? document.documentElement.classList.contains('light') || document.documentElement.dataset.theme === 'light'
+      : false;
+
   const currentStep = steps[currentStepIndex] || {
     id: 'unknown',
     title: 'Initializing...',
@@ -57,7 +64,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
   const isIndeterminate = currentStep.type === 'indeterminate' && !hasError;
   const isDeterminate = currentStep.type === 'determinate' && !hasError;
 
-  // Sub-step progress calculation
+  // Sub-step progress calculation (0 - 100)
   const subStepProgress = Math.max(
     0,
     Math.min(
@@ -83,7 +90,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
               className={`font-bold uppercase tracking-wider text-[11px] ${
                 hasError
                   ? 'text-red-500'
-                  : isLight
+                  : resolvedIsLight
                   ? 'text-neutral-500'
                   : 'text-neutral-400'
               }`}
@@ -92,8 +99,8 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
             </span>
             {currentStep.category && (
               <>
-                <span className={isLight ? 'text-neutral-300' : 'text-neutral-600'}>•</span>
-                <span className={isLight ? 'text-neutral-600' : 'text-neutral-400'}>
+                <span className={resolvedIsLight ? 'text-neutral-300' : 'text-neutral-600'}>•</span>
+                <span className={resolvedIsLight ? 'text-neutral-600' : 'text-neutral-400'}>
                   {currentStep.category}
                 </span>
               </>
@@ -104,7 +111,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
             className={`font-black tabular-nums text-xs ${
               hasError
                 ? 'text-red-500'
-                : isLight
+                : resolvedIsLight
                 ? 'text-neutral-800'
                 : 'text-neutral-200'
             }`}
@@ -115,24 +122,26 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
 
         {/* Overall Progress Bar Track */}
         <div
-          className={`h-1.5 w-full rounded-full overflow-hidden transition-colors ${
+          className={`h-1.5 w-full rounded-full overflow-hidden relative transition-colors ${
             hasError
               ? 'bg-red-950/40 dark:bg-red-950/60'
-              : isLight
+              : resolvedIsLight
               ? 'bg-neutral-200'
               : 'bg-neutral-800'
           }`}
         >
           <motion.div
-            className={`h-full rounded-full transition-colors ${
+            key="overall-progress-fill"
+            className={`h-full rounded-full absolute top-0 bottom-0 left-0 transition-colors ${
               hasError
                 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]'
-                : isLight
+                : resolvedIsLight
                 ? 'bg-neutral-800'
                 : 'bg-neutral-200'
             }`}
             initial={false}
             animate={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+            style={{ originX: 0, left: 0, transform: 'none' }}
             transition={{ type: 'spring', stiffness: 260, damping: 28 }}
           />
         </div>
@@ -145,7 +154,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
             className={`font-semibold tracking-tight text-sm truncate max-w-[360px] ${
               hasError
                 ? 'text-red-500'
-                : isLight
+                : resolvedIsLight
                 ? 'text-neutral-900'
                 : 'text-white'
             }`}
@@ -161,7 +170,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
                 Halted
               </span>
             ) : isDeterminate ? (
-              <span className={isLight ? 'text-neutral-600' : 'text-neutral-400'}>
+              <span className={resolvedIsLight ? 'text-neutral-600 font-bold' : 'text-neutral-400 font-bold'}>
                 {currentStep.bytesTotal
                   ? `${formatBytes(currentStep.bytesLoaded)} / ${formatBytes(currentStep.bytesTotal)}`
                   : `${Math.round(subStepProgress)}%`}
@@ -183,41 +192,52 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
           className={`h-2 w-full rounded-full overflow-hidden relative transition-colors ${
             hasError
               ? 'bg-red-950/40 dark:bg-red-950/60 ring-1 ring-red-500/40'
-              : isLight
+              : resolvedIsLight
               ? 'bg-neutral-200/90'
               : 'bg-neutral-800/90'
           }`}
         >
           {hasError ? (
             /* Error red fill */
-            <div className="h-full w-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.7)]" />
+            <div key="micro-error" className="h-full w-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.7)]" />
           ) : isDeterminate ? (
-            /* Determinate fill */
+            /* Determinate fill: Strictly anchored left-to-right */
             <motion.div
-              className={`h-full rounded-full ${
-                isLight ? 'bg-amber-500' : 'bg-amber-400'
+              key={`micro-determinate-${currentStep.id}`}
+              className={`h-full rounded-full absolute top-0 bottom-0 left-0 ${
+                resolvedIsLight ? 'bg-amber-500' : 'bg-amber-400'
               }`}
               initial={false}
               animate={{ width: `${subStepProgress}%` }}
+              style={{ originX: 0, left: 0, transform: 'none' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />
           ) : (
             /* Indeterminate Apple-style shimmering wave */
-            <motion.div
-              className={`absolute top-0 bottom-0 w-2/5 rounded-full ${
-                isLight
-                  ? 'bg-gradient-to-r from-transparent via-neutral-500/50 to-transparent'
-                  : 'bg-gradient-to-r from-transparent via-neutral-200/60 to-transparent'
-              }`}
-              animate={{
-                x: ['-100%', '300%'],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 1.6,
-                ease: 'easeInOut',
-              }}
-            />
+            <div key="micro-indeterminate" className="relative w-full h-full overflow-hidden">
+              {/* Subtle ambient pulse background to indicate active processing without freezing */}
+              <div
+                className={`absolute inset-0 rounded-full animate-pulse opacity-40 ${
+                  resolvedIsLight ? 'bg-amber-500/30' : 'bg-amber-400/25'
+                }`}
+              />
+              <motion.div
+                key="micro-shimmer"
+                className={`absolute top-0 bottom-0 w-2/5 rounded-full ${
+                  resolvedIsLight
+                    ? 'bg-gradient-to-r from-transparent via-amber-500/80 to-transparent'
+                    : 'bg-gradient-to-r from-transparent via-amber-300/80 to-transparent'
+                }`}
+                animate={{
+                  x: ['-100%', '300%'],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.6,
+                  ease: 'easeInOut',
+                }}
+              />
+            </div>
           )}
         </div>
 
@@ -270,7 +290,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
             exit={{ opacity: 0, y: 10, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             className={`p-4 rounded-2xl border shadow-xl flex flex-col gap-3 ${
-              isLight
+              resolvedIsLight
                 ? 'bg-red-50/95 border-red-200 text-neutral-900 shadow-red-500/10'
                 : 'bg-red-950/70 border-red-800/80 text-white shadow-black/50'
             }`}
@@ -314,7 +334,7 @@ export const DualProgressBar: React.FC<DualProgressBarProps> = ({
                   type="button"
                   onClick={onReset}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
-                    isLight
+                    resolvedIsLight
                       ? 'bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-300'
                       : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-700'
                   }`}

@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Loader2,
   Play,
   Pause,
   RotateCcw,
-  AlertTriangle,
   CheckCircle2,
-  Clock,
   DownloadCloud,
   Cpu,
   Layers,
@@ -16,8 +14,7 @@ import {
   Sun,
   Moon,
   Sparkles,
-  Zap,
-  Flame
+  Sliders
 } from 'lucide-react';
 import {
   LoadingStep,
@@ -28,6 +25,7 @@ import {
   formatSpeed
 } from '../../loading';
 import { GameViewport } from '../../viewport/GameViewport';
+import { SliderControl } from '../../primitives/SliderControl';
 
 export interface LoadingScreenPreviewPageProps {
   isLight?: boolean;
@@ -82,7 +80,7 @@ const INITIAL_STEPS: LoadingStep[] = [
     progressPct: 0,
     bytesLoaded: 0,
     bytesTotal: 58720256, // ~56 MB
-    speedBps: 0,
+    speedBps: 18500000,
   },
   {
     id: 'match-handshake',
@@ -115,26 +113,50 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
     setTimeout(() => setFeedbackToast(null), 2400);
   };
 
-  // Compute overall progress percentage (0 - 100)
+  // Compute overall progress percentage cleanly without erratic indeterminate jumping
   const calculateOverallProgress = (): number => {
     if (steps.length === 0) return 0;
-    let completedSteps = 0;
+    let completedRatio = 0;
     steps.forEach((step, idx) => {
-      if (idx < currentStepIndex) {
-        completedSteps += 1;
-      } else if (idx === currentStepIndex) {
+      if (idx < currentStepIndex || step.status === 'completed') {
+        completedRatio += 1.0;
+      } else if (idx === currentStepIndex && step.status === 'active') {
         if (step.type === 'determinate') {
-          const subPct = (step.progressPct || 0) / 100;
-          completedSteps += subPct;
+          const subFraction = Math.max(0, Math.min(1, (step.progressPct || 0) / 100));
+          completedRatio += subFraction;
         } else {
-          completedSteps += 0.5; // halfway through indeterminate step
+          // Indeterminate step: sits stably at step baseline without arbitrary +0.5 jumping
+          completedRatio += 0;
         }
       }
     });
-    return Math.min(100, Math.max(0, (completedSteps / steps.length) * 100));
+    return Math.min(100, Math.max(0, (completedRatio / steps.length) * 100));
   };
 
   const overallProgressPct = calculateOverallProgress();
+  const currentStep = steps[currentStepIndex] || steps[0];
+
+  // Adjust a specific determinate step's progress percentage (0 - 100) via slider
+  const handleStepProgressChange = (stepIdx: number, newPct: number) => {
+    // If running, pause auto-timer so user has full slider control
+    if (isRunning) setIsRunning(false);
+
+    setSteps((prev) =>
+      prev.map((s, idx) => {
+        if (idx !== stepIdx) return s;
+        const total = s.bytesTotal || 100;
+        const loaded = (newPct / 100) * total;
+        const isDone = newPct >= 100;
+        return {
+          ...s,
+          progressPct: newPct,
+          bytesLoaded: loaded,
+          status: isDone ? 'completed' : idx === currentStepIndex ? 'active' : s.status,
+          timeRemainingSec: isDone ? 0 : Math.max(0.5, ((total - loaded) / (s.speedBps || 25000000))),
+        };
+      })
+    );
+  };
 
   // Simulation tick loop
   useEffect(() => {
@@ -148,7 +170,7 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
 
         if (step.type === 'determinate') {
           const total = step.bytesTotal || 100;
-          const loaded = (step.bytesLoaded || 0) + (total * 0.04 * simSpeed);
+          const loaded = (step.bytesLoaded || 0) + (total * 0.03 * simSpeed);
           const newPct = Math.min(100, (loaded / total) * 100);
           const remainingSec = Math.max(0, ((total - loaded) / (step.speedBps || 25000000)));
 
@@ -184,7 +206,7 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
             };
           }
         } else {
-          // Indeterminate step: simulate active wait time (around 2.5s)
+          // Indeterminate step: simulate active wait time without erratic jumping
           const waitCounter = (step as any)._waitCount || 0;
           if (waitCounter > 25 / simSpeed) {
             // Complete indeterminate step
@@ -247,7 +269,6 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
           ? {
               ...s,
               status: 'active',
-              // switch to clean state
               errorDetails: undefined,
             }
           : s
@@ -468,6 +489,32 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
           </button>
         </div>
 
+        {/* Dedicated Active Step Determinate Progress Slider (用户可直接滑动 0% ~ 100%) */}
+        {currentStep.type === 'determinate' && (
+          <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                <Sliders className="h-3.5 w-3.5" />
+                <span>当前确定性步骤实时预览滑动条 (Adjust 0% ~ 100%)</span>
+              </span>
+              <span className="font-bold tabular-nums text-neutral-700 dark:text-neutral-300">
+                {Math.round(currentStep.progressPct || 0)}%
+              </span>
+            </div>
+            <SliderControl
+              label={`当前步骤: ${currentStep.title}`}
+              value={Math.round(currentStep.progressPct || 0)}
+              min={0}
+              max={100}
+              step={1}
+              unit="%"
+              colorScheme="amber"
+              isLight={isLight}
+              onChange={(val) => handleStepProgressChange(currentStepIndex, val)}
+            />
+          </div>
+        )}
+
         {/* Step Jumpers (快速跳转步骤) */}
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-neutral-200/80 dark:border-neutral-800 text-xs">
           <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400 mr-1">跳转步骤:</span>
@@ -520,85 +567,97 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
         </GameViewport>
       </div>
 
-      {/* 4. Deep Pipeline Step Inspector (步骤指标与状态详情卡) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {steps.map((st, idx) => {
-          const isActive = idx === currentStepIndex;
-          const isDone = st.status === 'completed';
-          const isErr = st.status === 'error';
+      {/* 4. Deep Pipeline Step Inspector (步骤指标与每个确定性步骤的滑动条) */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between text-xs font-mono font-bold text-neutral-600 dark:text-neutral-400 px-1">
+          <span>每个确定性阶段微调滑动条与详细指标 (Determinate Steps Sliders & Diagnostics)</span>
+          <span>共 {steps.length} 阶段</span>
+        </div>
 
-          return (
-            <div
-              key={st.id}
-              onClick={() => jumpToStep(idx)}
-              className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs flex flex-col justify-between gap-3 ${
-                isErr
-                  ? 'bg-red-500/10 border-red-500/50 text-red-400'
-                  : isActive
-                  ? isLight
-                    ? 'bg-sky-50/80 border-sky-400 ring-2 ring-sky-500/20'
-                    : 'bg-sky-950/30 border-sky-500/60 ring-2 ring-sky-500/20'
-                  : isLight
-                  ? 'bg-white border-neutral-200/90 hover:border-neutral-300'
-                  : 'bg-neutral-900/60 border-neutral-800 hover:border-neutral-700'
-              }`}
-            >
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-bold text-neutral-500 dark:text-neutral-400">
-                    STAGE 0{idx + 1}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      isErr
-                        ? 'bg-red-500 text-white'
-                        : isActive
-                        ? 'bg-sky-500 text-white animate-pulse'
-                        : isDone
-                        ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500'
-                    }`}
-                  >
-                    {st.status}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {steps.map((st, idx) => {
+            const isActive = idx === currentStepIndex;
+            const isDone = st.status === 'completed';
+            const isErr = st.status === 'error';
+
+            return (
+              <div
+                key={st.id}
+                className={`p-4 rounded-2xl border transition-all shadow-2xs flex flex-col justify-between gap-3 ${
+                  isErr
+                    ? 'bg-red-500/10 border-red-500/50 text-red-400'
+                    : isActive
+                    ? isLight
+                      ? 'bg-sky-50/80 border-sky-400 ring-2 ring-sky-500/20'
+                      : 'bg-sky-950/30 border-sky-500/60 ring-2 ring-sky-500/20'
+                    : isLight
+                    ? 'bg-white border-neutral-200/90 hover:border-neutral-300'
+                    : 'bg-neutral-900/60 border-neutral-800 hover:border-neutral-700'
+                }`}
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="font-bold text-neutral-500 dark:text-neutral-400">
+                      STAGE 0{idx + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => jumpToStep(idx)}
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                        isErr
+                          ? 'bg-red-500 text-white'
+                          : isActive
+                          ? 'bg-sky-500 text-white'
+                          : isDone
+                          ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30'
+                          : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
+                      }`}
+                    >
+                      {isActive ? 'Active' : isDone ? 'Done · Jump' : 'Pending'}
+                    </button>
+                  </div>
+
+                  <h4 className="text-sm font-bold tracking-tight text-neutral-900 dark:text-white mt-1">
+                    {st.title}
+                  </h4>
+
+                  <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400">
+                    {st.category}
                   </span>
                 </div>
 
-                <h4 className="text-sm font-bold tracking-tight text-neutral-900 dark:text-white mt-1">
-                  {st.title}
-                </h4>
-
-                <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400">
-                  {st.category}
-                </span>
-              </div>
-
-              {/* Step Telemetry Footnote */}
-              <div className="pt-2 border-t border-neutral-200/60 dark:border-neutral-800 text-xs font-mono flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  {st.type === 'determinate' ? (
-                    <>
-                      <DownloadCloud className="h-3.5 w-3.5 text-amber-500" />
-                      <span className="text-neutral-600 dark:text-neutral-300">Determinate</span>
-                    </>
-                  ) : (
-                    <>
+                {/* Step Slider for Determinate steps */}
+                {st.type === 'determinate' ? (
+                  <div className="pt-2 border-t border-neutral-200/60 dark:border-neutral-800 flex flex-col gap-1">
+                    <SliderControl
+                      label={`进度调节 (0% ~ 100%)`}
+                      value={Math.round(st.progressPct || 0)}
+                      min={0}
+                      max={100}
+                      step={1}
+                      unit="%"
+                      colorScheme="amber"
+                      isLight={isLight}
+                      onChange={(val) => handleStepProgressChange(idx, val)}
+                    />
+                    <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 mt-0.5">
+                      <span>已下载: {formatBytes(st.bytesLoaded)}</span>
+                      <span>总量: {formatBytes(st.bytesTotal)}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pt-2 border-t border-neutral-200/60 dark:border-neutral-800 text-xs font-mono flex items-center justify-between text-neutral-500">
+                    <div className="flex items-center gap-1.5">
                       <Cpu className="h-3.5 w-3.5 text-purple-400" />
-                      <span className="text-neutral-600 dark:text-neutral-300">Indeterminate</span>
-                    </>
-                  )}
-                </div>
-
-                <span className="font-bold text-neutral-800 dark:text-neutral-200">
-                  {st.type === 'determinate'
-                    ? st.bytesTotal
-                      ? formatBytes(st.bytesLoaded)
-                      : `${Math.round(st.progressPct || 0)}%`
-                    : 'Pulse Glow'}
-                </span>
+                      <span>不确定态 (Indeterminate)</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-amber-500">Shimmer Wave</span>
+                  </div>
+                )}
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
