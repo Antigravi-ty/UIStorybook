@@ -205,3 +205,57 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 ### 6.5 全局视觉基调 (Global Visual & Accent Theme)
 - 系统优先使用 **Neutral (无饱和度黑白)** 与 **Warm Amber (暖橙黄色)** 作为核心视觉主色调，相比原蓝色更柔和舒适，并内置视觉基调切换器供全局实时切换。
 
+---
+
+## 7. 界面双分层架构 (Dual-Layer Architecture: Menu Layer vs HUD Layer)
+
+为了根除沟通歧义并降低系统耦合度，项目将游戏与应用界面划分为两个生命周期与交互范式完全正交的独立顶层体系：
+
+### 7.1 层级 A：Menu Layer (菜单系统层 / 模态系统层)
+- **定位**：对局暂停、局间大厅、系统设置、车库外观改装与按键映射。
+- **特征**：独占交互焦点，背景通常进入变暗遮罩 (Dim) 或暂停 3D 渲染，使用 `MorphContainer` 调度层级流体尺寸形变与三段时序过渡。
+- **唯一预览基准**：`<MenuLayerPreviewPage>` (`src/showcase/pages/MenuLayerPreviewPage.tsx`)。
+- **命名规范**：沟通此范畴时统一称为 **Menu Layer (菜单层)**，各子面板以 `Layer 1 / Layer 2 / Layer 3` 命名。
+
+### 7.2 层级 B：HUD Layer / Match HUD (对局平视显示层 / 游戏实时层)
+- **定位**：比赛对局进行期间直接悬浮于 3D 视口之上的实时数据、态势感知与操作反馈。
+- **特征**：非模态、常驻或事件触发、无阻断交互、毫秒级响应、强依赖 18:9 安全区边缘锚定。
+- **唯一预览基准**：`<MatchHudPreviewPage>` (`src/showcase/pages/MatchHudPreviewPage.tsx`)。
+- **命名规范**：沟通此范畴时统一称为 **Match HUD (对局平视层 / HUD Layer)**，彻底避免与 Menu Layer 混淆。
+
+---
+
+## 8. Match HUD 规范与设计哲学 (Apple HIG + Nintendo 游戏哲学)
+
+原始 Rocket League UI 具有 2015 时代厚重视效和局部遮挡过多的问题。本项目借鉴两大设计哲学进行重构：
+
+### 8.1 设计哲学融合
+1. **Apple HIG 现代克制美学**：
+   - 晶莹磨砂材质 (`backdrop-blur-md bg-neutral-950/80 border-neutral-700/60`)。
+   - 严格的等宽排版（`font-mono tabular-nums`），杜绝倒计时与速度数字跳动引发的微抖动。
+   - 环形仪表借鉴 Apple Watch Activity Rings，圆润弧线与极简刻度。
+2. **Nintendo 触感与瞬间可读性 (Game Feel in Motion)**：
+   - 高速运动状态下的**瞬间形状辨识度**（如超音速 2200 uu/s 紫色脉冲、开球 3-2-1-GO! 弹性冲击波）。
+   - 空翻窗口（Flip Timer 1.5s）与四轮触球（Flip Reset）的直观感知反馈（钻石星芒 + 四轮独立接触传感器点亮指示）。
+3. **表现层完全解耦**：
+   - 所有 HUD 组件均为**纯表现层**，接收单向 `props`，不捆绑游戏循环或 WASM 单例。
+4. **预览内容无污染标准 (Footer Description Pattern)**：
+   - 预览外部控制器使用清晰中文辅助配置；
+   - 预览内部所有组件（Settings、HUD 标识）严格遵循标准英文电竞规范，杜绝杂乱的中文残留；
+   - 采用 RLCleanWASM 沉淀的标准模式：通过 hover 动态将说明投射到面板 Footer 中，面板主体保持单行清爽极简。
+
+### 8.2 HUD 标准组件索引对照表
+
+| 组件名称 | 表现职责 | 锚定位置 | 文件路径 |
+|---|---|---|---|
+| `<ScoreboardHUD>` | 队伍比分、5分钟倒计时、加时赛指示与模式徽章 | 顶部中心 | `src/hud/ScoreboardHUD.tsx` |
+| `<KickoffCountdownHUD>` | 开球 3-2-1-GO! 弹性冲击波倒计时 | 屏幕中央 | `src/hud/KickoffCountdownHUD.tsx` |
+| `<BoostGaugeHUD>` | 推进量环形/线性仪表、无限模式、喷火粒子高亮 | 右下角 | `src/hud/BoostGaugeHUD.tsx` |
+| `<BallCamIndicatorHUD>` | 球相机瞄准状态指示、出画来球方向与距离箭头 | 左下角 | `src/hud/BallCamIndicatorHUD.tsx` |
+| `<SpeedometerHUD>` | 车辆速度表、2200 uu/s 超音速刻度线与激波光效 | 底部中心 | `src/hud/SpeedometerHUD.tsx` |
+| `<FlipTimerHUD>` | 空中 1.5s 翻滚窗口倒计时与四轮触球 Flip Reset 提示 | 底部中心 (速度表上方) | `src/hud/FlipTimerHUD.tsx` |
+| `<MatchEventsHUD>` | 进球 (GOAL)、扑救 (SAVE)、爆破 (DEMO) 赛况横幅 | 中上部 | `src/hud/MatchEventsHUD.tsx` |
+| `<QuickChatHUD>` | 战术快捷短语聊天气泡流 (Team/All) | 左上角 | `src/hud/QuickChatHUD.tsx` |
+| `<NetworkDiagnosticsHUD>` | 120Hz 物理时钟、Ping、Sub-tick 时延抖动遥测 | 右上角 | `src/hud/NetworkDiagnosticsHUD.tsx` |
+| `<MatchHudContainer>` | HUD 全局编排容器 (支持 Safe Area 与独立开关) | 全屏视口 | `src/hud/MatchHudContainer.tsx` |
+

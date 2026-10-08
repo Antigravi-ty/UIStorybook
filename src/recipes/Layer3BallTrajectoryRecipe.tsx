@@ -10,11 +10,7 @@ import { VStack } from '../layout/VStack';
 import { 
   Activity, 
   Eye, 
-  ChevronRight, 
-  Minimize2, 
   Sparkles, 
-  Sliders, 
-  Check, 
   Info 
 } from 'lucide-react';
 
@@ -30,9 +26,9 @@ export interface Layer3BallTrajectoryRecipeProps {
  * Supports Live Preview with Tab key collapse/expand.
  * Tuning parameters:
  * - Trajectory Draw Duration (0.5s - 5.0s)
- * - Trajectory Color (Warm Amber / Cyan Neon / Apple Green / Monochromatic White)
- * - Collision Bounce Point Marker
- * - Air Drag & Magnus Spin Simulation Visualizer
+ * - Trajectory Glow Color (Warm Amber / Monochrome / Apple Green / Neon Cyan)
+ * - Bounce Impact Rings
+ * - Magnus Spin Vector Visualizer
  * - Real-time Sub-Tick Precision
  */
 export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProps> = ({
@@ -42,12 +38,15 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
   transparent = false,
 }) => {
   // Trajectory Prediction Parameters
-  const [trajectoryDuration, setTrajectoryDuration] = useState(2.5); // seconds
+  const [trajectoryDuration, setTrajectoryDuration] = useState(2.5);
   const [renderColor, setRenderColor] = useState('amber');
   const [showBounceMarkers, setShowBounceMarkers] = useState(true);
   const [showSpinVector, setShowSpinVector] = useState(true);
   const [decayFade, setDecayFade] = useState(true);
   const [subTickPrecision, setSubTickPrecision] = useState('high');
+
+  // Dynamic hover description for footer
+  const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
 
   return (
     <PanelContainer isLight={isLight} transparent={transparent} className="w-full max-w-[480px]">
@@ -90,30 +89,38 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
           >
             <div className="flex items-center gap-2">
               <Eye className="h-4 w-4 text-amber-500 shrink-0" />
-              <span>按键盘 <strong>TAB</strong> 可将此窗口快速折叠至右侧边栏并恢复游戏背景渲染</span>
+              <span>Press <strong>TAB</strong> to collapse panel to sidebar and resume game background</span>
             </div>
             <KeycapBadge shortcut="TAB" size="sm" isLight={isLight} />
           </div>
 
           {/* 1. Trajectory Draw Duration */}
-          <SliderControl
-            label="Trajectory Horizon (预测时长)"
-            value={trajectoryDuration}
-            min={0.5}
-            max={5.0}
-            step={0.1}
-            unit="s"
-            description="前瞻模拟计算绘制球体未来飞行轨迹秒数"
-            onChange={setTrajectoryDuration}
-            colorScheme="amber"
-            isLight={isLight}
-          />
+          <div
+            onMouseEnter={() => setHoveredDesc('Forward simulation window for ball trajectory visualization in seconds.')}
+            onMouseLeave={() => setHoveredDesc(null)}
+          >
+            <SliderControl
+              label="Trajectory Horizon"
+              value={trajectoryDuration}
+              min={0.5}
+              max={5.0}
+              step={0.1}
+              unit="s"
+              onChange={setTrajectoryDuration}
+              colorScheme="amber"
+              isLight={isLight}
+            />
+          </div>
 
           {/* 2. Color Scheme Selector */}
-          <div className="flex flex-col gap-1.5">
+          <div
+            className="flex flex-col gap-1.5"
+            onMouseEnter={() => setHoveredDesc('Selects visual theme for the predictive trajectory ribbon in 3D arena.')}
+            onMouseLeave={() => setHoveredDesc(null)}
+          >
             <div className="flex items-center justify-between text-xs">
               <span className={`font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
-                Trajectory Glow Color (轨迹弧光色调)
+                Trajectory Glow Color
               </span>
               <span className="text-[11px] font-mono text-neutral-400">Neutral & Soft</span>
             </div>
@@ -132,40 +139,56 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
 
           {/* 3. Bounce Markers & Spin Simulation */}
           <Card isLight={isLight} variant="outlined" className="p-4 flex flex-col gap-3">
-            <span className="text-xs font-bold tracking-tight mb-1">物理触地与微操辅助 (Physics Markers)</span>
+            <span className="text-xs font-bold tracking-tight mb-1 text-neutral-300">Physics Markers & Assistance</span>
             
-            <ToggleSwitch
-              label="Bounce Impact Rings (球体弹跳落点环)"
-              description="在地面与球门框标出即将发生反弹的高光预测光圈"
-              checked={showBounceMarkers}
-              onCheckedChange={setShowBounceMarkers}
-              variant="orange"
-              isLight={isLight}
-            />
+            <div
+              onMouseEnter={() => setHoveredDesc('Renders projected ground impact and goal frame bounce prediction rings.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
+              <ToggleSwitch
+                label="Bounce Impact Rings"
+                checked={showBounceMarkers}
+                onCheckedChange={setShowBounceMarkers}
+                variant="neutral"
+                isLight={isLight}
+              />
+            </div>
 
-            <ToggleSwitch
-              label="Magnus Spin Vector (马格努斯旋转向量)"
-              description="可视化空气阻力与自旋对弧线落点的真实偏移修正"
-              checked={showSpinVector}
-              onCheckedChange={setShowSpinVector}
-              variant="orange"
-              isLight={isLight}
-            />
+            <div
+              onMouseEnter={() => setHoveredDesc('Visualizes aerodynamic Magnus spin vector and curvature offset.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
+              <ToggleSwitch
+                label="Magnus Spin Vector"
+                checked={showSpinVector}
+                onCheckedChange={setShowSpinVector}
+                variant="neutral"
+                isLight={isLight}
+              />
+            </div>
 
-            <ToggleSwitch
-              label="Decay Fade-Out (远端轨迹透明衰减)"
-              description="避免远端轨迹遮挡前方视线"
-              checked={decayFade}
-              onCheckedChange={setDecayFade}
-              variant="orange"
-              isLight={isLight}
-            />
+            <div
+              onMouseEnter={() => setHoveredDesc('Fades alpha at the far end of the flight path to prevent visual clutter.')}
+              onMouseLeave={() => setHoveredDesc(null)}
+            >
+              <ToggleSwitch
+                label="Decay Fade-Out"
+                checked={decayFade}
+                onCheckedChange={setDecayFade}
+                variant="neutral"
+                isLight={isLight}
+              />
+            </div>
           </Card>
 
           {/* 4. Sub-Tick Precision */}
-          <div className="flex flex-col gap-1.5">
+          <div
+            className="flex flex-col gap-1.5"
+            onMouseEnter={() => setHoveredDesc('Sub-tick physics steps for high-frequency trajectory integration.')}
+            onMouseLeave={() => setHoveredDesc(null)}
+          >
             <span className={`text-xs font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
-              Physics Solver Steps (解算细分精度)
+              Physics Solver Steps
             </span>
             <SegmentedSwitch
               value={subTickPrecision}
@@ -182,9 +205,15 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
       </PanelContent>
 
       <PanelFooter hint="TAB to Preview" isLight={isLight}>
-        <div className="flex items-center gap-1.5 text-[11px] opacity-75 font-mono">
-          <Activity className="h-3.5 w-3.5 text-amber-500" />
-          <span>Calculated: {trajectoryDuration.toFixed(1)}s Horizon</span>
+        <div className="flex items-center gap-2 w-full text-xs truncate">
+          <Info className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
+          <span className={`truncate transition-colors duration-150 ${
+            hoveredDesc
+              ? (isLight ? 'text-neutral-900' : 'text-neutral-100')
+              : (isLight ? 'text-neutral-400' : 'text-neutral-500')
+          }`}>
+            {hoveredDesc || `Calculated: ${trajectoryDuration.toFixed(1)}s Horizon`}
+          </span>
         </div>
       </PanelFooter>
     </PanelContainer>

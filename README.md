@@ -55,20 +55,26 @@ UIStorybook 是针对 [RLCleanWASM](https://github.com/Antigravi-ty/RLCleanWASM)
 
 ---
 
-## 🗂️ 菜单分级架构与直接调用系统 (Menu Hierarchy)
+## 🗂️ 界面双分层体系 (Dual-Layer: Menu Layer vs HUD Layer)
 
-- **Layer 1: 根级全局菜单 (Root Game Menus)**
-  - `Layer1MatchPostRecipe` (比赛暂停/赛后战报根菜单, `420px`)：再来一局、战报统计入口、车库改装与设置。
-  - `Layer1MainMenuRecipe` (经典暂停大厅根菜单, `420px`)：恢复游戏、车库装配、按键设置。
-- **Layer 2: 专项功能二级菜单 (Category Sub-Menus)**
-  - `Layer2MatchStatsRecipe` (赛后数据与战术遥测, `580px`)：蓝橙对局看板、进球/助攻/扑救指标网格。
-  - `Layer2GarageRecipe` (车库改装与涂装, `660px`)：UnderlineTabs 车型/轮毂/尾气选择器。
-  - `Layer2SettingsRecipe` (音画与系统设置, `520px`)：音量滑块、画质分段选择、视野 FOV 调节。
-  - `KeybindingRecipe` (按键与手柄映射, `560px`)：键盘/手柄键位重映射。
-- **Layer 3: 深度参数三级面板 (Granular Detail Sub-Menus)**
-  - `Layer3AudioDetailRecipe` (音频高级均衡器与声场, `480px`)：3-Band EQ、动态范围、HRTF 3D 空间环绕声。
+系统将游戏与交互界面严格区分为两层完全解耦的架构：
+1. **Menu Layer (系统/菜单/模态层)**：对局暂停、局间大厅、系统设置、车库改装与按键映射。由 `MorphContainer` 调度层级形变，在 `<MenuLayerPreviewPage>` 预览。
+   - **Layer 1: 根级全局菜单** (`Layer1MainMenuRecipe`, `Layer1MatchPostRecipe`)
+   - **Layer 2: 专项功能二级菜单** (`Layer2GarageRecipe`, `Layer2SettingsRecipe`, `Layer2PlayRecipe`, `Layer2MatchStatsRecipe`, `KeybindingRecipe`)
+   - **Layer 3: 深度参数三级面板** (`Layer3AudioDetailRecipe`, `Layer3BallTrajectoryRecipe`)
+2. **Match HUD Layer (对局平视显示层 / HUD Layer)**：比赛进行时的实时态势感知与实时仪表，在 `<MatchHudPreviewPage>` 预览。
+   - `ScoreboardHUD`: 积分板与 5 分钟倒计时 / 加时赛指示
+   - `KickoffCountdownHUD`: 开球 3-2-1-GO! 冲击波倒计时
+   - `BoostGaugeHUD`: 环形 (Apple Activity Ring 风格) 与线性推进仪表 (0-100 & 无限模式)
+   - `BallCamIndicatorHUD`: 球相机瞄准状态与出画方位角度指示器
+   - `SpeedometerHUD`: 速度计与 2200 uu/s 超音速激波指示
+   - `FlipTimerHUD`: 空中 1.5s 翻滚窗口倒计时与四轮触球 Flip Reset 状态指示器
+   - `MatchEventsHUD`: 进球、扑救、爆破赛况横幅
+   - `QuickChatHUD`: 战术快捷聊天气泡流
+   - `NetworkDiagnosticsHUD`: 120Hz 物理时钟与微秒级抖动监控
+   - `MatchHudContainer`: HUD 整体安全区布局编排外壳
 
-所有菜单均为低耦合纯呈现组件，支持单行直接调用或放入 `MorphingShell` 自由切换。
+所有组件均为低耦合纯呈现组件，支持单行直接调用，严禁注入游戏引擎单例。
 
 ---
 
