@@ -61,16 +61,30 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
       className={`relative select-none pointer-events-auto flex flex-col items-center gap-1.5 transition-all ${className}`}
     >
       {/* Top Readout: Speed Numbers & Supersonic Badge */}
-      <div className="flex items-center gap-3 px-3 py-1 rounded-xl backdrop-blur-md border shadow-lg bg-neutral-950/70 border-white/10 text-white">
+      <div
+        className={`flex items-center gap-3 px-3 py-1 rounded-xl backdrop-blur-md border shadow-lg transition-colors ${
+          isLight
+            ? 'bg-white/85 border-neutral-300/80 text-neutral-900 shadow-neutral-400/20'
+            : 'bg-neutral-950/70 border-white/10 text-white shadow-black/60'
+        }`}
+      >
         <div className="flex items-baseline gap-1 font-mono">
           <span className="text-sm font-black tabular-nums tracking-tight">
             {kmh}
           </span>
-          <span className="text-[10px] text-neutral-400 font-semibold uppercase">
+          <span
+            className={`text-[10px] font-semibold uppercase ${
+              isLight ? 'text-neutral-500' : 'text-neutral-400'
+            }`}
+          >
             KM/H
           </span>
           {showUnits === 'both' && (
-            <span className="text-[10px] text-neutral-500 font-normal ml-1">
+            <span
+              className={`text-[10px] font-normal ml-1 ${
+                isLight ? 'text-neutral-500' : 'text-neutral-500'
+              }`}
+            >
               ({Math.round(clampedSpeed)} uu/s)
             </span>
           )}
@@ -93,10 +107,20 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
       </div>
 
       {/* Progress Track Bar */}
-      <div className="relative w-72 sm:w-80 md:w-96 h-2.5 rounded-full overflow-hidden backdrop-blur-md border border-white/20 bg-neutral-900/80 shadow-lg">
+      <div
+        className={`relative w-72 sm:w-80 md:w-96 h-2.5 rounded-full overflow-hidden backdrop-blur-md border shadow-lg transition-colors ${
+          isLight
+            ? 'border-neutral-300/80 bg-neutral-200/80'
+            : 'border-white/20 bg-neutral-900/80'
+        }`}
+      >
         {/* Supersonic Notch at 85% */}
         <div
-          className="absolute top-0 bottom-0 w-0.5 bg-white/90 z-20 shadow-[0_0_6px_#ffffff]"
+          className={`absolute top-0 bottom-0 w-0.5 z-20 ${
+            isLight
+              ? 'bg-neutral-800 shadow-[0_0_4px_rgba(0,0,0,0.3)]'
+              : 'bg-white/90 shadow-[0_0_6px_#ffffff]'
+          }`}
           style={{ left: '85%' }}
           title="Supersonic Threshold (2200 uu/s)"
         />
@@ -115,9 +139,18 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
       </div>
 
       {/* Track Footnote: 0 -> 2200 (Supersonic) -> Max */}
-      <div className="w-72 sm:w-80 md:w-96 flex items-center justify-between text-[8px] font-mono opacity-50 px-1">
+      <div
+        className={`w-72 sm:w-80 md:w-96 flex items-center justify-between text-[8px] font-mono px-1 ${
+          isLight ? 'text-neutral-600 opacity-80' : 'opacity-50 text-neutral-400'
+        }`}
+      >
         <span>0</span>
-        <span className="text-purple-400 font-semibold" style={{ marginLeft: '60%' }}>
+        <span
+          className={`font-semibold ${
+            isLight ? 'text-purple-600 font-bold' : 'text-purple-400'
+          }`}
+          style={{ marginLeft: '60%' }}
+        >
           ▲ 2200 SUPERSONIC
         </span>
         <span>MAX</span>

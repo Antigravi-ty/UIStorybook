@@ -49,13 +49,21 @@ export const FlipTimerHUD: React.FC<FlipTimerHUDProps> = ({
       data-hud-component="flip-timer"
       className={`relative select-none pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-2xl border backdrop-blur-md shadow-xl transition-all ${
         phase === 'reset'
-          ? 'bg-emerald-500/20 border-emerald-500/60 shadow-[0_0_24px_rgba(16,185,129,0.4)] text-white'
+          ? isLight
+            ? 'bg-emerald-500/15 border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.3)] text-emerald-950'
+            : 'bg-emerald-500/20 border-emerald-500/60 shadow-[0_0_24px_rgba(16,185,129,0.4)] text-white'
           : phase === 'airborne'
           ? fraction > 0.3
-            ? 'bg-amber-500/15 border-amber-500/50 shadow-amber-500/20 text-white'
+            ? isLight
+              ? 'bg-amber-500/15 border-amber-500/50 shadow-amber-500/15 text-amber-950'
+              : 'bg-amber-500/15 border-amber-500/50 shadow-amber-500/20 text-white'
+            : isLight
+            ? 'bg-red-500/15 border-red-500/50 shadow-red-500/15 text-red-950'
             : 'bg-red-500/15 border-red-500/50 shadow-red-500/20 text-white'
           : phase === 'expired'
-          ? 'bg-neutral-900/60 border-neutral-700/60 text-neutral-400 opacity-75'
+          ? isLight
+            ? 'bg-neutral-200/70 border-neutral-300/80 text-neutral-500'
+            : 'bg-neutral-900/60 border-neutral-700/60 text-neutral-400 opacity-75'
           : isLight
           ? 'bg-white/85 border-neutral-300/80 text-neutral-800 shadow-neutral-300/20'
           : 'bg-neutral-950/85 border-white/15 text-neutral-200 shadow-black/60'

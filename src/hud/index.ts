@@ -6,4 +6,5 @@ export * from './SpeedometerHUD';
 export * from './FlipTimerHUD';
 export * from './MatchAccoladeBannerHUD';
 export * from './QuickChatFeedHUD';
+export * from './NetworkDiagnosticsHUD';
 export * from './MatchHudRecipe';

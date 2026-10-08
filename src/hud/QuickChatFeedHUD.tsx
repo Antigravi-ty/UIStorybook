@@ -29,14 +29,36 @@ export const QuickChatFeedHUD: React.FC<QuickChatFeedHUDProps> = ({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
             transition={UI_EASING.spring.snappy}
-            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border backdrop-blur-md shadow-md text-xs font-mono ${
+            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border backdrop-blur-md shadow-md text-xs font-mono transition-colors ${
               msg.team === 'orange'
-                ? 'bg-orange-950/75 border-orange-500/40 text-orange-200'
-                : 'bg-blue-950/75 border-blue-500/40 text-blue-200'
+                ? isLight
+                  ? 'bg-orange-500/15 border-orange-500/50 text-orange-950 shadow-orange-500/10'
+                  : 'bg-orange-950/75 border-orange-500/40 text-orange-200 shadow-orange-900/30'
+                : isLight
+                ? 'bg-blue-500/15 border-blue-500/50 text-blue-950 shadow-blue-500/10'
+                : 'bg-blue-950/75 border-blue-500/40 text-blue-200 shadow-blue-900/30'
             }`}
           >
-            <span className="font-bold shrink-0">{msg.sender}:</span>
-            <span className="text-white font-medium">{msg.text}</span>
+            <span
+              className={`font-black shrink-0 ${
+                msg.team === 'orange'
+                  ? isLight
+                    ? 'text-orange-700'
+                    : 'text-orange-300'
+                  : isLight
+                  ? 'text-blue-700'
+                  : 'text-blue-300'
+              }`}
+            >
+              {msg.sender}:
+            </span>
+            <span
+              className={`font-semibold ${
+                isLight ? 'text-neutral-900' : 'text-white'
+              }`}
+            >
+              {msg.text}
+            </span>
           </motion.div>
         ))}
       </AnimatePresence>

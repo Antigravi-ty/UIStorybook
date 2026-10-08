@@ -6,6 +6,7 @@ import { SpeedometerHUD } from './SpeedometerHUD';
 import { FlipTimerHUD } from './FlipTimerHUD';
 import { MatchAccoladeBannerHUD } from './MatchAccoladeBannerHUD';
 import { QuickChatFeedHUD } from './QuickChatFeedHUD';
+import { NetworkDiagnosticsHUD } from './NetworkDiagnosticsHUD';
 import {
   MatchScoreState,
   BoostState,
@@ -14,6 +15,7 @@ import {
   CameraMode,
   AccoladeEvent,
   QuickChatMessage,
+  NetworkTelemetry,
 } from './types';
 
 export interface MatchHudRecipeProps {
@@ -26,6 +28,7 @@ export interface MatchHudRecipeProps {
   accoladeEvent?: AccoladeEvent | null;
   countdownNumber?: number | null;
   quickChatMessages?: QuickChatMessage[];
+  telemetry?: Partial<NetworkTelemetry>;
   boostVariant?: 'ring' | 'linear' | 'hybrid';
   isLight?: boolean;
   className?: string;
@@ -53,6 +56,7 @@ export const MatchHudRecipe: React.FC<MatchHudRecipeProps> = ({
   accoladeEvent = null,
   countdownNumber = null,
   quickChatMessages = [],
+  telemetry = { pingMs: 18, fps: 120, subTickJitterMs: 0.1, packetLossPct: 0 },
   boostVariant = 'ring',
   isLight = false,
   className = '',
@@ -63,7 +67,7 @@ export const MatchHudRecipe: React.FC<MatchHudRecipeProps> = ({
       data-layer="hud"
       className={`relative w-full h-full pointer-events-none select-none flex flex-col justify-between p-4 sm:p-6 overflow-hidden ${className}`}
     >
-      {/* 1. TOP ANCHOR: Scoreboard & Quick Chat */}
+      {/* 1. TOP ANCHOR: Scoreboard, Quick Chat & Network Diagnostics */}
       <div className="relative flex items-start justify-between w-full z-30">
         {/* Top-Left: Quick Chat Feed */}
         <div className="flex flex-col gap-2">
@@ -88,8 +92,16 @@ export const MatchHudRecipe: React.FC<MatchHudRecipeProps> = ({
           />
         </div>
 
-        {/* Top-Right: Spacer / reserved */}
-        <div className="w-10 sm:w-20" />
+        {/* Top-Right: Network Diagnostics & Telemetry */}
+        <div className="flex justify-end">
+          <NetworkDiagnosticsHUD
+            pingMs={telemetry.pingMs}
+            fps={telemetry.fps}
+            subTickJitterMs={telemetry.subTickJitterMs}
+            packetLossPct={telemetry.packetLossPct}
+            isLight={isLight}
+          />
+        </div>
       </div>
 
       {/* 2. CENTER ANCHOR: Accolades & Kickoff Countdown */}

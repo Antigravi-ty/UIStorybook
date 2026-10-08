@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Crosshair,
   Play,
@@ -6,18 +6,13 @@ import {
   RotateCcw,
   Zap,
   Gauge,
-  Flame,
   Check,
   Ruler,
-  MessageSquare,
   Sparkles,
-  Trophy,
-  Shield,
   Clock,
-  ArrowUpRight,
-  Eye,
   Sliders,
-  Volume2,
+  Sun,
+  Wifi,
 } from 'lucide-react';
 import {
   MatchScoreState,
@@ -27,6 +22,7 @@ import {
   CameraMode,
   AccoladeEvent,
   QuickChatMessage,
+  NetworkTelemetry,
   MatchScoreboardHUD,
   BoostGaugeHUD,
   BallCamIndicatorHUD,
@@ -34,13 +30,11 @@ import {
   FlipTimerHUD,
   MatchAccoladeBannerHUD,
   QuickChatFeedHUD,
+  NetworkDiagnosticsHUD,
   MatchHudRecipe,
 } from '../../hud';
 import { Badge } from '../../primitives/Badge';
-import { SliderControl } from '../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
-import { ToggleSwitch } from '../../primitives/ToggleSwitch';
-import { KeycapBadge } from '../../primitives/KeycapBadge';
 import { CodeBlock } from '../CodeBlock';
 
 export interface HudLayerPreviewPageProps {
@@ -84,6 +78,29 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
     { id: '2', sender: 'ViperStrike', text: 'Take the shot!', team: 'orange', timestamp: Date.now() - 3000 },
     { id: '3', sender: 'You', text: 'I got it!', team: 'blue', timestamp: Date.now() - 1000 },
   ]);
+
+  // 8. ARENA BACKDROP & BRIGHTNESS CONTROLS
+  const [arenaBackdrop, setArenaBackdrop] = useState<'daylight' | 'twilight' | 'night'>(
+    isLight ? 'daylight' : 'night'
+  );
+  const [backdropBrightness, setBackdropBrightness] = useState<number>(100);
+  const [hudThemeMode, setHudThemeMode] = useState<'auto' | 'light' | 'dark'>('auto');
+
+  // 9. NETWORK TELEMETRY STATE (TOP-RIGHT HUD)
+  const [telemetry, setTelemetry] = useState<NetworkTelemetry>({
+    pingMs: 18,
+    fps: 120,
+    subTickJitterMs: 0.1,
+    packetLossPct: 0,
+  });
+
+  // Effective HUD Light/Dark mode
+  const effectiveHudIsLight =
+    hudThemeMode === 'light'
+      ? true
+      : hudThemeMode === 'dark'
+      ? false
+      : arenaBackdrop === 'daylight' || isLight;
 
   // Toast feedback
   const [feedbackToast, setFeedbackToast] = useState<string | null>(null);
@@ -218,6 +235,17 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
     setFlipResetCount(0);
   };
 
+  // Arena Backdrop Gradient Definition
+  const getArenaBackground = () => {
+    if (arenaBackdrop === 'daylight') {
+      return 'radial-gradient(ellipse at 50% 120%, #93c5fd 0%, #60a5fa 30%, #bfdbfe 65%, #f1f5f9 100%)';
+    }
+    if (arenaBackdrop === 'twilight') {
+      return 'radial-gradient(ellipse at 50% 120%, #6366f1 0%, #312e81 40%, #1e1b4b 75%, #09090b 100%)';
+    }
+    return 'radial-gradient(ellipse at 50% 120%, #0c1c38 0%, #030712 60%, #000000 100%)';
+  };
+
   // Layout Inspector Export Handler
   const handleExportHudLayout = async () => {
     const stage = document.getElementById('hud-preview-stage');
@@ -238,6 +266,7 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
       { id: 'hud-flip-timer', name: 'FLIP / DODGE RESET TIMER' },
       { id: 'hud-quickchat-feed', name: 'TOP-LEFT QUICK CHAT FEED' },
       { id: 'hud-accolade-banner', name: 'CENTER ACCOLADE BANNER' },
+      { id: 'hud-network-diagnostics', name: 'TOP-RIGHT NETWORK TELEMETRY' },
     ];
 
     elements.forEach((item, idx) => {
@@ -276,9 +305,11 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
             <Crosshair className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">HUD Layer 实时预览</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+              HUD Layer 实时预览
+            </h1>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Heads-Up Display 战局平视显示层规范 (对局比分板、推进器规表、球相机视角、速度表与翻滚倒计时)
+              Heads-Up Display 战局平视显示层规范 (对局比分板、推进器规表、球相机视角、速度表、翻滚倒计时与网络遥测)
             </p>
           </div>
         </div>
@@ -288,13 +319,18 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
           <button
             type="button"
             onClick={handleExportHudLayout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono font-medium transition-all active:scale-95 cursor-pointer bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 border-neutral-300 dark:border-neutral-700 shadow-2xs"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono font-medium transition-all active:scale-95 cursor-pointer shadow-2xs ${
+              isLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300'
+                : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-100 border-neutral-700'
+            }`}
             title="测量并导出当前 HUD 各个平视锚点组件的尺寸与位置数据"
           >
             <Ruler className="h-3.5 w-3.5 text-emerald-500" />
             <span>导出 HUD 布局数据</span>
           </button>
 
+          {/* 推进器形态 */}
           <div className="flex items-center gap-2">
             <span className={`font-medium ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
               推进器形态:
@@ -310,21 +346,63 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
               ]}
             />
           </div>
+
+          {/* 场馆背景主题 */}
+          <div className="flex items-center gap-2">
+            <span className={`font-medium ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+              场馆背景:
+            </span>
+            <SegmentedSwitch
+              value={arenaBackdrop}
+              onValueChange={(v) => {
+                const mode = v as 'daylight' | 'twilight' | 'night';
+                setArenaBackdrop(mode);
+                if (mode === 'daylight') setBackdropBrightness(100);
+                else if (mode === 'twilight') setBackdropBrightness(85);
+                else setBackdropBrightness(60);
+              }}
+              isLight={isLight}
+              options={[
+                { value: 'daylight', label: 'Daylight (白昼)' },
+                { value: 'twilight', label: 'Twilight (暮色)' },
+                { value: 'night', label: 'Night (暗夜)' },
+              ]}
+            />
+          </div>
+
+          {/* HUD 配色方案 */}
+          <div className="flex items-center gap-2">
+            <span className={`font-medium ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+              HUD 配色:
+            </span>
+            <SegmentedSwitch
+              value={hudThemeMode}
+              onValueChange={(v) => setHudThemeMode(v as any)}
+              isLight={isLight}
+              options={[
+                { value: 'auto', label: 'Auto (自动)' },
+                { value: 'light', label: 'Light (浅色)' },
+                { value: 'dark', label: 'Dark (深色)' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 
       {/* 外部实时遥控调测盘 (External Simulator Dock) */}
       <div
-        className={`p-4 rounded-2xl border flex flex-col gap-4 transition-colors ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
+        className={`p-4 md:p-5 rounded-2xl border flex flex-col gap-4 transition-colors ${
+          isLight
+            ? 'bg-white border-neutral-200/90 shadow-xs text-neutral-900'
+            : 'bg-neutral-900/70 border-neutral-800 text-neutral-100'
         }`}
       >
-        <div className="flex items-center justify-between text-xs pb-2 border-b border-neutral-100 dark:border-neutral-800">
+        <div className="flex items-center justify-between text-xs pb-2 border-b border-neutral-200/70 dark:border-neutral-800">
           <div className="flex items-center gap-2 font-bold">
             <Sliders className="h-4 w-4 text-emerald-500" />
             <span>对局遥控控制台 (Live Match Telemetry Simulator)</span>
           </div>
-          <span className="text-[11px] font-mono text-neutral-400">
+          <span className={`text-[11px] font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
             调节各控制项，实时观测下方 HUD 各平视组件的动画与微交互
           </span>
         </div>
@@ -332,46 +410,58 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
         {/* 控制条第一行：比分、时钟与开球倒计时 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           {/* 比分调节 */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+          <div
+            className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
             <div className="flex flex-col">
               <span className="font-semibold">对局比分</span>
-              <span className="text-[10px] text-neutral-400">蓝队 vs 橙队</span>
+              <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                蓝队 vs 橙队
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setBlueScore((s) => Math.max(0, s - 1))}
-                  className="h-6 w-6 rounded bg-blue-500/20 text-blue-500 font-bold hover:bg-blue-500/30 active:scale-95 cursor-pointer"
+                  className="h-6 w-6 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-500/25 active:scale-95 cursor-pointer border border-blue-500/30"
                 >
                   -
                 </button>
-                <span className="w-5 text-center font-bold text-blue-500">{blueScore}</span>
+                <span className="w-5 text-center font-bold text-blue-600 dark:text-blue-400 font-mono text-sm">
+                  {blueScore}
+                </span>
                 <button
                   type="button"
                   onClick={() => handleTriggerGoal('blue')}
-                  className="h-6 w-6 rounded bg-blue-500 text-white font-bold hover:bg-blue-600 active:scale-95 cursor-pointer"
+                  className="h-6 w-6 rounded bg-blue-600 text-white font-bold hover:bg-blue-700 active:scale-95 cursor-pointer shadow-2xs"
                   title="蓝队得分并触发进球横幅"
                 >
                   +
                 </button>
               </div>
 
-              <span className="text-neutral-400">:</span>
+              <span className={isLight ? 'text-neutral-400 font-bold' : 'text-neutral-600'}>:</span>
 
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setOrangeScore((s) => Math.max(0, s - 1))}
-                  className="h-6 w-6 rounded bg-orange-500/20 text-orange-500 font-bold hover:bg-orange-500/30 active:scale-95 cursor-pointer"
+                  className="h-6 w-6 rounded bg-orange-500/15 text-orange-600 dark:text-orange-400 font-bold hover:bg-orange-500/25 active:scale-95 cursor-pointer border border-orange-500/30"
                 >
                   -
                 </button>
-                <span className="w-5 text-center font-bold text-orange-500">{orangeScore}</span>
+                <span className="w-5 text-center font-bold text-orange-600 dark:text-orange-400 font-mono text-sm">
+                  {orangeScore}
+                </span>
                 <button
                   type="button"
                   onClick={() => handleTriggerGoal('orange')}
-                  className="h-6 w-6 rounded bg-orange-500 text-white font-bold hover:bg-orange-600 active:scale-95 cursor-pointer"
+                  className="h-6 w-6 rounded bg-orange-600 text-white font-bold hover:bg-orange-700 active:scale-95 cursor-pointer shadow-2xs"
                   title="橙队得分并触发进球横幅"
                 >
                   +
@@ -381,10 +471,16 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
           </div>
 
           {/* 时钟控制 */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+          <div
+            className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
             <div className="flex flex-col">
               <span className="font-semibold">比赛时钟</span>
-              <span className="text-[10px] text-neutral-400">
+              <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                 {isOvertime ? '加时赛阶段' : '常规 5 分钟'}
               </span>
             </div>
@@ -394,8 +490,10 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
                 onClick={() => setIsClockRunning((r) => !r)}
                 className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                   isClockRunning
-                    ? 'bg-amber-500 text-white border-amber-500'
-                    : 'bg-neutral-200 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700'
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                    : isLight
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
                 }`}
                 title={isClockRunning ? '暂停时钟' : '继续时钟'}
               >
@@ -408,7 +506,11 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
                   setClockSeconds(300);
                   setIsOvertime(false);
                 }}
-                className="p-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 cursor-pointer"
+                className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                  isLight
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                }`}
                 title="重置为 5:00"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
@@ -420,10 +522,12 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
                   setIsOvertime((o) => !o);
                   setClockSeconds(0);
                 }}
-                className={`px-2 py-1 rounded-lg text-[11px] font-bold border cursor-pointer ${
+                className={`px-2 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
                   isOvertime
-                    ? 'bg-amber-500 text-white border-amber-500'
-                    : 'bg-neutral-100 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700'
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                    : isLight
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
                 }`}
               >
                 加时赛
@@ -432,15 +536,23 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
           </div>
 
           {/* 开球 3-2-1 倒计时 */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+          <div
+            className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
             <div className="flex flex-col">
               <span className="font-semibold">开球倒计时</span>
-              <span className="text-[10px] text-neutral-400">Kickoff 3-2-1-GO! 弹簧动效</span>
+              <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                Kickoff 3-2-1-GO! 弹簧动效
+              </span>
             </div>
             <button
               type="button"
               onClick={handleTriggerKickoff}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold bg-amber-500 text-white hover:bg-amber-600 active:scale-95 transition-all cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold bg-amber-500 text-white hover:bg-amber-600 active:scale-95 transition-all cursor-pointer shadow-2xs"
             >
               <Clock className="h-3.5 w-3.5" />
               <span>启动 3-2-1</span>
@@ -451,7 +563,13 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
         {/* 控制条第二行：推进器、车速与翻滚倒计时 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-1">
           {/* 推进器量与喷气测试 */}
-          <div className="flex flex-col gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+          <div
+            className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
             <div className="flex items-center justify-between">
               <span className="font-semibold flex items-center gap-1">
                 <Zap className="h-3.5 w-3.5 text-amber-500" />
@@ -467,12 +585,16 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
                   className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer select-none ${
                     isSpendingBoost
                       ? 'bg-amber-500 text-white border-amber-500 animate-pulse'
-                      : 'bg-neutral-200 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700'
+                      : isLight
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                      : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
                   }`}
                 >
                   按住喷气
                 </button>
-                <label className="flex items-center gap-1 cursor-pointer select-none text-[10px]">
+                <label className={`flex items-center gap-1 cursor-pointer select-none text-[10px] ${
+                  isLight ? 'text-neutral-600' : 'text-neutral-400'
+                }`}>
                   <input
                     type="checkbox"
                     checked={isUnlimitedBoost}
@@ -490,12 +612,20 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
               value={boostAmount}
               disabled={isUnlimitedBoost}
               onChange={(e) => setBoostAmount(Number(e.target.value))}
-              className="accent-amber-500 cursor-pointer w-full"
+              className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-amber-500 ${
+                isLight ? 'bg-neutral-200' : 'bg-neutral-800'
+              }`}
             />
           </div>
 
           {/* 车速与超音速冲刺 */}
-          <div className="flex flex-col gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+          <div
+            className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
             <div className="flex items-center justify-between">
               <span className="font-semibold flex items-center gap-1">
                 <Gauge className="h-3.5 w-3.5 text-emerald-500" />
@@ -515,19 +645,27 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
               max={2300}
               value={speedUu}
               onChange={(e) => setSpeedUu(Number(e.target.value))}
-              className="accent-emerald-500 cursor-pointer w-full"
+              className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-emerald-500 ${
+                isLight ? 'bg-neutral-200' : 'bg-neutral-800'
+              }`}
             />
           </div>
 
-          {/* 空翻 / 二段跳倒计时调测 (核心新功能) */}
-          <div className="flex flex-col gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+          {/* 空翻 / 二段跳倒计时调测 */}
+          <div
+            className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
             <div className="flex items-center justify-between">
               <span className="font-semibold flex items-center gap-1">
                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                 空翻状态: <strong className="uppercase font-mono">{flipPhase}</strong>
               </span>
-              <span className="text-[10px] font-mono text-neutral-400">
-                1.25s 倒计时机制
+              <span className={`text-[10px] font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                1.25s 机制
               </span>
             </div>
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -542,7 +680,7 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
               <button
                 type="button"
                 onClick={handleFlipReset}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95 cursor-pointer shadow-2xs"
+                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 cursor-pointer shadow-2xs"
                 title="模拟4轮触球或触顶，获得无时限 Flip Reset"
               >
                 触球 (Flip Reset!)
@@ -550,7 +688,11 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
               <button
                 type="button"
                 onClick={handleLand}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 active:scale-95 cursor-pointer"
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border active:scale-95 cursor-pointer transition-colors ${
+                  isLight
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                }`}
                 title="重置回地面"
               >
                 落地 (Grounded)
@@ -560,55 +702,219 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
         </div>
 
         {/* 控制条第三行：对局事件横幅与快捷聊天播报 */}
-        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-neutral-500 font-medium">模拟通告播报:</span>
+        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-neutral-200/70 dark:border-neutral-800 text-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`font-medium ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+              模拟通告播报:
+            </span>
             <button
               type="button"
               onClick={() => handleTriggerAccolade('epic-save')}
-              className="px-2.5 py-1 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+              className={`px-2.5 py-1 rounded-lg border cursor-pointer transition-colors shadow-2xs ${
+                isLight
+                  ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-800'
+                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+              }`}
             >
               🛡️ Epic Save (+75)
             </button>
             <button
               type="button"
               onClick={() => handleTriggerAccolade('shot')}
-              className="px-2.5 py-1 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+              className={`px-2.5 py-1 rounded-lg border cursor-pointer transition-colors shadow-2xs ${
+                isLight
+                  ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-800'
+                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+              }`}
             >
               🎯 Shot on Goal (+20)
             </button>
             <button
               type="button"
               onClick={() => handleTriggerAccolade('demo')}
-              className="px-2.5 py-1 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+              className={`px-2.5 py-1 rounded-lg border cursor-pointer transition-colors shadow-2xs ${
+                isLight
+                  ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-800'
+                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+              }`}
             >
               💥 Demolition!
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-neutral-500 font-medium">发送快捷短语:</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`font-medium ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+              发送快捷短语:
+            </span>
             <button
               type="button"
               onClick={() => handleSendChat('Nice shot!')}
-              className="px-2 py-0.5 rounded text-[11px] bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 cursor-pointer"
+              className={`px-2.5 py-1 rounded-lg border cursor-pointer transition-colors text-[11px] font-mono shadow-2xs ${
+                isLight
+                  ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-800'
+                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+              }`}
             >
               "Nice shot!"
             </button>
             <button
               type="button"
               onClick={() => handleSendChat('Great pass!')}
-              className="px-2 py-0.5 rounded text-[11px] bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 cursor-pointer"
+              className={`px-2.5 py-1 rounded-lg border cursor-pointer transition-colors text-[11px] font-mono shadow-2xs ${
+                isLight
+                  ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-800'
+                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+              }`}
             >
               "Great pass!"
             </button>
             <button
               type="button"
               onClick={() => handleSendChat('What a save!')}
-              className="px-2 py-0.5 rounded text-[11px] bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 cursor-pointer"
+              className={`px-2.5 py-1 rounded-lg border cursor-pointer transition-colors text-[11px] font-mono shadow-2xs ${
+                isLight
+                  ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-200 text-neutral-800'
+                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+              }`}
             >
               "What a save!"
             </button>
+          </div>
+        </div>
+
+        {/* 控制条第四行：场景背景亮度调节与网络诊断测试 (NEW) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1 border-t border-neutral-200/70 dark:border-neutral-800">
+          {/* 场景视口背景亮度滑动器 */}
+          <div
+            className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-semibold flex items-center gap-1.5">
+                <Sun className="h-3.5 w-3.5 text-amber-500" />
+                <span>场景背景亮度: {backdropBrightness}%</span>
+              </span>
+              <div className="flex items-center gap-1.5 text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => setBackdropBrightness(100)}
+                  className={`px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                    backdropBrightness === 100
+                      ? 'bg-amber-500 text-white border-amber-500 font-bold shadow-2xs'
+                      : isLight
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                      : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                  }`}
+                >
+                  100% 全亮
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBackdropBrightness(70)}
+                  className={`px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                    backdropBrightness === 70
+                      ? 'bg-amber-500 text-white border-amber-500 font-bold shadow-2xs'
+                      : isLight
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                      : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                  }`}
+                >
+                  70% 中度
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBackdropBrightness(40)}
+                  className={`px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                    backdropBrightness === 40
+                      ? 'bg-amber-500 text-white border-amber-500 font-bold shadow-2xs'
+                      : isLight
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                      : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                  }`}
+                >
+                  40% 暗调
+                </button>
+              </div>
+            </div>
+            <input
+              type="range"
+              min={20}
+              max={100}
+              value={backdropBrightness}
+              onChange={(e) => setBackdropBrightness(Number(e.target.value))}
+              className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-amber-500 ${
+                isLight ? 'bg-neutral-200' : 'bg-neutral-800'
+              }`}
+            />
+          </div>
+
+          {/* 右上角网络遥测调测 (Network Diagnostics Telemetry) */}
+          <div
+            className={`flex flex-col gap-2 p-3 rounded-xl border transition-colors ${
+              isLight
+                ? 'bg-neutral-50/80 border-neutral-200/90 shadow-2xs'
+                : 'bg-neutral-900/50 border-neutral-800'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-semibold flex items-center gap-1.5">
+                <Wifi className="h-3.5 w-3.5 text-emerald-500" />
+                <span>右上角 HUD 诊断遥测 (Network Telemetry)</span>
+              </span>
+              <span className={`text-[10px] font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                {telemetry.pingMs}ms · {telemetry.fps} FPS
+              </span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() =>
+                  setTelemetry({ pingMs: 18, fps: 120, subTickJitterMs: 0.1, packetLossPct: 0 })
+                }
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                  telemetry.pingMs === 18 && telemetry.packetLossPct === 0
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                    : isLight
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                }`}
+              >
+                ✓ 良好网络 (18ms / 120FPS)
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setTelemetry({ pingMs: 95, fps: 120, subTickJitterMs: 2.4, packetLossPct: 0 })
+                }
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                  telemetry.pingMs === 95
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                    : isLight
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                }`}
+              >
+                ⚠️ 高延迟 (95ms)
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setTelemetry({ pingMs: 145, fps: 58, subTickJitterMs: 6.8, packetLossPct: 4 })
+                }
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                  telemetry.packetLossPct === 4
+                    ? 'bg-red-500 text-white border-red-500 shadow-2xs'
+                    : isLight
+                    ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-700'
+                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                }`}
+              >
+                🚨 丢包波动 (Packet Loss)
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -616,23 +922,48 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
       {/* 2. 真实对局视口舞台 (Viewport Stage with 3D Stadium Backdrop) */}
       <div
         id="hud-preview-stage"
-        className="relative w-full aspect-[18/9] max-h-[640px] rounded-3xl overflow-hidden border border-neutral-300 dark:border-neutral-800 shadow-2xl select-none"
-        style={{
-          background: isLight
-            ? 'radial-gradient(ellipse at 50% 120%, #1a365d 0%, #0f172a 60%, #020617 100%)'
-            : 'radial-gradient(ellipse at 50% 120%, #0c1c38 0%, #030712 60%, #000000 100%)',
-        }}
+        className={`relative w-full aspect-[18/9] max-h-[640px] rounded-3xl overflow-hidden border shadow-2xl select-none transition-colors ${
+          isLight ? 'border-neutral-300/90 shadow-neutral-400/20' : 'border-neutral-800 shadow-black'
+        }`}
       >
+        {/* Dynamic Stadium Sky & Ground Backdrop (brightness filter applied) */}
+        <div
+          className="absolute inset-0 transition-all duration-300"
+          style={{
+            background: getArenaBackground(),
+            filter: `brightness(${backdropBrightness / 100})`,
+          }}
+        />
+
         {/* Simulated 3D Arena Ground Grid & Goal Arch Lighting */}
-        <div className="absolute inset-0 pointer-events-none opacity-40">
+        <div
+          className={`absolute inset-0 pointer-events-none transition-opacity ${
+            arenaBackdrop === 'daylight' ? 'opacity-60' : 'opacity-40'
+          }`}
+        >
           {/* Pitch center ring & boundary lines */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-t-full border-t-2 border-dashed border-cyan-400/40" />
-          <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-cyan-950/20 via-transparent to-transparent" />
+          <div
+            className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-t-full border-t-2 border-dashed transition-colors ${
+              arenaBackdrop === 'daylight'
+                ? 'border-cyan-700/60'
+                : 'border-cyan-400/40'
+            }`}
+          />
+          <div
+            className={`absolute bottom-0 left-0 right-0 h-1/2 transition-colors ${
+              arenaBackdrop === 'daylight'
+                ? 'bg-gradient-to-t from-sky-400/20 via-transparent to-transparent'
+                : 'bg-gradient-to-t from-cyan-950/20 via-transparent to-transparent'
+            }`}
+          />
           {/* Pitch perspective grid */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 transition-all"
             style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+              backgroundImage:
+                arenaBackdrop === 'daylight'
+                  ? 'linear-gradient(rgba(15,23,42,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.12) 1px, transparent 1px)'
+                  : 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
               backgroundSize: '40px 40px',
               perspective: '600px',
               transform: 'rotateX(60deg) translateY(20%)',
@@ -644,13 +975,31 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="relative flex flex-col items-center">
             {/* Pulsing Target Ball */}
-            <div className="h-10 w-10 rounded-full border-2 border-amber-400/80 bg-amber-500/20 shadow-[0_0_24px_rgba(245,158,11,0.5)] flex items-center justify-center animate-pulse">
-              <span className="text-[9px] font-mono font-bold text-amber-300">BALL</span>
+            <div
+              className={`h-10 w-10 rounded-full border-2 flex items-center justify-center animate-pulse transition-colors ${
+                arenaBackdrop === 'daylight'
+                  ? 'border-amber-600 bg-amber-400/40 text-amber-950 shadow-[0_0_24px_rgba(245,158,11,0.5)]'
+                  : 'border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-[0_0_24px_rgba(245,158,11,0.5)]'
+              }`}
+            >
+              <span className="text-[9px] font-mono font-black">BALL</span>
             </div>
             {/* Trajectory Guide Beam */}
-            <div className="w-0.5 h-20 bg-gradient-to-b from-amber-400/60 to-transparent my-1" />
+            <div
+              className={`w-0.5 h-20 my-1 transition-colors ${
+                arenaBackdrop === 'daylight'
+                  ? 'bg-gradient-to-b from-amber-600/70 to-transparent'
+                  : 'bg-gradient-to-b from-amber-400/60 to-transparent'
+              }`}
+            />
             {/* Vehicle Octane Silhouette Box */}
-            <div className="px-4 py-1.5 rounded-lg border border-white/30 bg-black/50 text-white/80 font-mono text-[10px] tracking-wider shadow-lg">
+            <div
+              className={`px-4 py-1.5 rounded-lg border font-mono text-[10px] tracking-wider shadow-lg transition-colors ${
+                arenaBackdrop === 'daylight'
+                  ? 'border-neutral-400/80 bg-white/85 text-neutral-900 shadow-md'
+                  : 'border-white/30 bg-black/50 text-white/80'
+              }`}
+            >
               OCTANE VEHICLE [YOU]
             </div>
           </div>
@@ -688,16 +1037,19 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
           accoladeEvent={activeAccolade}
           countdownNumber={countdown}
           quickChatMessages={chatMessages}
+          telemetry={telemetry}
           boostVariant={boostVariant}
-          isLight={false} // Match HUD is high-contrast dark overlay inside game
+          isLight={effectiveHudIsLight}
         />
       </div>
 
       {/* 3. 独立原子组件参考谱与代码直接调用说明 (Component Catalog) */}
       <div className="flex flex-col gap-4 mt-4">
         <div className="flex items-center gap-2 pb-2 border-b border-neutral-200 dark:border-neutral-800">
-          <h2 className="text-lg font-bold tracking-tight">HUD 组件独立参考谱 (Recipe Registry)</h2>
-          <Badge variant="primary" size="sm">
+          <h2 className="text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+            HUD 组件独立参考谱 (Recipe Registry)
+          </h2>
+          <Badge variant="primary" size="sm" isLight={isLight}>
             Zero Coupling Primitives
           </Badge>
         </div>
@@ -707,147 +1059,187 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
           {/* Card 1: Scoreboard */}
-          <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${
-            isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
-          }`}>
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs">MatchScoreboardHUD</span>
-                <Badge size="sm" variant="neutral">Top Anchor</Badge>
+                <Badge size="sm" variant="neutral" isLight={isLight}>Top Anchor</Badge>
               </div>
-              <span className="text-[11px] text-neutral-400">
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                 双队比分板与对局时钟，加时赛状态与开球 3-2-1 整合。
               </span>
             </div>
-            <div className="flex items-center justify-center p-4 rounded-xl bg-neutral-950/70 border border-neutral-800 overflow-x-auto">
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border overflow-x-auto transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
               <MatchScoreboardHUD
                 blueScore={blueScore}
                 orangeScore={orangeScore}
                 clockSeconds={clockSeconds}
                 isOvertime={isOvertime}
                 countdown={countdown}
+                isLight={isLight}
               />
             </div>
             <CodeBlock
               language="tsx"
-              code={`<MatchScoreboardHUD\n  blueScore={${blueScore}}\n  orangeScore={${orangeScore}}\n  clockSeconds={${clockSeconds}}\n  isOvertime={${isOvertime}}\n/>`}
+              code={`<MatchScoreboardHUD\n  blueScore={${blueScore}}\n  orangeScore={${orangeScore}}\n  clockSeconds={${clockSeconds}}\n  isOvertime={${isOvertime}}\n  isLight={${isLight}}\n/>`}
             />
           </div>
 
           {/* Card 2: Boost Gauge */}
-          <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${
-            isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
-          }`}>
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs">BoostGaugeHUD</span>
-                <Badge size="sm" variant="neutral">Bottom-Right</Badge>
+                <Badge size="sm" variant="neutral" isLight={isLight}>Bottom-Right</Badge>
               </div>
-              <span className="text-[11px] text-neutral-400">
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                 推进器量规表，支持现代化 Arc Ring 弧环与 Linear 刻度规条。
               </span>
             </div>
-            <div className="flex items-center justify-center p-4 rounded-xl bg-neutral-950/70 border border-neutral-800">
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
               <BoostGaugeHUD
                 amount={boostAmount}
                 isSpending={isSpendingBoost}
                 isUnlimited={isUnlimitedBoost}
                 variant={boostVariant}
+                isLight={isLight}
               />
             </div>
             <CodeBlock
               language="tsx"
-              code={`<BoostGaugeHUD\n  amount={${boostAmount}}\n  isSpending={${isSpendingBoost}}\n  isUnlimited={${isUnlimitedBoost}}\n  variant="${boostVariant}"\n/>`}
+              code={`<BoostGaugeHUD\n  amount={${boostAmount}}\n  isSpending={${isSpendingBoost}}\n  isUnlimited={${isUnlimitedBoost}}\n  variant="${boostVariant}"\n  isLight={${isLight}}\n/>`}
             />
           </div>
 
           {/* Card 3: Flip / Dodge Timer */}
-          <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${
-            isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
-          }`}>
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs">FlipTimerHUD</span>
-                <Badge size="sm" variant="success">New Mechanic</Badge>
+                <Badge size="sm" variant="success" isLight={isLight}>New Mechanic</Badge>
               </div>
-              <span className="text-[11px] text-neutral-400">
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                 起跳后 1.25 秒二段跳倒计时与 4 轮触球 Flip Reset 刷新提示。
               </span>
             </div>
-            <div className="flex items-center justify-center p-4 rounded-xl bg-neutral-950/70 border border-neutral-800">
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
               <FlipTimerHUD
                 phase={flipPhase}
                 remainingMs={flipRemainingMs}
                 resetCount={flipResetCount}
+                isLight={isLight}
               />
             </div>
             <CodeBlock
               language="tsx"
-              code={`<FlipTimerHUD\n  phase="${flipPhase}"\n  remainingMs={${flipRemainingMs}}\n  resetCount={${flipResetCount}}\n/>`}
+              code={`<FlipTimerHUD\n  phase="${flipPhase}"\n  remainingMs={${flipRemainingMs}}\n  resetCount={${flipResetCount}}\n  isLight={${isLight}}\n/>`}
             />
           </div>
 
           {/* Card 4: Speedometer */}
-          <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${
-            isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
-          }`}>
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs">SpeedometerHUD</span>
-                <Badge size="sm" variant="neutral">Bottom-Center</Badge>
+                <Badge size="sm" variant="neutral" isLight={isLight}>Bottom-Center</Badge>
               </div>
-              <span className="text-[11px] text-neutral-400">
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                 0-2300 非线性车速表，2200 刻度线触发超音速紫光拖尾。
               </span>
             </div>
-            <div className="flex items-center justify-center p-4 rounded-xl bg-neutral-950/70 border border-neutral-800">
-              <SpeedometerHUD speed={speedUu} />
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
+              <SpeedometerHUD speed={speedUu} isLight={isLight} />
             </div>
             <CodeBlock
               language="tsx"
-              code={`<SpeedometerHUD\n  speed={${Math.round(speedUu)}}\n  showUnits="both"\n/>`}
+              code={`<SpeedometerHUD\n  speed={${Math.round(speedUu)}}\n  showUnits="both"\n  isLight={${isLight}}\n/>`}
             />
           </div>
 
           {/* Card 5: Ball Cam Indicator */}
-          <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${
-            isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
-          }`}>
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs">BallCamIndicatorHUD</span>
-                <Badge size="sm" variant="neutral">Bottom-Left</Badge>
+                <Badge size="sm" variant="neutral" isLight={isLight}>Bottom-Left</Badge>
               </div>
-              <span className="text-[11px] text-neutral-400">
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                 球相机/车头相机视角切换指示胶囊，带按键提示与触觉回弹。
               </span>
             </div>
-            <div className="flex items-center justify-center p-4 rounded-xl bg-neutral-950/70 border border-neutral-800">
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
               <BallCamIndicatorHUD
                 mode={cameraMode}
                 onToggle={() => setCameraMode((m) => (m === 'ball' ? 'car' : 'ball'))}
+                isLight={isLight}
               />
             </div>
             <CodeBlock
               language="tsx"
-              code={`<BallCamIndicatorHUD\n  mode="${cameraMode}"\n  shortcut="SPACE"\n  onToggle={toggleCam}\n/>`}
+              code={`<BallCamIndicatorHUD\n  mode="${cameraMode}"\n  shortcut="SPACE"\n  isLight={${isLight}}\n  onToggle={toggleCam}\n/>`}
             />
           </div>
 
           {/* Card 6: Accolade Banner */}
-          <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${
-            isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
-          }`}>
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs">MatchAccoladeBannerHUD</span>
-                <Badge size="sm" variant="neutral">Center Overlay</Badge>
+                <Badge size="sm" variant="neutral" isLight={isLight}>Center Overlay</Badge>
               </div>
-              <span className="text-[11px] text-neutral-400">
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                 进球高光庆祝横幅、开球倒计时与扑救/爆燃得分徽章。
               </span>
             </div>
-            <div className="flex items-center justify-center p-4 rounded-xl bg-neutral-950/70 border border-neutral-800">
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
               <MatchAccoladeBannerHUD
                 currentAccolade={{
                   id: 'demo',
@@ -857,11 +1249,77 @@ export const HudLayerPreviewPage: React.FC<HudLayerPreviewPageProps> = ({
                   speedKmh: 112,
                   team: 'blue',
                 }}
+                isLight={isLight}
               />
             </div>
             <CodeBlock
               language="tsx"
-              code={`<MatchAccoladeBannerHUD\n  currentAccolade={event}\n  countdownNumber={count}\n/>`}
+              code={`<MatchAccoladeBannerHUD\n  currentAccolade={event}\n  countdownNumber={count}\n  isLight={${isLight}}\n/>`}
+            />
+          </div>
+
+          {/* Card 7: Network Diagnostics (Top-Right Telemetry) */}
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs">NetworkDiagnosticsHUD</span>
+                <Badge size="sm" variant="success" isLight={isLight}>Top-Right Anchor</Badge>
+              </div>
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                对局右上角网络与物理帧率遥测 (FPS、Ping 延迟、微卡顿 Jitter 与丢包警报)。
+              </span>
+            </div>
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
+              <NetworkDiagnosticsHUD
+                pingMs={telemetry.pingMs}
+                fps={telemetry.fps}
+                subTickJitterMs={telemetry.subTickJitterMs}
+                packetLossPct={telemetry.packetLossPct}
+                isLight={isLight}
+              />
+            </div>
+            <CodeBlock
+              language="tsx"
+              code={`<NetworkDiagnosticsHUD\n  fps={${telemetry.fps}}\n  pingMs={${telemetry.pingMs}}\n  subTickJitterMs={${telemetry.subTickJitterMs}}\n  isLight={${isLight}}\n/>`}
+            />
+          </div>
+
+          {/* Card 8: Quick Chat Feed */}
+          <div
+            className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs text-neutral-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+            }`}
+          >
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs">QuickChatFeedHUD</span>
+                <Badge size="sm" variant="neutral" isLight={isLight}>Top-Left Anchor</Badge>
+              </div>
+              <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                左上角快捷聊天信息流，支持蓝队/橙队阵营颜色与平滑淡出动效。
+              </span>
+            </div>
+            <div
+              className={`flex items-center justify-center p-4 rounded-xl border transition-colors ${
+                isLight ? 'bg-neutral-100/80 border-neutral-200/90 shadow-inner' : 'bg-neutral-950/70 border-neutral-800'
+              }`}
+            >
+              <QuickChatFeedHUD
+                messages={chatMessages.slice(-2)}
+                isLight={isLight}
+              />
+            </div>
+            <CodeBlock
+              language="tsx"
+              code={`<QuickChatFeedHUD\n  messages={chatMessages}\n  isLight={${isLight}}\n/>`}
             />
           </div>
         </div>

@@ -54,3 +54,10 @@ export interface QuickChatMessage {
   team: MatchTeam;
   timestamp: number;
 }
+
+export interface NetworkTelemetry {
+  pingMs: number;
+  fps: number;
+  subTickJitterMs: number;
+  packetLossPct?: number;
+}

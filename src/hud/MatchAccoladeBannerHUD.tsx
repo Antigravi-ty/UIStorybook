@@ -93,12 +93,18 @@ export const MatchAccoladeBannerHUD: React.FC<MatchAccoladeBannerHUDProps> = ({
               </div>
             ) : (
               /* Crisp Accolade Card (Epic Save, Shot, Demo) */
-              <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl border backdrop-blur-md shadow-xl bg-neutral-950/85 border-white/20 text-white">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+              <div
+                className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl border backdrop-blur-md shadow-xl transition-colors ${
+                  isLight
+                    ? 'bg-white/90 border-neutral-300/80 text-neutral-900 shadow-neutral-400/20'
+                    : 'bg-neutral-950/85 border-white/20 text-white shadow-black/80'
+                }`}
+              >
+                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-500 dark:text-amber-400">
                   {currentAccolade.type === 'epic-save' || currentAccolade.type === 'save' ? (
                     <Shield className="h-5 w-5" />
                   ) : currentAccolade.type === 'demo' ? (
-                    <Skull className="h-5 w-5 text-red-400" />
+                    <Skull className="h-5 w-5 text-red-500" />
                   ) : (
                     <Target className="h-5 w-5" />
                   )}
@@ -106,17 +112,29 @@ export const MatchAccoladeBannerHUD: React.FC<MatchAccoladeBannerHUDProps> = ({
 
                 <div className="flex flex-col items-start leading-tight">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-black font-mono tracking-wider uppercase">
+                    <span
+                      className={`text-sm font-black font-mono tracking-wider uppercase ${
+                        isLight ? 'text-neutral-900' : 'text-white'
+                      }`}
+                    >
                       {currentAccolade.title}
                     </span>
                     {currentAccolade.points && (
-                      <span className="text-xs font-mono font-bold text-amber-400">
+                      <span
+                        className={`text-xs font-mono font-bold ${
+                          isLight ? 'text-amber-600' : 'text-amber-400'
+                        }`}
+                      >
                         +{currentAccolade.points}
                       </span>
                     )}
                   </div>
                   {currentAccolade.subtitle && (
-                    <span className="text-[10px] opacity-70">
+                    <span
+                      className={`text-[10px] ${
+                        isLight ? 'text-neutral-500' : 'opacity-70'
+                      }`}
+                    >
                       {currentAccolade.subtitle}
                     </span>
                   )}
