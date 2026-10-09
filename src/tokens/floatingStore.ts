@@ -218,6 +218,7 @@ export const floatingStore = {
       isStackDismissed: true,
       focusedWindowId: null,
       activeFlight: null,
+      batchMinimizeSignal: 0,
     };
     notify();
   },

@@ -86,6 +86,13 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   const [internalTab, setInternalTab] = useState<SettingsTabId>(initialTab as SettingsTabId);
   const currentTab = (controlledTab as SettingsTabId) ?? internalTab;
 
+  // Synchronize internal tab when initialTab prop updates externally
+  React.useEffect(() => {
+    if (initialTab) {
+      setInternalTab(initialTab as SettingsTabId);
+    }
+  }, [initialTab]);
+
   // Hover description state for dynamic footer
   const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
 
@@ -163,7 +170,7 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
       />
 
       {/* Underline Tabs: Horizontal scrolling enabled for extensive tabs */}
-      <div className="px-6 pt-2 overflow-x-auto no-scrollbar" data-ui-element="tabs-wrapper">
+      <div className="px-6 pt-2 overflow-x-auto no-scrollbar shrink-0" data-ui-element="tabs-wrapper">
         <UnderlineTabs
           items={tabs}
           activeId={currentTab}

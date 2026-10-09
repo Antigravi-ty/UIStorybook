@@ -15,11 +15,14 @@ import {
   Play,
   RotateCcw,
   Sparkles,
-  ChevronLeft
+  ChevronLeft,
+  Sliders,
+  Keyboard
 } from 'lucide-react';
 import { ContainerTransitionMode } from '../../navigation/transitions';
 import { Badge } from '../../primitives/Badge';
 import { KeycapBadge } from '../../primitives/KeycapBadge';
+import { UnderlineTabs, TabItem } from '../../primitives/UnderlineTabs';
 import { MorphContainerContext } from '../../tokens/morphContext';
 import { 
   Layer1MainMenuRecipe,
@@ -72,6 +75,18 @@ export const MENU_ROUTE_CONFIG: Record<ActiveMenuRoute, LayerRouteConfig> = {
   'audio-eq': { id: 'audio-eq', label: 'Acoustics & EQ', layer: 3, width: 480, parentRoute: 'settings' },
   'trajectory': { id: 'trajectory', label: 'Ball Trajectory Predictor', layer: 3, width: 480, parentRoute: 'additional-preview' },
 };
+
+export const SETTINGS_QUICK_TABS: TabItem[] = [
+  { id: 'gameplay', label: 'Gameplay' },
+  { id: 'camera', label: 'Camera' },
+  { id: 'controls', label: 'Controls' },
+  { id: 'interface', label: 'Interface' },
+  { id: 'video', label: 'Video' },
+  { id: 'audio', label: 'Audio' },
+  { id: 'chat', label: 'Chat' },
+  { id: 'extra', label: 'Extra' },
+  { id: 'advanced', label: 'Advanced' },
+];
 
 /**
  * 校验指定三级面板在当前路由上下文下是否允许切换
@@ -600,6 +615,31 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
               <span className="font-mono text-[10px] opacity-75">680px</span>
             </button>
           </div>
+
+          {/* 当处于 Settings 时，展开显示 settings 的 UnderlineTabs 快速切换子栏 */}
+          {currentRoute === 'settings' && (
+            <div className="w-full pt-2 flex flex-col gap-1.5 border-t border-neutral-100 dark:border-neutral-800/60 mt-1">
+              <div className="flex items-center justify-between text-[11px] text-neutral-500 dark:text-neutral-400 font-mono">
+                <span>Settings 选项卡联动 (UnderlineTabs):</span>
+                <span className="text-amber-500 font-semibold">
+                  当前: {settingsTab.toUpperCase()}
+                </span>
+              </div>
+              <div className="overflow-x-auto no-scrollbar">
+                <UnderlineTabs
+                  items={SETTINGS_QUICK_TABS}
+                  activeId={settingsTab}
+                  onChange={(tabId) => {
+                    setSettingsTab(tabId);
+                    showToast(`已切换至 Settings -> ${tabId}`);
+                  }}
+                  isLight={isLight}
+                  size="sm"
+                  fullWidth={false}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Layer 3 选项：三级独立面板 */}
@@ -994,6 +1034,8 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                       isLight={isLight}
                       onBack={() => handleSelectRoute('main-menu')}
                       initialTab={settingsTab}
+                      activeTab={settingsTab}
+                      onTabChange={(tab) => setSettingsTab(tab)}
                       backgroundRenderPaused={bgRenderPaused}
                       onToggleBackgroundRender={setBgRenderPaused}
                       onNavigateAudioDetail={() => {
