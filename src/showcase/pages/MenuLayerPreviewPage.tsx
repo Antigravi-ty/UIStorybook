@@ -109,6 +109,8 @@ interface FlyingGhost {
   startH: number;
   destX: number;
   destY: number;
+  title?: string;
+  category?: string;
 }
 
 export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
@@ -308,6 +310,8 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
       startH,
       destX,
       destY,
+      title: preset.title,
+      category: preset.category,
     });
 
     setTimeout(() => {
@@ -335,8 +339,8 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   const dockW = 88;
   const dockH = 38;
   const expandedW = routeWidthMap[currentRoute] || 480;
-  // 针对根菜单采用紧凑高度 440px，二级与三级统一 540px
-  const expandedH = currentRoute === 'main-menu' ? 440 : 540;
+  // 针对根菜单拉长高度至 510px（容纳新增的 Additional Previews 选项卡与内衬，避免内容挤压），二级与三级统一 540px
+  const expandedH = currentRoute === 'main-menu' ? 510 : 540;
 
   const xExpanded = Math.max(16, Math.round((stageSize.width - expandedW) / 2));
   const yExpanded = Math.max(16, Math.round((stageSize.height - expandedH) / 2));
@@ -811,9 +815,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           </div>
         </div>
 
-        {/* 二级/三级菜单背景变暗遮罩 (Layer 0 与 Dock 状态完全透明) */}
+        {/* 二级/三级菜单背景变暗遮罩 (Layer 0 与 Dock 状态完全透明，处于底层 z-10) */}
         <div
-          className="absolute inset-0 pointer-events-none backdrop-blur-none"
+          className="absolute inset-0 pointer-events-none backdrop-blur-none z-10"
           style={{
             backgroundColor:
               currentRoute === 'layer-0' || isDockState || currentRoute === 'main-menu'
@@ -825,6 +829,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
 
         {/* 
           Spawning Ghost Container (点击 Floating Window '+' 时的飞入右上角 Stack 动效)
+          层级设为 z-40，严格位于半透明黑色遮罩 (z-10) 与中央菜单 (z-30) 之上，飞向最高层级的 Stack Icon (z-50)
         */}
         <AnimatePresence>
           {flyingGhost && (
@@ -836,7 +841,8 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 width: flyingGhost.startW,
                 height: flyingGhost.startH,
                 borderRadius: 8,
-                opacity: 0.9,
+                opacity: 1,
+                scale: 1,
               }}
               animate={{
                 x: flyingGhost.destX,
@@ -844,7 +850,8 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 width: 40,
                 height: 40,
                 borderRadius: 12,
-                opacity: 0,
+                opacity: [1, 1, 0.9, 0],
+                scale: [1, 1.05, 0.95, 0.85],
               }}
               transition={{
                 duration: 0.28,
@@ -855,12 +862,14 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 top: 0,
                 left: 0,
               }}
-              className={`z-50 pointer-events-none border backdrop-blur-md ${
+              className={`z-40 pointer-events-none border backdrop-blur-md overflow-hidden select-none flex items-center justify-center ${
                 isLight
-                  ? 'bg-neutral-900 border-neutral-800 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_0_16px_rgba(0,0,0,0.2)]'
-                  : 'bg-neutral-100 border-neutral-300 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_16px_rgba(255,255,255,0.1)]'
+                  ? 'bg-white/95 border-neutral-300 text-neutral-900 shadow-[0_4px_24px_rgba(0,0,0,0.18)]'
+                  : 'bg-neutral-850/95 border-neutral-700 text-neutral-100 shadow-[0_4px_24px_rgba(0,0,0,0.7)]'
               }`}
-            />
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            </motion.div>
           )}
         </AnimatePresence>
 

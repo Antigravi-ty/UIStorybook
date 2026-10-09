@@ -116,7 +116,7 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
       <div
         className={`${
           absolute ? 'absolute top-4 right-4' : 'fixed top-4 right-6'
-        } z-40 select-none flex flex-col items-end ${className}`}
+        } z-50 select-none flex flex-col items-end ${className}`}
       >
         {/* 1. Main Stack Square Button (Neutral Monochrome) */}
         <div

@@ -196,7 +196,8 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
                 width: flyingGhost.startW,
                 height: flyingGhost.startH,
                 borderRadius: 8,
-                opacity: 0.9,
+                opacity: 1,
+                scale: 1,
               }}
               animate={{
                 x: flyingGhost.destX,
@@ -204,7 +205,8 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
                 width: 40,
                 height: 40,
                 borderRadius: 12,
-                opacity: 0,
+                opacity: [1, 1, 0.9, 0],
+                scale: [1, 1.05, 0.95, 0.85],
               }}
               transition={{
                 duration: 0.28,
@@ -215,12 +217,14 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
                 top: 0,
                 left: 0,
               }}
-              className={`z-50 pointer-events-none border backdrop-blur-md ${
+              className={`z-40 pointer-events-none border backdrop-blur-md overflow-hidden select-none flex items-center justify-center ${
                 isLight
-                  ? 'bg-neutral-900 border-neutral-800 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_0_16px_rgba(0,0,0,0.2)]'
-                  : 'bg-neutral-100 border-neutral-300 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_16px_rgba(255,255,255,0.1)]'
+                  ? 'bg-white/95 border-neutral-300 text-neutral-900 shadow-[0_4px_24px_rgba(0,0,0,0.18)]'
+                  : 'bg-neutral-850/95 border-neutral-700 text-neutral-100 shadow-[0_4px_24px_rgba(0,0,0,0.7)]'
               }`}
-            />
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            </motion.div>
           )}
         </AnimatePresence>
 

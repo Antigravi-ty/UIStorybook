@@ -29,7 +29,7 @@ let state: FloatingWindowState = {
   windows: [],
   windowOrder: [],
   isStackTrayOpen: false,
-  isStackDismissed: false,
+  isStackDismissed: true,
   focusedWindowId: null,
 };
 
