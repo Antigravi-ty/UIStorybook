@@ -15,64 +15,13 @@ import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
 import { CodeBlock } from '../CodeBlock';
 import { useFloatingStore } from '../../tokens/floatingStore';
+import { PRESET_WINDOWS, type PresetConfig } from '../../tokens/floatingPresets';
 import { FloatingStackIcon } from '../../navigation/FloatingStackIcon';
 import { FloatingWindowManager } from '../../navigation/FloatingWindowManager';
 
 export interface FloatingWindowsSimulationPageProps {
   isLight?: boolean;
 }
-
-/**
- * 4 Preset Window Definitions:
- * 1. Very short title: '1' (Fixed size)
- * 2. Very short title (resizable): '1 (Resizable)'
- * 3. Very long title: 'Diagnostic Telemetry & Real-Time Engine Spectrogram Stream' (Fixed size)
- * 4. Very long title (resizable): 'Advanced Aerodynamic Downforce Vector Matrix Calibration (Resizable)'
- * English only as requested.
- */
-interface PresetConfig {
-  id: string;
-  title: string;
-  category: string;
-  width: number;
-  height: number;
-  resizable: boolean;
-}
-
-const PRESET_WINDOWS: PresetConfig[] = [
-  {
-    id: 'simd-short',
-    title: '1',
-    category: 'Kernel',
-    width: 320,
-    height: 220,
-    resizable: false,
-  },
-  {
-    id: 'pid-short-resizable',
-    title: '1 (Resizable)',
-    category: 'Diagnostic',
-    width: 360,
-    height: 240,
-    resizable: true,
-  },
-  {
-    id: 'telemetry-long',
-    title: 'Diagnostic Telemetry & Real-Time Engine Spectrogram Stream',
-    category: 'Hitbox',
-    width: 480,
-    height: 280,
-    resizable: false,
-  },
-  {
-    id: 'aero-long-resizable',
-    title: 'Advanced Aerodynamic Downforce Vector Matrix Calibration (Resizable)',
-    category: 'Diagnostic',
-    width: 500,
-    height: 320,
-    resizable: true,
-  },
-];
 
 interface FlyingGhost {
   id: string;

@@ -105,27 +105,39 @@
 
 ### 4.1 层级划分与实时预览引擎 (Menu Layer 是唯一产品标准参考)
 - **活跃菜单链 (统一作为所有页面与模态弹窗的唯一实现基准)**:
-  - **Layer 0: 对局实时层 (隐匿菜单 / In-Game Arena Active)**：
-    - **定义与交互规范**：无任何菜单遮挡，对局 3D 背景 100% 渲染且后台不暂停 (`backgroundRenderPaused = false`)。在 Layer 1 主暂停菜单点击「Resume Match」或按下 `ESC` 即瞬时退回 Layer 0；在 Layer 0 点击画面任意区域或按下 `ESC` 即瞬时呼出 Layer 1。
-    - **动效规范**：**零动画瞬时展现与隐匿**，杜绝残影与退场延迟。
-  - **Layer 1: 根级主暂停菜单**：`Layer1MainMenuRecipe` (`420px`)：恢复对局 (退回 Layer 0)、车库装配、游戏设置、专项预览 (Additional Preview)、按键映射、离开对局。
+  - **Layer 0: 零级实时对局 (Active Match / No Menu)** (`0px`):
+    - **定义**：对局进行中无任何菜单显示的纯净视图，背景画面 100% 恢复渲染，无变暗遮罩与黑屏。
+    - **流转行为**：在 Layer 1 主菜单点击“Resume Match”或按键盘 `ESC` 键平滑退回到 Layer 0。
+    - **唤起行为**：在 Layer 0 状态下按下 `ESC` 键或点击屏幕下方快捷药丸，即时呼出 Layer 1 主菜单。
+  - **Layer 1: 根级主暂停菜单**：`Layer1MainMenuRecipe` (`420px`)：恢复对局 (Resume Match 退回 Layer 0)、车库装配、游戏设置、Additional Previews 预览沙盒、离开对局。
     - **启动动效规范**：**零动画瞬时展现 (Instant Appear)**，关闭亦为瞬时消失，杜绝入场/退场动画延迟。
     - **视觉突出规范**：容器四周黑色外阴影 (`shadow-[0_0_50px_rgba(0,0,0,0.85)]`)，在千奇百怪的复杂或动态背景下均能清晰隔离并突出显示，边框保持统一精致轻量，杜绝厚重黑边。
     - **背景规范**：**绝对无模糊 (No Blur)**，一级根菜单背景保持透明不额外变暗 (`bg-transparent`)，杜绝 120Hz 动态背景下的 GPU 合成开销。
   - **Layer 2: 专项功能二级菜单**：
     - `Layer2GarageRecipe` (车库改装与涂装, `680px`)
     - `Layer2SettingsRecipe` (音画系统设置, `680px`，含 Video/Audio/Camera/Gameplay 分标签与进入三级音频均衡器入口)
-    - `Layer2AdditionalPreviewRecipe` (专项预览中枢, `680px`，含 Live Preview 实时停靠与 4 款 Floating Window 预设入栈)
+    - `Layer2PlayRecipe` (对局玩法与单机网格模式选择, `680px`)
+    - `Layer2AdditionalPreviewRecipe` (实时预览与悬浮窗沙盒, `680px`，包含 Live Preview 与 Floating Window 两大核心选项卡)
     - `KeybindingRecipe` (按键与手柄映射, `560px`)
     - **背景过渡规范**：背景进入变暗状态 (`bg-black/65` 或 `rgba(0,0,0,0.55)`)，采用渐变过渡动画（默认 250ms 左右，支持外部灵活配置），**依然严禁使用模糊效果 (`backdrop-blur-none`)**，以节约高频动态 3D 场景性能。
   - **Layer 3: 深度参数三级面板**：
-    - `Layer3AudioDetailRecipe` (音频高级均衡器与声场, `480px`，支持 3-Band EQ、HRTF 3D 空间环绕声)
-    - `Layer3BallTrajectoryRecipe` (弹道预测器与 Live Preview, `480px`，支持 Tab 快捷键时序折叠至右侧 88px × 38px Dock Pill)
-    - **父子归属与逻辑约束**：三级独立面板严格从属于其二级父级菜单（如 `audio-eq` 隶属于 `settings`，`trajectory` 隶属于 `additional-preview` / `settings`）。在非关联菜单下**锁定不可选**，防止跨菜单错误关联。
-- **双向动效解耦架构 (Navigation Morph vs Spatial Live Preview Dock)**：
-  - **方向 A：层级导航切换 (Layer 1 ↔ Layer 2 ↔ Layer 3)**：居中容器的 1D 宽度流体形变 (`FluidMorph` 0.28s) 或三段分步 (`SequencedStep` 100+150+100ms)，保持屏幕居中。
-  - **方向 B：Live Preview 停靠切换 (Center 480px ↔ Right Dock 88px)**：正交 2D 空间折叠，采用内容快速淡出 (110ms) → 外壳平滑平移收缩至右侧边缘 (260ms) → Pill 徽章显现。
-  - **解耦核心原则**：严禁在 `layout` 流体容器内部同时叠加 `x/y` 相对位移，必须捕获绝对起始 DOMRect 并在折叠态接管为 2D 独立调度，彻底根除尺寸抽动 (Jitter) 与从视口左上角 (0, 0) 莫名飞出的上下文丢失问题。
+    - `Layer3AudioDetailRecipe` (音频高级均衡器与声场, `480px`，支持 3-Band EQ、HRTF 3D 空间环绕声，父级：Settings)
+    - `Layer3BallTrajectoryRecipe` (弹道预测器与实时预览, `480px`，父级：Settings 或 Additional Preview)
+    - **父子归属与逻辑约束**：三级独立面板严格从属于其二级父级菜单。在非关联菜单下**锁定不可选**，防止跨菜单错误关联。
+
+### 4.2 双向动效与解耦架构分析 (Dual-Motion Paradigm: Layer Navigation vs Spatial Docking)
+当三级菜单同时承载**默认层级连续形变 (Fluid Morph)** 与 **实时预览侧边收纳 (Live Preview Docking)** 时，极易引发严重的技术坑点与动效缺陷：
+1. **抽动与缩放畸变的根源 (FLIP Scale Distortion)**：
+   - 若直接使用 Framer Motion `layout` 属性驱动容器，当容器从 `480×540px` 面板折叠为 `88×38px` 侧边 Dock 药丸时，Framer Motion 会计算 `scaleX` 与 `scaleY` 矩阵（`scaleY = 38/540 ≈ 0.07`）。
+   - 这会导致容器边框、文字、按钮被暴力压扁成一条线（高度/宽度抽动）；反向展开时又放大 14 倍，引发严重的视觉形变与重排跳跃。
+2. **坐标上下文丢失的根源 (Lost Context & Flying from 0,0)**：
+   - 常规菜单居中依赖 flexbox 居中布局，而侧边 Dock 依赖绝对定位（`right-3`）。
+   - 若在动效中动态切换容器定位模式（如 relative 切换到 absolute），Framer Motion 的上下文快照会瞬间丢失父级偏移量，导致容器从左上角 `(0, 0)` 莫名其妙地飞出来。
+3. **架构解耦解决方案 (Decoupled Geometric Projection)**：
+   - **统一绝对空间坐标投影**：Stage 容器建立统一绝对参考系，无论居中面板（`xCenter = (W-w)/2`, `yCenter = (H-h)/2`）还是侧边 Dock（`xDock = W-16-dockW`, `yDock = (H-dockH)/2`），始终在同一坐标系内动画 `x, y, width, height, borderRadius`。
+   - **摒弃矩阵缩放**：不依赖 `layout` FLIP 缩放，直接插值几何尺寸与位移，彻底消除文本与组件的缩放畸变。
+   - **分步时序解耦**：折叠时**内容先淡出** $\rightarrow$ **空壳几何变形平滑移动** $\rightarrow$ **药丸图标淡入**；展开时逆向执行。内容与容器尺寸彻底解耦，杜绝内容在尺寸变化过程中的振颤。
+   - **双向独立过渡策略**：水平方向的层级流转（Layer 1 ⇄ 2 ⇄ 3）使用 `fluid-morph` 或 `sequenced-step`；空间维度的侧边折叠使用 Dedicated Dock State Machine，两者互不干涉。
 - **容器内容 (Container Content) 与窗口层级 (Window Layer) 的界定**：
   - 二级菜单内部的 Tabs（例如 `Layer2SettingsRecipe` 中的 Video/Audio/Camera/Gameplay，或 `Layer2GarageRecipe` 中的 Car Bodies/Decals/Wheels/Boost FX）属于**同级容器内的内容切换**，不属于独立窗口层级。
   - 同一二级菜单在内部切换 Tab 时，容器保持固定/默认尺寸（固定内容高度），**绝不发生容器尺寸 Resize，也不需要过渡动效**，确保即时响应。
@@ -173,9 +185,7 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 | 一级主暂停菜单 | `<Layer1MainMenuRecipe>` | `src/recipes/Layer1MainMenuRecipe.tsx` |
 | 二级车辆车库改装 | `<Layer2GarageRecipe>` | `src/recipes/Layer2GarageRecipe.tsx` |
 | 二级游戏音画设置 | `<Layer2SettingsRecipe>` | `src/recipes/Layer2SettingsRecipe.tsx` |
-| 二级专项功能预览中枢 | `<Layer2AdditionalPreviewRecipe>` | `src/recipes/Layer2AdditionalPreviewRecipe.tsx` |
 | 三级音频高级均衡器 | `<Layer3AudioDetailRecipe>` | `src/recipes/Layer3AudioDetailRecipe.tsx` |
-| 三级弹道预测与实时停靠 | `<Layer3BallTrajectoryRecipe>` | `src/recipes/Layer3BallTrajectoryRecipe.tsx` |
 | 二级按键手柄映射 | `<KeybindingRecipe>` | `src/recipes/KeybindingRecipe.tsx` |
 | 一级预留赛后战报菜单 | `<Layer1MatchPostRecipe>` | `src/recipes/Layer1MatchPostRecipe.tsx` |
 | 二级预留赛后统计面板 | `<Layer2MatchStatsRecipe>` | `src/recipes/Layer2MatchStatsRecipe.tsx` |

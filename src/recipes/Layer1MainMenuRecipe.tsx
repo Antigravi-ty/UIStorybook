@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Gamepad2, Wrench, Settings, ArrowUpRight, PauseCircle, PlayCircle, Eye } from 'lucide-react';
+import { Play, Gamepad2, Wrench, Settings, Layers, ArrowUpRight, PauseCircle, PlayCircle } from 'lucide-react';
 import { PanelContainer, PanelContent } from '../layout/Panel';
 import { MenuContainer, MenuItem, MenuDivider } from '../navigation';
 import { Badge } from '../primitives/Badge';
@@ -12,7 +12,7 @@ export interface Layer1MainMenuRecipeProps {
   onNavigatePlay?: () => void;
   onNavigateGarage?: () => void;
   onNavigateSettings?: (targetTab?: string) => void;
-  onNavigateAdditionalPreview?: () => void;
+  onNavigatePreviews?: () => void;
   /** Background render pause indicator status */
   backgroundRenderPaused?: boolean;
   className?: string;
@@ -38,7 +38,7 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
   onNavigatePlay,
   onNavigateGarage,
   onNavigateSettings,
-  onNavigateAdditionalPreview,
+  onNavigatePreviews,
   backgroundRenderPaused = true,
   className = '',
 }) => {
@@ -113,14 +113,14 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
             isLight={isLight}
           />
 
-          {/* Additional Preview */}
-          {onNavigateAdditionalPreview && (
+          {/* Additional Previews */}
+          {onNavigatePreviews && (
             <MenuItem
-              icon={<Eye className="h-5 w-5" />}
-              title="Additional Preview"
-              subtitle="Live preview dock & floating diagnostic windows"
+              icon={<Layers className="h-5 w-5" />}
+              title="Additional Previews"
+              subtitle="Live Preview & floating window sandbox"
               hasArrow
-              onClick={onNavigateAdditionalPreview}
+              onClick={onNavigatePreviews}
               isLight={isLight}
             />
           )}

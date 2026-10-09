@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Layers, 
   ArrowRight, 
@@ -10,15 +11,16 @@ import {
   Settings,
   Ruler,
   Eye,
+  AppWindow,
+  Play,
+  RotateCcw,
   Sparkles,
-  ChevronLeft,
-  X,
-  Play
+  ChevronLeft
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MorphContainer, ContainerTransitionMode } from '../../navigation/transitions';
+import { ContainerTransitionMode } from '../../navigation/transitions';
 import { Badge } from '../../primitives/Badge';
 import { KeycapBadge } from '../../primitives/KeycapBadge';
+import { MorphContainerContext } from '../../tokens/morphContext';
 import { 
   Layer1MainMenuRecipe,
   Layer2PlayRecipe,
@@ -27,19 +29,20 @@ import {
   Layer2AdditionalPreviewRecipe,
   Layer3AudioDetailRecipe,
   Layer3BallTrajectoryRecipe,
-  PresetConfig,
 } from '../../recipes';
 import { FloatingStackIcon } from '../../navigation/FloatingStackIcon';
 import { FloatingWindowManager } from '../../navigation/FloatingWindowManager';
-import { floatingStore } from '../../tokens/floatingStore';
+import { floatingStore, useFloatingStore } from '../../tokens/floatingStore';
+import { PRESET_WINDOWS, type PresetConfig } from '../../tokens/floatingPresets';
+import { UI_EASING } from '../../tokens/easing';
 
 export type ActiveMenuRoute = 
-  | 'layer-0'
+  | 'layer-0' 
   | 'main-menu' 
   | 'play' 
   | 'garage' 
   | 'settings' 
-  | 'additional-preview'
+  | 'additional-preview' 
   | 'audio-eq' 
   | 'trajectory';
 
@@ -60,7 +63,7 @@ export interface LayerRouteConfig {
 }
 
 export const MENU_ROUTE_CONFIG: Record<ActiveMenuRoute, LayerRouteConfig> = {
-  'layer-0': { id: 'layer-0', label: 'Layer 0 (In-Game / No Menu)', layer: 0, width: 0 },
+  'layer-0': { id: 'layer-0', label: 'Active Match (Layer 0)', layer: 0, width: 0 },
   'main-menu': { id: 'main-menu', label: 'Main Menu', layer: 1, width: 420 },
   'play': { id: 'play', label: 'Play Modes', layer: 2, width: 680, parentRoute: 'main-menu' },
   'garage': { id: 'garage', label: 'Garage Loadout', layer: 2, width: 680, parentRoute: 'main-menu' },
@@ -81,12 +84,16 @@ export const isLayer3RouteAvailable = (
   const cfg = MENU_ROUTE_CONFIG[panelRoute];
   if (!cfg || cfg.layer !== 3) return false;
   if (panelRoute === 'trajectory') {
-    return currentRoute === 'additional-preview' || currentRoute === 'settings' || currentRoute === 'trajectory';
+    return (
+      currentRoute === 'settings' ||
+      currentRoute === 'additional-preview' ||
+      currentRoute === 'trajectory'
+    );
   }
   return currentRoute === cfg.parentRoute || currentRoute === panelRoute;
 };
 
-export type LivePreviewPhase = 
+export type LivePreviewAnimPhase = 
   | 'expanded'
   | 'collapsing_content'
   | 'collapsing_resize'
@@ -94,52 +101,57 @@ export type LivePreviewPhase =
   | 'expanding_content'
   | 'expanding_resize';
 
+interface FlyingGhost {
+  id: string;
+  startX: number;
+  startY: number;
+  startW: number;
+  startH: number;
+  destX: number;
+  destY: number;
+}
+
 export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   isLight = true,
   onNavigateToReserved,
   backdropDuration = 250,
 }) => {
-  // 当前预览路由状态（对应独立窗口层级，支持 Layer 0 对局态）
+  // 当前预览路由状态（对应独立窗口层级）
   const [currentRoute, setCurrentRoute] = useState<ActiveMenuRoute>('main-menu');
-  // 记录从哪个二级菜单跳转进入三级面板（以便 onBack 返回正确父级）
-  const previousParentRouteRef = useRef<ActiveMenuRoute>('additional-preview');
-
   // 当前过渡动效模式 (流体形变 vs 三段时序分步)
   const [transitionMode, setTransitionMode] = useState<ContainerTransitionMode>('fluid-morph');
   // 目标 Settings 选项卡
   const [settingsTab, setSettingsTab] = useState<string>('gameplay');
-  // 后台渲染暂停指示 (在 Layer 0 时自动恢复渲染)
+  // 后台渲染暂停指示
   const [bgRenderPaused, setBgRenderPaused] = useState<boolean>(true);
   // 交互反馈提示
   const [feedbackToast, setFeedbackToast] = useState<string | null>(null);
 
-  // 舞台容器引用与尺寸追踪
+  // 记录三级菜单的触发父路由（支持从 Settings 或 Additional Preview 返回）
+  const [lastParentRoute, setLastParentRoute] = useState<ActiveMenuRoute>('additional-preview');
+
+  // Live Preview 专有时序状态机
+  const [liveAnimPhase, setLiveAnimPhase] = useState<LivePreviewAnimPhase>('expanded');
+  const [isPillHovered, setIsPillHovered] = useState(false);
+  const [ballSimSpeed, setBallSimSpeed] = useState(128);
+
+  // SequencedStep 模式下的三段时序状态 (仅在 sequenced-step 模式下使用)
+  const [stepPhase, setStepPhase] = useState<'idle' | 'fadeOut' | 'resize' | 'fadeIn'>('idle');
+  const [displayedRoute, setDisplayedRoute] = useState<ActiveMenuRoute>('main-menu');
+
+  // Stage 尺寸与飞行幽灵状态（用于 '+' 点击加入 Stack 飞行动画）
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [stageSize, setStageSize] = useState({ width: 900, height: 620 });
-
-  // Layer 3 Live Preview 时序与停靠状态
-  const [livePreviewPhase, setLivePreviewPhase] = useState<LivePreviewPhase>('expanded');
-  const [isDockHovered, setIsDockHovered] = useState(false);
-
-  // Floating Window '+' 点击飞入右上角 Stack 的 Ghost 动画状态
-  const [flyingGhost, setFlyingGhost] = useState<{
-    id: string;
-    startX: number;
-    startY: number;
-    startW: number;
-    startH: number;
-    destX: number;
-    destY: number;
-  } | null>(null);
+  const [flyingGhost, setFlyingGhost] = useState<FlyingGhost | null>(null);
 
   const showToast = (msg: string) => {
     setFeedbackToast(msg);
     setTimeout(() => {
       setFeedbackToast(null);
-    }, 2200);
+    }, 2400);
   };
 
-  // 舞台尺寸监听
+  // 动态监听 Stage 尺寸
   useEffect(() => {
     if (!stageRef.current) return;
     const update = () => {
@@ -168,69 +180,75 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
     'trajectory': 480,
   };
 
-  const handleSelectRoute = (route: ActiveMenuRoute) => {
-    if (route === 'trajectory') {
-      if (currentRoute === 'settings') {
-        previousParentRouteRef.current = 'settings';
-      } else if (currentRoute === 'additional-preview') {
-        previousParentRouteRef.current = 'additional-preview';
-      }
-      // 切换至 trajectory 时确保初始处于 expanded 状态
-      setLivePreviewPhase('expanded');
-    } else {
-      // 离开 trajectory 时重置 live preview 状态
-      setLivePreviewPhase('expanded');
+  // 路由切换统一入口（支持 SequencedStep 分步与 FluidMorph 连续流体）
+  const handleSelectRoute = (targetRoute: ActiveMenuRoute) => {
+    if (targetRoute === currentRoute) return;
+
+    // 如果当前处于 Live Preview 收折状态，切出前重置为 expanded
+    if (liveAnimPhase !== 'expanded') {
+      setLiveAnimPhase('expanded');
     }
 
-    if (route === 'layer-0') {
-      setBgRenderPaused(false);
-      showToast('进入 Layer 0: 对局实时渲染中 (按 ESC 键恢复菜单)');
-    } else if (currentRoute === 'layer-0') {
-      setBgRenderPaused(true);
+    if (transitionMode === 'fluid-morph') {
+      setCurrentRoute(targetRoute);
+      setDisplayedRoute(targetRoute);
+      return;
     }
 
-    setCurrentRoute(route);
+    // Sequenced-Step 严格三段时序：FadeOut (100ms) -> Resize (150ms) -> FadeIn (100ms)
+    setStepPhase('fadeOut');
+    setTimeout(() => {
+      setCurrentRoute(targetRoute);
+      setDisplayedRoute(targetRoute);
+      setStepPhase('resize');
+      setTimeout(() => {
+        setStepPhase('fadeIn');
+        setTimeout(() => {
+          setStepPhase('idle');
+        }, 100);
+      }, 150);
+    }, 100);
   };
 
-  // Live Preview 时序折叠调度
-  const handleCollapseLivePreview = () => {
-    if (livePreviewPhase !== 'expanded') return;
-    setLivePreviewPhase('collapsing_content');
+  // ──────────────────────────────────────────────────────────────────────────
+  // Live Preview 专用时序折叠/展开调度器
+  // 核心解耦：内容先淡出 -> 容器绝对几何坐标缩放移动 -> 药丸内容显现，杜绝 FLIP 缩放抽动
+  // ──────────────────────────────────────────────────────────────────────────
+  const handleTriggerCollapse = () => {
+    if (liveAnimPhase !== 'expanded') return;
+    setLiveAnimPhase('collapsing_content');
     setTimeout(() => {
-      setLivePreviewPhase('collapsing_resize');
+      setLiveAnimPhase('collapsing_resize');
       setTimeout(() => {
-        setLivePreviewPhase('collapsed');
+        setLiveAnimPhase('collapsed');
       }, 260);
-    }, 110);
+    }, 100);
   };
 
-  // Live Preview 时序展开调度
-  const handleExpandLivePreview = () => {
-    if (livePreviewPhase !== 'collapsed') return;
-    setLivePreviewPhase('expanding_content');
+  const handleTriggerExpand = () => {
+    if (liveAnimPhase !== 'collapsed') return;
+    setLiveAnimPhase('expanding_content');
     setTimeout(() => {
-      setLivePreviewPhase('expanding_resize');
+      setLiveAnimPhase('expanding_resize');
       setTimeout(() => {
-        setLivePreviewPhase('expanded');
+        setLiveAnimPhase('expanded');
       }, 260);
-    }, 90);
+    }, 80);
   };
 
   const handleToggleLivePreview = () => {
-    if (livePreviewPhase === 'expanded') {
-      handleCollapseLivePreview();
-    } else if (livePreviewPhase === 'collapsed') {
-      handleExpandLivePreview();
+    if (liveAnimPhase === 'expanded') {
+      handleTriggerCollapse();
+    } else if (liveAnimPhase === 'collapsed') {
+      handleTriggerExpand();
     }
   };
 
-  // 键盘快捷键监听：TAB 响应 Live Preview 收起/展开，ESC 响应逐级返回与 Layer 0 切换
+  // 键盘快捷键监听器：
+  // 1. TAB 键：在 Layer 3 Live Preview 面板中折叠/展开
+  // 2. ESC 键：Layer 0 呼出 Layer 1；Layer 1 退回到 Layer 0；Layer 2 退回到 Layer 1；Layer 3 退回到父级 Layer 2
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
-        return;
-      }
-
       if (e.key === 'Tab') {
         if (currentRoute === 'trajectory') {
           e.preventDefault();
@@ -238,49 +256,38 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
         }
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        if (currentRoute === 'trajectory') {
-          if (livePreviewPhase === 'collapsed') {
-            handleExpandLivePreview();
-          } else {
-            handleSelectRoute(previousParentRouteRef.current || 'additional-preview');
-          }
+        if (currentRoute === 'layer-0') {
+          handleSelectRoute('main-menu');
+          showToast('ESC: 呼出主菜单 (Layer 1)');
+        } else if (currentRoute === 'main-menu') {
+          handleSelectRoute('layer-0');
+          showToast('ESC: 继续比赛 (返回 Layer 0)');
         } else if (
-          currentRoute === 'play' || 
-          currentRoute === 'garage' || 
-          currentRoute === 'settings' || 
+          currentRoute === 'play' ||
+          currentRoute === 'garage' ||
+          currentRoute === 'settings' ||
           currentRoute === 'additional-preview'
         ) {
           handleSelectRoute('main-menu');
         } else if (currentRoute === 'audio-eq') {
           handleSelectRoute('settings');
-        } else if (currentRoute === 'main-menu') {
-          handleSelectRoute('layer-0');
-        } else if (currentRoute === 'layer-0') {
-          handleSelectRoute('main-menu');
+        } else if (currentRoute === 'trajectory') {
+          if (liveAnimPhase === 'collapsed') {
+            handleTriggerExpand();
+          } else {
+            handleSelectRoute(lastParentRoute);
+          }
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentRoute, livePreviewPhase]);
+  }, [currentRoute, liveAnimPhase, lastParentRoute]);
 
-  // Floating Window '+' 点击生成动画并入栈
-  const handleSpawnPresetWindow = (preset: PresetConfig, e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!stageRef.current) {
-      floatingStore.spawnWindow({
-        id: `${preset.id}-${Date.now().toString().slice(-4)}`,
-        title: preset.title,
-        category: preset.category,
-        width: preset.width,
-        height: preset.height,
-        resizable: preset.resizable,
-        startMinimized: true,
-      });
-      showToast(`✓ 已将 "${preset.title}" 窗口收纳至右上角 Stack`);
-      return;
-    }
-
+  // 处理在 Additional Preview -> Floating Window 选项卡中点击 '+' 飞入 Stack 动画
+  const handleAddPresetWindow = (preset: PresetConfig, e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!stageRef.current) return;
     const btnRect = e.currentTarget.getBoundingClientRect();
     const stageRect = stageRef.current.getBoundingClientRect();
 
@@ -314,33 +321,45 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
         startMinimized: true,
       });
       setFlyingGhost(null);
-      showToast(`✓ 已将 "${preset.title}" 窗口收纳至右上角 Stack`);
+      showToast(`✓ 已将 "${preset.title}" 收缩压入右上角 Stack`);
     }, 280);
   };
 
-  // Live Preview 停靠尺寸与坐标计算
-  const isDockState = livePreviewPhase === 'collapsed' || livePreviewPhase === 'collapsing_resize' || livePreviewPhase === 'expanding_content';
+  // ──────────────────────────────────────────────────────────────────────────
+  // 几何尺寸与坐标计算（绝对坐标空间投影，彻底解决两种动效冲突）
+  // ──────────────────────────────────────────────────────────────────────────
+  const isDockState = 
+    currentRoute === 'trajectory' && 
+    (liveAnimPhase === 'collapsed' || liveAnimPhase === 'collapsing_resize' || liveAnimPhase === 'expanding_content');
+
   const dockW = 88;
   const dockH = 38;
-  const expandedW = 480;
-  const expandedH = 540;
+  const expandedW = routeWidthMap[currentRoute] || 480;
+  // 针对根菜单采用紧凑高度 440px，二级与三级统一 540px
+  const expandedH = currentRoute === 'main-menu' ? 440 : 540;
 
   const xExpanded = Math.max(16, Math.round((stageSize.width - expandedW) / 2));
   const yExpanded = Math.max(16, Math.round((stageSize.height - expandedH) / 2));
+
   const xDock = Math.max(16, Math.round(stageSize.width - 16 - dockW));
   const yDock = Math.max(16, Math.round((stageSize.height - dockH) / 2));
 
-  // 背景遮罩颜色计算：Layer 0 无遮罩；Layer 1 透明不压暗；Live Preview 折叠时透明
-  const getBackdropBg = () => {
-    if (currentRoute === 'layer-0') return 'transparent';
-    if (currentRoute === 'main-menu') return 'transparent';
-    if (currentRoute === 'trajectory' && isDockState) return 'transparent';
-    return 'rgba(0, 0, 0, 0.55)';
-  };
+  const targetX = isDockState ? xDock : xExpanded;
+  const targetY = isDockState ? yDock : yExpanded;
+  const targetW = isDockState ? dockW : expandedW;
+  const targetH = isDockState ? dockH : expandedH;
+  const targetRadius = isDockState ? 12 : 16;
+
+  const isContentVisible = 
+    currentRoute !== 'layer-0' && 
+    !isDockState && 
+    (transitionMode === 'fluid-morph' ? liveAnimPhase === 'expanded' : stepPhase !== 'fadeOut' && stepPhase !== 'resize' && liveAnimPhase === 'expanded');
+
+  const isPillContentVisible = liveAnimPhase === 'collapsed';
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {/* 顶部标题与动效切换控制条：无冗余介绍，纯净标题 */}
+      {/* 顶部标题与动效切换控制条 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200/80 dark:border-neutral-800">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
@@ -365,7 +384,6 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
               const tabButtons = Array.from(previewStage.querySelectorAll<HTMLElement>('[role="tab"]'));
               const contentEl = previewStage.querySelector<HTMLElement>('[data-ui-element="panel-content"]');
               const footerEl = previewStage.querySelector<HTMLElement>('[data-ui-element="panel-footer"]');
-              const cards = Array.from(previewStage.querySelectorAll<HTMLElement>('button[data-ui-element="car-card"], .grid button'));
 
               const getPadStr = (cs: CSSStyleDeclaration) => `top=${cs.paddingTop} right=${cs.paddingRight} bottom=${cs.paddingBottom} left=${cs.paddingLeft}`;
               const getRectStr = (r: DOMRect) => `${Math.round(r.width * 10) / 10}px × ${Math.round(r.height * 10) / 10}px (x: ${Math.round(r.x)}, y: ${Math.round(r.y)})`;
@@ -381,36 +399,25 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 const sCs = window.getComputedStyle(shellEl);
                 lines.push('\n[1. MENU CONTAINER (OUTER SHELL)]');
                 lines.push(`  • Size:         ${getRectStr(sRect)}`);
-                lines.push(`  • Inline/CSS W: ${shellEl.style.width || sCs.width} (Max-W: ${sCs.maxWidth})`);
                 lines.push(`  • Padding:      ${getPadStr(sCs)}`);
               }
 
               if (headerEl) {
                 const hRect = headerEl.getBoundingClientRect();
-                const hCs = window.getComputedStyle(headerEl);
-                lines.push('\n[2. PANEL HEADER]');
-                lines.push(`  • Size:         ${getRectStr(hRect)}`);
-                lines.push(`  • Title:        "${headerEl.querySelector('h2, h1')?.textContent?.trim() || ''}"`);
+                lines.push(`\n[2. PANEL HEADER] Size: ${getRectStr(hRect)} | Title: "${headerEl.querySelector('h1, h2')?.textContent?.trim() || ''}"`);
               }
 
               if (tabsEl) {
-                const tRect = tabsEl.getBoundingClientRect();
-                lines.push('\n[3. UNDERLINE TABS]');
-                lines.push(`  • Tablist Size: ${getRectStr(tRect)}`);
-                lines.push(`  • Tab Count:    ${tabButtons.length} tab(s)`);
+                lines.push(`\n[3. TABS] Total ${tabButtons.length} tab(s)`);
               }
 
               if (contentEl) {
                 const cRect = contentEl.getBoundingClientRect();
-                lines.push('\n[4. PANEL CONTENT (BODY)]');
-                lines.push(`  • Size:         ${getRectStr(cRect)}`);
+                lines.push(`\n[4. PANEL CONTENT] Size: ${getRectStr(cRect)} | ScrollH: ${contentEl.scrollHeight}px`);
               }
 
               if (footerEl) {
-                const fRect = footerEl.getBoundingClientRect();
-                lines.push('\n[5. PANEL FOOTER]');
-                lines.push(`  • Size:         ${getRectStr(fRect)}`);
-                lines.push(`  • Content:      "${footerEl.textContent?.replace(/\s+/g, ' ').trim() || ''}"`);
+                lines.push(`\n[5. PANEL FOOTER] Content: "${footerEl.textContent?.replace(/\s+/g, ' ').trim() || ''}"`);
               }
 
               lines.push('========================================================================\n');
@@ -470,19 +477,19 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
         </div>
       </div>
 
-      {/* 顶部多层级快捷选择器区域：严格按窗口层级划分 (0, 1, 2, 3) */}
+      {/* 顶部多层级快捷选择器区域：严格按窗口层级划分 (Layer 0, Layer 1, Layer 2, Layer 3) */}
       <div
         className={`p-4 rounded-2xl border flex flex-col gap-3.5 transition-colors ${
           isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
         }`}
       >
-        {/* Layer 0 选项：对局层 / 隐匿 (无菜单) */}
+        {/* Layer 0 选项：零级对局 (无菜单状态) */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs">
           <div className="flex items-center gap-1.5 min-w-[120px] shrink-0 font-semibold text-neutral-500 dark:text-neutral-400">
             <Badge variant="neutral" size="sm" isLight={isLight}>
               Layer 0
             </Badge>
-            <span>对局层 (无菜单)</span>
+            <span>零级对局 (无菜单)</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -497,14 +504,14 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                   : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
               }`}
             >
-              <Play className="h-3.5 w-3.5 fill-current" />
-              <span>IN-GAME ARENA (恢复对局 · 隐匿菜单)</span>
-              <span className="font-mono text-[10px] opacity-75">Layer 0</span>
+              <Play className="h-3.5 w-3.5" />
+              <span>Active Match (零级实时对局 · 无菜单状态)</span>
+              <span className="font-mono text-[10px] opacity-75">0px</span>
             </button>
           </div>
         </div>
 
-        {/* Layer 1 选项 */}
+        {/* Layer 1 选项：一级根菜单 */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs pt-2.5 border-t border-neutral-100 dark:border-neutral-800/80">
           <div className="flex items-center gap-1.5 min-w-[120px] shrink-0 font-semibold text-neutral-500 dark:text-neutral-400">
             <Badge variant="primary" size="sm" isLight={isLight}>
@@ -531,7 +538,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           </div>
         </div>
 
-        {/* Layer 2 选项：展示根菜单下的二级功能菜单 */}
+        {/* Layer 2 选项：二级功能菜单 */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs pt-2.5 border-t border-neutral-100 dark:border-neutral-800/80">
           <div className="flex items-center gap-1.5 min-w-[120px] shrink-0 font-semibold text-neutral-500 dark:text-neutral-400">
             <Badge variant="warning" size="sm" isLight={isLight}>
@@ -553,7 +560,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
               }`}
             >
               <Gamepad2 className="h-3.5 w-3.5" />
-              <span>Play (模式选择)</span>
+              <span>Play (模式选择 / 6 种玩法网格)</span>
               <span className="font-mono text-[10px] opacity-75">680px</span>
             </button>
 
@@ -569,7 +576,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
               }`}
             >
               <Wrench className="h-3.5 w-3.5" />
-              <span>Garage (车库)</span>
+              <span>Garage (车库 / Car, Colour, Anthem, Name)</span>
               <span className="font-mono text-[10px] opacity-75">680px</span>
             </button>
 
@@ -585,10 +592,11 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
               }`}
             >
               <Settings className="h-3.5 w-3.5" />
-              <span>Settings (综合设置)</span>
+              <span>Settings (9+1 Tabs 综合设置)</span>
               <span className="font-mono text-[10px] opacity-75">680px</span>
             </button>
 
+            {/* 新增: Additional Preview 二级菜单 */}
             <button
               type="button"
               onClick={() => handleSelectRoute('additional-preview')}
@@ -600,14 +608,14 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                   : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
               }`}
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Additional Preview (Live Preview & Floating Window)</span>
+              <Eye className="h-3.5 w-3.5" />
+              <span>Additional Preview (实时预览与悬浮窗沙盒)</span>
               <span className="font-mono text-[10px] opacity-75">680px</span>
             </button>
           </div>
         </div>
 
-        {/* Layer 3 选项：深度独立面板 */}
+        {/* Layer 3 选项：三级独立面板 */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs pt-2.5 border-t border-neutral-100 dark:border-neutral-800/80">
           <div className="flex items-center gap-1.5 min-w-[120px] shrink-0 font-semibold text-neutral-500 dark:text-neutral-400">
             <Badge variant="success" size="sm" isLight={isLight}>
@@ -628,6 +636,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                   disabled={!available}
                   onClick={() => {
                     if (available) {
+                      setLastParentRoute('settings');
                       handleSelectRoute('audio-eq');
                     } else {
                       showToast('逻辑限制: 该三级面板隶属于 Game Settings，当前菜单禁止错误跨层级关联');
@@ -642,6 +651,11 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                         : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200 cursor-pointer shadow-2xs'
                       : 'opacity-40 cursor-not-allowed bg-neutral-100/60 dark:bg-neutral-800/40 text-neutral-400 dark:text-neutral-500 border-dashed border-neutral-300 dark:border-neutral-700 select-none'
                   }`}
+                  title={
+                    available
+                      ? '点击直接进入 Acoustics & EQ (480px)'
+                      : '此三级面板隶属于 Game Settings，当前菜单不可用'
+                  }
                 >
                   <Volume2 className="h-3.5 w-3.5" />
                   <span>Acoustics & EQ (音频高级均衡器)</span>
@@ -666,9 +680,14 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                   disabled={!available}
                   onClick={() => {
                     if (available) {
+                      if (currentRoute === 'settings') {
+                        setLastParentRoute('settings');
+                      } else if (currentRoute === 'additional-preview') {
+                        setLastParentRoute('additional-preview');
+                      }
                       handleSelectRoute('trajectory');
                     } else {
-                      showToast('逻辑限制: 该三级面板隶属于 Additional Preview / Settings，请先进入对应二级菜单');
+                      showToast('逻辑限制: 该三级面板隶属于 Settings 或 Additional Preview，当前菜单不可用');
                     }
                   }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
@@ -680,13 +699,18 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                         : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200 cursor-pointer shadow-2xs'
                       : 'opacity-40 cursor-not-allowed bg-neutral-100/60 dark:bg-neutral-800/40 text-neutral-400 dark:text-neutral-500 border-dashed border-neutral-300 dark:border-neutral-700 select-none'
                   }`}
+                  title={
+                    available
+                      ? '点击直接进入 Ball Trajectory Predictor (支持 Tab 快捷键 Live Preview)'
+                      : '此三级面板隶属于 Settings 或 Additional Preview，当前菜单不可用'
+                  }
                 >
                   <Eye className="h-3.5 w-3.5" />
                   <span>Ball Trajectory (弹道预测器 · Live Preview)</span>
                   <span className="font-mono text-[10px] opacity-75">480px</span>
                   {!available && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 font-mono">
-                      需在 Preview/Settings 唤起
+                      需在 Settings 或 Previews 唤起
                     </span>
                   )}
                 </button>
@@ -695,23 +719,21 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
 
             {/* 动态逻辑关联状态提示 */}
             <span className={`text-[11px] font-mono ml-1.5 ${
-              currentRoute === 'settings' || currentRoute === 'additional-preview' || currentRoute === 'audio-eq' || currentRoute === 'trajectory'
+              currentRoute === 'additional-preview' || currentRoute === 'settings' || currentRoute === 'audio-eq' || currentRoute === 'trajectory'
                 ? 'text-emerald-600 dark:text-emerald-400 font-medium'
                 : isLight
                 ? 'text-neutral-500'
                 : 'text-neutral-400'
             }`}>
-              {currentRoute === 'layer-0'
-                ? '(当前处于 Layer 0 对局态 · 菜单已隐藏)'
-                : currentRoute === 'additional-preview'
-                ? '(✓ 已选中 Additional Preview: 三级 Live Preview 已就绪)'
+              {currentRoute === 'additional-preview'
+                ? '(✓ 已选中 Additional Preview: 三级实时预览面板已就绪)'
                 : currentRoute === 'settings'
                 ? '(✓ 已选中 Game Settings: 三级音频与弹道面板已就绪)'
                 : currentRoute === 'audio-eq'
                 ? '(当前处于 Layer 3 独立音频声场面板)'
                 : currentRoute === 'trajectory'
-                ? '(当前处于 Layer 3 弹道面板 · 按 TAB 键可折叠至右侧 Dock)'
-                : '(请先进入二级菜单以唤起关联三级面板)'}
+                ? `(当前处于 Layer 3 弹道预测器面板，支持 Tab 快捷键收起/展开 Live Preview，返回到 ${lastParentRoute})`
+                : '(请先进入 Game Settings 或 Additional Preview 唤起关联三级面板)'}
             </span>
           </div>
         </div>
@@ -723,19 +745,19 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           }`}
         >
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-neutral-400">当前活跃状态:</span>
+            <span className="text-neutral-400">当前活跃窗口:</span>
             <span className="font-bold text-amber-500">
-              {currentRoute === 'layer-0' && 'Layer 0: In-Game Arena Active (无菜单 · 实时对局)'}
+              {currentRoute === 'layer-0' && 'Layer 0: Active Match Gameplay (0px · 零级无菜单状态)'}
               {currentRoute === 'main-menu' && 'Layer 1: MENU (420px)'}
               {currentRoute === 'play' && 'Layer 2: Play Modes (680px)'}
               {currentRoute === 'garage' && 'Layer 2: Garage Loadout (680px)'}
               {currentRoute === 'settings' && 'Layer 2: Game Settings (680px)'}
-              {currentRoute === 'additional-preview' && 'Layer 2: Additional Preview (680px)'}
+              {currentRoute === 'additional-preview' && 'Layer 2: Additional Preview (680px · 实时预览与悬浮窗)'}
               {currentRoute === 'audio-eq' && 'Layer 3: Acoustics & EQ (480px)'}
               {currentRoute === 'trajectory' && (
                 isDockState
-                  ? 'Layer 3: Ball Trajectory (88px · Collapsed to Right Dock · TAB to expand)'
-                  : 'Layer 3: Ball Trajectory Predictor (480px · Live Preview · TAB to collapse)'
+                  ? 'Layer 3: Live Preview Dock Pill (88×38px · 已折叠至侧边)'
+                  : 'Layer 3: Ball Trajectory Predictor (480px · Live Preview 展开)'
               )}
             </span>
           </div>
@@ -749,11 +771,14 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
         </div>
       </div>
 
-      {/* 核心单一预览引擎容器 (Single-Container Live Preview Stage) */}
+      {/* ──────────────────────────────────────────────────────────────────────────
+          核心单一预览引擎舞台 (Unified Live Preview & Floating Windows Stage)
+          建立统一绝对几何投影坐标系，彻底消除 FLIP scale 缩放引起的形变抽动与上下文丢失
+         ────────────────────────────────────────────────────────────────────────── */}
       <div
         id="storybook-preview-stage"
         ref={stageRef}
-        className={`relative min-h-[580px] rounded-2xl border p-6 md:p-10 flex items-center justify-center overflow-hidden transition-colors ${
+        className={`relative min-h-[620px] rounded-2xl border p-6 md:p-10 flex items-center justify-center overflow-hidden transition-colors ${
           isLight 
             ? 'bg-neutral-100/70 border-neutral-200/90 shadow-inner' 
             : 'bg-neutral-950/80 border-neutral-800 shadow-inner'
@@ -765,70 +790,42 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           backgroundSize: '24px 24px',
         }}
       >
-        {/* 背景球场物理模拟指示 (在 Layer 0 或 Live Preview 折叠时 100% 显现) */}
+        {/* 背景对局/球场模拟仿真环境 (当处于 Layer 0 或 Live Preview 折叠药丸状态时，100% 恢复渲染) */}
         <div
           className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300 ${
-            currentRoute === 'layer-0' || (currentRoute === 'trajectory' && isDockState)
-              ? 'opacity-100'
-              : 'opacity-20'
+            currentRoute === 'layer-0' || isDockState ? 'opacity-100' : 'opacity-25'
           }`}
         >
           <div className="flex flex-col items-center gap-2 select-none">
             <span className="text-5xl animate-bounce">⚽</span>
-            <span className="text-xs font-mono font-bold text-neutral-800 dark:text-neutral-200">
-              [Arena 3D Physics Simulation · 120Hz Active]
+            <span className="text-xs font-mono font-bold text-neutral-700 dark:text-neutral-300">
+              [Three.js Simulation Active: Ball Speed {ballSimSpeed} km/h]
             </span>
             <span className="text-xs text-neutral-400 max-w-md text-center leading-relaxed">
               {currentRoute === 'layer-0'
-                ? '⚽ 对局实时运行中：背景画面 100% 渲染，无菜单遮挡。按 ESC 或点击画面呼出主菜单。'
-                : currentRoute === 'trajectory' && isDockState
-                ? '✨ Live Preview 已收缩至右侧 Dock：背景游戏画面完全呈现，可实时观测 3D 轨迹！'
-                : '中央菜单展开状态：背景渲染变暗以聚焦参数配置。'}
+                ? '✨ Layer 0 状态：对局中无任何菜单遮挡，背景画面 100% 实时渲染。按 ESC 或点击下方按钮呼出主菜单。'
+                : isDockState
+                ? '✨ Live Preview 已收缩至右侧 Dock 药丸：背景画面 100% 恢复渲染，无黑屏遮挡！'
+                : '中央面板展开状态：背景渲染自动变暗降噪，以聚焦精细参数控制器。'}
             </span>
           </div>
         </div>
 
-        {/* 二级/三级菜单背景变暗遮罩 */}
+        {/* 二级/三级菜单背景变暗遮罩 (Layer 0 与 Dock 状态完全透明) */}
         <div
           className="absolute inset-0 pointer-events-none backdrop-blur-none"
           style={{
-            backgroundColor: getBackdropBg(),
+            backgroundColor:
+              currentRoute === 'layer-0' || isDockState || currentRoute === 'main-menu'
+                ? 'transparent'
+                : 'rgba(0, 0, 0, 0.55)',
             transition: `background-color ${backdropDuration}ms cubic-bezier(0.2, 0.8, 0.25, 1)`,
           }}
         />
 
-        {/* Layer 0 对局态：无菜单时的可点击全屏遮罩 */}
-        {currentRoute === 'layer-0' && (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-end pb-8 cursor-pointer select-none z-10"
-            onClick={() => handleSelectRoute('main-menu')}
-            title="点击唤起主暂停菜单 (Layer 1: MENU)"
-          >
-            <div
-              className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl border backdrop-blur-md transition-all active:scale-95 ${
-                isLight
-                  ? 'bg-white/90 border-neutral-300 text-neutral-900 shadow-lg'
-                  : 'bg-neutral-900/90 border-neutral-700 text-neutral-100 shadow-2xl'
-              }`}
-            >
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-mono text-xs font-semibold">
-                Layer 0 对局进行中 · 点击画面或按下
-              </span>
-              <KeycapBadge shortcut="ESC" size="sm" isLight={isLight} />
-              <span className="font-mono text-xs font-semibold">呼出菜单</span>
-            </div>
-          </div>
-        )}
-
         {/* 
-          常驻悬浮窗口管理器与右上角 Stack 图标：
-          在当前舞台内独立运行，支持在 Layer 0、Layer 1、Layer 2 下随时打开与拖动
+          Spawning Ghost Container (点击 Floating Window '+' 时的飞入右上角 Stack 动效)
         */}
-        <FloatingStackIcon isLight={isLight} absolute={true} containerRef={stageRef} />
-        <FloatingWindowManager isLight={isLight} containerRef={stageRef} />
-
-        {/* Floating Window '+' 点击飞入动画 Ghost 容器 */}
         <AnimatePresence>
           {flyingGhost && (
             <motion.div
@@ -867,162 +864,200 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           )}
         </AnimatePresence>
 
+        {/* 舞台右上角常驻 Floating Stack Icon 栈托盘 */}
+        <FloatingStackIcon isLight={isLight} absolute={true} containerRef={stageRef} />
+
+        {/* 舞台内悬浮窗口管理器 */}
+        <FloatingWindowManager isLight={isLight} containerRef={stageRef} />
+
         {/* 
-          Layer 3 Live Preview 停靠容器 (当 currentRoute === 'trajectory' 且处于折叠过渡/已折叠态时激活):
-          使用 2D 绝对坐标进行解耦平滑过渡，杜绝与 MorphContainer 的 1D 宽度流体形变产生布局抽动冲突！
+          Layer 0 零级对局快捷呼出提示条 (仅在 Layer 0 时呈现)
         */}
-        {currentRoute === 'trajectory' && isDockState && (
-          <motion.div
-            initial={{
-              x: xExpanded,
-              y: yExpanded,
-              width: expandedW,
-              height: expandedH,
-              borderRadius: 16,
-            }}
-            animate={{
-              x: xDock,
-              y: yDock,
-              width: dockW,
-              height: dockH,
-              borderRadius: 12,
-            }}
-            transition={{
-              duration: 0.28,
-              ease: [0.2, 0.8, 0.25, 1],
-            }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}
-            className={`select-none z-30 transition-shadow overflow-hidden ${
-              isLight
-                ? 'border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_0_16px_rgba(0,0,0,0.15)] cursor-pointer'
-                : 'border border-neutral-700 bg-neutral-900 hover:bg-neutral-850 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_18px_rgba(255,255,255,0.08)] cursor-pointer'
-            }`}
-            onClick={handleExpandLivePreview}
-            onMouseEnter={() => setIsDockHovered(true)}
-            onMouseLeave={() => setIsDockHovered(false)}
-            title="点击或按下 TAB 展开 Live Preview 面板"
-          >
-            <div
-              className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 px-2.5 transition-opacity duration-110 ${
-                livePreviewPhase === 'collapsed' ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <motion.div
-                animate={{ x: isDockHovered ? -2.5 : 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                className={`flex items-center justify-center shrink-0 ${
-                  isLight ? 'text-neutral-900' : 'text-neutral-100'
-                }`}
-              >
-                <ChevronLeft className="h-4 w-4 stroke-[2.5]" />
-              </motion.div>
-
-              <div className={`h-3.5 w-px ${isLight ? 'bg-neutral-200' : 'bg-neutral-700'}`} />
-
-              <KeycapBadge shortcut="TAB" size="sm" isLight={isLight} />
+        {currentRoute === 'layer-0' && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-4 py-2.5 rounded-2xl border backdrop-blur-md select-none transition-all shadow-xl bg-neutral-900/90 text-neutral-100 border-neutral-700/80">
+            <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="flex flex-col">
+              <span className="text-xs font-bold font-mono">Active Match (Layer 0 · In-Game Arena)</span>
+              <span className="text-[11px] text-neutral-400">当前处于无菜单对局状态，按键盘 ESC 键或点击右侧呼出菜单</span>
             </div>
-          </motion.div>
+            <div className="h-4 w-px bg-neutral-700" />
+            <button
+              type="button"
+              onClick={() => handleSelectRoute('main-menu')}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-white cursor-pointer transition-all active:scale-95 shadow-2xs"
+            >
+              <KeycapBadge shortcut="ESC" size="sm" isLight={false} />
+              <span>呼出主菜单</span>
+            </button>
+          </div>
         )}
 
         {/* 
-          核心单一 MorphContainer (负责 Layer 1, Layer 2, Layer 3 展开态的层级流体尺寸形变):
-          在 Layer 0 或 Layer 3 折叠态时保持隐藏，避免多控制器冲突
+          统一形态解耦容器 (Decoupled Stage Container)
+          - 采用绝对几何投影坐标 (x, y, width, height, borderRadius)
+          - 不依赖 Framer Motion layout FLIP，杜绝缩放矩阵破坏子元素
+          - 水平层级流转与空间折叠共用同一个平滑物理插值管道
         */}
-        {currentRoute !== 'layer-0' && !(currentRoute === 'trajectory' && isDockState) && (
-          <MorphContainer
-            currentKey={currentRoute}
-            width={routeWidthMap[currentRoute]}
-            mode={transitionMode}
-            isLight={isLight}
-            className={`rounded-2xl ${
-              isLight
-                ? 'shadow-[0_0_0_1px_rgba(0,0,0,0.12),0_0_24px_rgba(0,0,0,0.16),0_0_48px_rgba(0,0,0,0.10)]'
-                : 'shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_0_25px_rgba(0,0,0,0.85),0_0_35px_rgba(255,255,255,0.08)]'
-            }`}
-          >
-            {/* Layer 1 根菜单 */}
-            {currentRoute === 'main-menu' && (
-              <Layer1MainMenuRecipe
-                isLight={isLight}
-                onResume={() => handleSelectRoute('layer-0')}
-                onNavigatePlay={() => handleSelectRoute('play')}
-                onNavigateGarage={() => handleSelectRoute('garage')}
-                onNavigateSettings={(tab) => {
-                  if (tab) setSettingsTab(tab);
-                  handleSelectRoute('settings');
-                }}
-                onNavigateAdditionalPreview={() => handleSelectRoute('additional-preview')}
-                backgroundRenderPaused={bgRenderPaused}
-              />
-            )}
+        {currentRoute !== 'layer-0' && (
+          <MorphContainerContext.Provider value={true}>
+            <motion.div
+              data-morph-container="true"
+              data-panel="container"
+              initial={false}
+              animate={{
+                x: targetX,
+                y: targetY,
+                width: targetW,
+                height: targetH,
+                borderRadius: targetRadius,
+                opacity: 1,
+              }}
+              transition={{
+                duration: 0.28,
+                ease: [0.2, 0.8, 0.25, 1],
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}
+              className={`select-none z-30 transition-shadow overflow-hidden flex flex-col ${
+                isDockState
+                  ? isLight
+                    ? 'border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_0_16px_rgba(0,0,0,0.15)] cursor-pointer'
+                    : 'border border-neutral-700 bg-neutral-900 hover:bg-neutral-850 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_18px_rgba(255,255,255,0.08)] cursor-pointer'
+                  : isLight
+                  ? 'border border-neutral-300/80 bg-neutral-50/98 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.12),0_0_24px_rgba(0,0,0,0.16),0_0_48px_rgba(0,0,0,0.10)]'
+                  : 'border border-neutral-700/60 bg-neutral-900/98 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_0_25px_rgba(0,0,0,0.85),0_0_35px_rgba(255,255,255,0.08)]'
+              }`}
+              onClick={isDockState ? handleTriggerExpand : undefined}
+              onMouseEnter={() => isDockState && setIsPillHovered(true)}
+              onMouseLeave={() => setIsPillHovered(false)}
+            >
+              {/* 
+                状态 1: 折叠收纳药丸状态 (Dock Pill Content)
+                仅在 isDockState 下渲染，包含 '<' 与 TAB 键位徽章
+              */}
+              {isDockState ? (
+                <div
+                  className={`w-full h-full flex items-center justify-between px-3 cursor-pointer select-none transition-opacity duration-150 ${
+                    isPillContentVisible ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <motion.div
+                    animate={{ x: isPillHovered ? -2.5 : 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                    className={`flex items-center justify-center shrink-0 ${
+                      isLight ? 'text-neutral-900' : 'text-neutral-100'
+                    }`}
+                  >
+                    <ChevronLeft className="h-4 w-4 stroke-[2.5]" />
+                  </motion.div>
+                  <div className={`h-3.5 w-px ${isLight ? 'bg-neutral-200' : 'bg-neutral-700'}`} />
+                  <KeycapBadge shortcut="TAB" size="sm" isLight={isLight} />
+                </div>
+              ) : (
+                /* 
+                  状态 2: 展开菜单内容区域 (Expanded Menu Recipes)
+                  通过时序透明度完全与容器尺寸解耦，防止尺寸过渡期间内容抽动
+                */
+                <div
+                  className={`w-full h-full flex flex-col transition-opacity ${
+                    isContentVisible ? 'opacity-100 pointer-events-auto duration-150' : 'opacity-0 pointer-events-none duration-100'
+                  }`}
+                >
+                  {/* Layer 1 根菜单 */}
+                  {displayedRoute === 'main-menu' && (
+                    <Layer1MainMenuRecipe
+                      isLight={isLight}
+                      onResume={() => {
+                        handleSelectRoute('layer-0');
+                        showToast('进入零级对局 (Layer 0 · 无菜单状态)');
+                      }}
+                      onNavigatePlay={() => handleSelectRoute('play')}
+                      onNavigateGarage={() => handleSelectRoute('garage')}
+                      onNavigateSettings={(tab) => {
+                        if (tab) setSettingsTab(tab);
+                        handleSelectRoute('settings');
+                      }}
+                      onNavigatePreviews={() => handleSelectRoute('additional-preview')}
+                      backgroundRenderPaused={bgRenderPaused}
+                    />
+                  )}
 
-            {/* Layer 2: Play Modes */}
-            {currentRoute === 'play' && (
-              <Layer2PlayRecipe
-                isLight={isLight}
-                onBack={() => handleSelectRoute('main-menu')}
-                onSelectMode={(m) => showToast(`选择了玩法模式: ${m}`)}
-              />
-            )}
+                  {/* Layer 2: Play Modes */}
+                  {displayedRoute === 'play' && (
+                    <Layer2PlayRecipe
+                      isLight={isLight}
+                      onBack={() => handleSelectRoute('main-menu')}
+                      onSelectMode={(m) => showToast(`选择了玩法模式: ${m}`)}
+                    />
+                  )}
 
-            {/* Layer 2: Garage */}
-            {currentRoute === 'garage' && (
-              <Layer2GarageRecipe
-                isLight={isLight}
-                onBack={() => handleSelectRoute('main-menu')}
-              />
-            )}
+                  {/* Layer 2: Garage */}
+                  {displayedRoute === 'garage' && (
+                    <Layer2GarageRecipe
+                      isLight={isLight}
+                      onBack={() => handleSelectRoute('main-menu')}
+                    />
+                  )}
 
-            {/* Layer 2: Settings */}
-            {currentRoute === 'settings' && (
-              <Layer2SettingsRecipe
-                isLight={isLight}
-                onBack={() => handleSelectRoute('main-menu')}
-                initialTab={settingsTab}
-                backgroundRenderPaused={bgRenderPaused}
-                onToggleBackgroundRender={setBgRenderPaused}
-                onNavigateAudioDetail={() => handleSelectRoute('audio-eq')}
-                onNavigateTrajectoryDetail={() => handleSelectRoute('trajectory')}
-              />
-            )}
+                  {/* Layer 2: Settings */}
+                  {displayedRoute === 'settings' && (
+                    <Layer2SettingsRecipe
+                      isLight={isLight}
+                      onBack={() => handleSelectRoute('main-menu')}
+                      initialTab={settingsTab}
+                      backgroundRenderPaused={bgRenderPaused}
+                      onToggleBackgroundRender={setBgRenderPaused}
+                      onNavigateAudioDetail={() => {
+                        setLastParentRoute('settings');
+                        handleSelectRoute('audio-eq');
+                      }}
+                      onNavigateTrajectoryDetail={() => {
+                        setLastParentRoute('settings');
+                        handleSelectRoute('trajectory');
+                      }}
+                    />
+                  )}
 
-            {/* Layer 2: Additional Preview */}
-            {currentRoute === 'additional-preview' && (
-              <Layer2AdditionalPreviewRecipe
-                isLight={isLight}
-                onBack={() => handleSelectRoute('main-menu')}
-                onNavigateLivePreview={() => handleSelectRoute('trajectory')}
-                onSpawnPresetWindow={handleSpawnPresetWindow}
-              />
-            )}
+                  {/* Layer 2: Additional Preview (Live Preview & Floating Window 沙盒) */}
+                  {displayedRoute === 'additional-preview' && (
+                    <Layer2AdditionalPreviewRecipe
+                      isLight={isLight}
+                      onBack={() => handleSelectRoute('main-menu')}
+                      onNavigateLivePreview={() => {
+                        setLastParentRoute('additional-preview');
+                        handleSelectRoute('trajectory');
+                      }}
+                      onAddPresetWindow={handleAddPresetWindow}
+                    />
+                  )}
 
-            {/* Layer 3: Audio Detail EQ */}
-            {currentRoute === 'audio-eq' && (
-              <Layer3AudioDetailRecipe
-                isLight={isLight}
-                onBack={() => handleSelectRoute('settings')}
-              />
-            )}
+                  {/* Layer 3: Audio Detail EQ */}
+                  {displayedRoute === 'audio-eq' && (
+                    <Layer3AudioDetailRecipe
+                      isLight={isLight}
+                      onBack={() => handleSelectRoute('settings')}
+                    />
+                  )}
 
-            {/* Layer 3: Ball Trajectory Predictor Configuration (Live Preview enabled) */}
-            {currentRoute === 'trajectory' && (
-              <div
-                className={`transition-opacity duration-110 w-full flex flex-col ${
-                  livePreviewPhase === 'collapsing_content' ? 'opacity-0' : 'opacity-100'
-                }`}
-              >
-                <Layer3BallTrajectoryRecipe
-                  isLight={isLight}
-                  onBack={() => handleSelectRoute(previousParentRouteRef.current || 'additional-preview')}
-                  onCollapsePreview={handleCollapseLivePreview}
-                />
-              </div>
-            )}
-          </MorphContainer>
+                  {/* Layer 3: Ball Trajectory Predictor (Live Preview enabled) */}
+                  {displayedRoute === 'trajectory' && (
+                    <Layer3BallTrajectoryRecipe
+                      isLight={isLight}
+                      transparent={true}
+                      onBack={() => {
+                        setLiveAnimPhase('expanded');
+                        handleSelectRoute(lastParentRoute);
+                      }}
+                      onCollapsePreview={handleTriggerCollapse}
+                    />
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </MorphContainerContext.Provider>
         )}
       </div>
 

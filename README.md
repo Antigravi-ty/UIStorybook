@@ -58,10 +58,11 @@ UIStorybook 是针对 [RLCleanWASM](https://github.com/Antigravi-ty/RLCleanWASM)
 ## 🗂️ 界面双分层体系 (Dual-Layer: Menu Layer vs HUD Layer)
 
 系统将游戏与交互界面严格区分为两层完全解耦的架构：
-1. **Menu Layer (系统/菜单/模态层)**：对局暂停、局间大厅、系统设置、车库改装与按键映射。由 `MorphContainer` 调度层级形变，在 `<MenuLayerPreviewPage>` 预览。
+1. **Menu Layer (系统/菜单/模态层)**：对局暂停、局间大厅、系统设置、车库改装与按键映射。由统一解耦舞台容器调度层级形变与空间折叠，在 `<MenuLayerPreviewPage>` 预览。
+   - **Layer 0: 零级实时对局** (无菜单纯净对局视图，100% 背景画面恢复，ESC 唤起主菜单)
    - **Layer 1: 根级全局菜单** (`Layer1MainMenuRecipe`, `Layer1MatchPostRecipe`)
-   - **Layer 2: 专项功能二级菜单** (`Layer2GarageRecipe`, `Layer2SettingsRecipe`, `Layer2PlayRecipe`, `Layer2MatchStatsRecipe`, `KeybindingRecipe`)
-   - **Layer 3: 深度参数三级面板** (`Layer3AudioDetailRecipe`, `Layer3BallTrajectoryRecipe`)
+   - **Layer 2: 专项功能二级菜单** (`Layer2GarageRecipe`, `Layer2SettingsRecipe`, `Layer2PlayRecipe`, `Layer2AdditionalPreviewRecipe`, `Layer2MatchStatsRecipe`, `KeybindingRecipe`)
+   - **Layer 3: 深度参数三级面板** (`Layer3AudioDetailRecipe`, `Layer3BallTrajectoryRecipe` · 支持 Live Preview 药丸折叠与 TAB 键响应)
 2. **Match HUD Layer (对局平视显示层 / HUD Layer)**：比赛进行时的实时态势感知与实时仪表，在 `<MatchHudPreviewPage>` 预览。
    - `ScoreboardHUD`: 积分板与 5 分钟倒计时 / 加时赛指示
    - `KickoffCountdownHUD`: 开球 3-2-1-GO! 冲击波倒计时
