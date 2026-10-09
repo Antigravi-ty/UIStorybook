@@ -133,12 +133,14 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
       >
         {/* 
           Label container:
-          - Symmetrical px-1.5 horizontal padding.
-          - Optical baseline correction via -translate-y-px, lifting capital letter W to exact visual center.
+          - Symmetrical pl-1.5 pr-1.5 in resting state for true geometric centering.
+          - On hover: right padding smoothly collapses (group-hover:pr-0.5) as the cross expands,
+            eliminating redundant whitespace between letter and cross.
+          - Optical baseline correction via -translate-y-px.
         */}
         <span 
           data-element="keycap-label"
-          className="inline-flex items-center justify-center h-full px-1.5 text-[10px] font-mono font-semibold leading-none shrink-0 -translate-y-px select-none"
+          className="inline-flex items-center justify-center h-full pl-1.5 pr-1.5 group-hover:pr-0.5 text-[10px] font-mono font-semibold leading-none shrink-0 -translate-y-px select-none transition-all duration-200 ease-out"
         >
           {shortcut}
         </span>
@@ -146,14 +148,13 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
         {/* 
           Inner deletion cross:
           - Default: w-0, opacity-0, overflow-hidden (zero footprint).
-          - On hover: expands smoothly to w-[18px], perfectly housing the 14px button.
-          - Button is centered with symmetric 2px margin on left & right, completely preventing the left/right edge from being clipped.
+          - On hover: expands smoothly to w-[19px] with pr-1 right margin to sit flush and unclipped.
           - Cross icon stays red (text-red-500) permanently.
           - On hover over cross: subtle rounded-rect soft red background (hover:bg-red-500/15).
         */}
         <span 
           data-element="unbind-container"
-          className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[18px] group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto shrink-0"
+          className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[19px] group-hover:opacity-100 group-hover:pr-1 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto shrink-0"
         >
           <button
             type="button"
