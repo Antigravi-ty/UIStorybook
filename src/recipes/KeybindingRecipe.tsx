@@ -120,29 +120,37 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
 }) => {
   return (
     <div 
-      className="group relative inline-flex items-center shrink-0"
-      title={`按键: ${shortcut} (Hover 点击红叉删除)`}
+      className="group relative inline-flex items-center shrink-0 transition-all duration-200"
+      title={`按键: ${shortcut} (Hover 弹出红叉取消绑定)`}
     >
       <KeycapBadge
         shortcut={shortcut}
         kind={kind}
         size="sm"
         isLight={isLight}
-        className="transition-transform group-hover:scale-[0.98]"
+        className="shrink-0 transition-transform group-hover:scale-[0.98]"
       />
-      {/* Red unbind cross popping out smoothly on hover */}
-      <button
-        type="button"
-        aria-label={`Unbind ${shortcut}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        className="opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-150 inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white cursor-pointer ml-1 shrink-0 -mr-0.5 shadow-2xs"
-        title={`取消绑定: ${shortcut}`}
-      >
-        <X className="h-2.5 w-2.5 stroke-[2.5]" />
-      </button>
+      
+      {/* 
+        Zero-footprint unbind cross:
+        Consumes exactly 0px width by default (w-0, overflow-hidden, pointer-events-none).
+        On hover, the wrapper expands smoothly to width 18px (w-[18px]),
+        pushing subsequent badges and the '+' button to the right organically.
+      */}
+      <div className="w-0 overflow-hidden opacity-0 group-hover:w-[18px] group-hover:opacity-100 transition-all duration-200 ease-out flex items-center justify-end pointer-events-none group-hover:pointer-events-auto">
+        <button
+          type="button"
+          aria-label={`Unbind ${shortcut}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-red-500/15 hover:bg-red-500 text-red-500 hover:text-white cursor-pointer ml-1 shrink-0 transition-all transform scale-75 group-hover:scale-100 shadow-2xs"
+          title={`取消绑定: ${shortcut}`}
+        >
+          <X className="h-2.5 w-2.5 stroke-[2.5]" />
+        </button>
+      </div>
     </div>
   );
 };
@@ -463,8 +471,8 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
                 </span>
               </div>
 
-              {/* Col 2: Keyboard Binds (Supports unlimited keybindings with hover delete & '+' button) */}
-              <div className="col-span-4 flex flex-wrap items-center gap-1.5 pr-2">
+              {/* Col 2: Keyboard Binds (Compact layout: zero space waste, hover pushes siblings) */}
+              <div className="col-span-4 flex flex-wrap items-center gap-1 pr-2 transition-all">
                 {b.keyboard.map((k) => (
                   <RemovableKeycap
                     key={k}
@@ -498,8 +506,8 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
                 )}
               </div>
 
-              {/* Col 3: Controller / Gamepad Binds (Supports unlimited gamepad binds with hover delete & '+' button) */}
-              <div className="col-span-4 flex flex-wrap items-center gap-1.5">
+              {/* Col 3: Controller / Gamepad Binds (Compact layout: zero space waste, hover pushes siblings) */}
+              <div className="col-span-4 flex flex-wrap items-center gap-1 transition-all">
                 {b.gamepad.map((padKey) => (
                   <RemovableKeycap
                     key={padKey}
