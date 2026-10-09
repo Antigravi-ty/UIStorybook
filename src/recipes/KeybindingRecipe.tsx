@@ -128,18 +128,19 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
         kind={kind}
         size="sm"
         isLight={isLight}
-        className="inline-flex items-center overflow-hidden transition-all duration-200 cursor-default select-none group-hover:border-red-500/50"
+        className="inline-flex items-center overflow-hidden transition-all duration-200 cursor-default select-none pr-1.5"
       >
         <span className="leading-none">{shortcut}</span>
 
         {/* 
-          Integrated inner deletion cross:
-          Located ENTIRELY inside the keycap badge container.
+          Inner deletion cross:
+          Integrated DIRECTLY inside the keycap badge container.
           Consumes 0px width by default (w-0, opacity-0, overflow-hidden).
-          When hovered, the keycap container itself expands to the right to reveal the red unbind cross,
-          pushing adjacent keys to the right with zero ambiguity about which key the cross belongs to.
+          When hovered, keycap border stays neutral grey while expanding naturally to the right.
+          The cross is vibrant red by default (text-red-500) and displays a full red circular background on hover (hover:bg-red-500 hover:text-white).
+          Wider container (18px) and centered alignment ensure the circle is never clipped into an arc+line.
         */}
-        <span className="inline-flex items-center overflow-hidden w-0 opacity-0 group-hover:w-[15px] group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto">
+        <span className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[18px] group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto ml-0 group-hover:ml-0.5">
           <button
             type="button"
             aria-label={`Unbind ${shortcut}`}
@@ -147,10 +148,10 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
               e.stopPropagation();
               onRemove();
             }}
-            className="inline-flex items-center justify-center h-3 w-3 rounded-full hover:bg-red-500/20 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 cursor-pointer ml-1 shrink-0 transition-colors"
+            className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full text-red-500 hover:bg-red-500 hover:text-white cursor-pointer transition-colors shrink-0"
             title={`取消绑定: ${shortcut}`}
           >
-            <X className="h-2 w-2 stroke-[2.5]" />
+            <X className="h-2.5 w-2.5 stroke-[2.5]" />
           </button>
         </span>
       </KeycapBadge>
