@@ -128,19 +128,21 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
         kind={kind}
         size="sm"
         isLight={isLight}
-        className="inline-flex items-center overflow-hidden transition-all duration-200 cursor-default select-none pr-1.5"
+        className="!p-0 !min-h-[20px] !h-5 inline-flex items-center overflow-hidden transition-all duration-200 cursor-default select-none"
       >
-        <span className="leading-none">{shortcut}</span>
+        {/* Label container: optical true vertical and horizontal center */}
+        <span className="inline-flex items-center justify-center h-full px-1.5 text-[10px] font-mono font-semibold leading-none shrink-0">
+          {shortcut}
+        </span>
 
         {/* 
           Inner deletion cross:
-          Integrated DIRECTLY inside the keycap badge container.
-          Consumes 0px width by default (w-0, opacity-0, overflow-hidden).
-          When hovered, keycap border stays neutral grey while expanding naturally to the right.
-          The cross is vibrant red by default (text-red-500) and displays a full red circular background on hover (hover:bg-red-500 hover:text-white).
-          Wider container (18px) and centered alignment ensure the circle is never clipped into an arc+line.
+          - Default: w-0, opacity-0, overflow-hidden (zero footprint).
+          - On hover: expands smoothly, snug against right border (pr-1), eliminating oversized right gap.
+          - Cross icon stays red (text-red-500) both before and after hover.
+          - On hover: subtle rounded rectangular soft red background (hover:bg-red-500/15).
         */}
-        <span className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[18px] group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto ml-0 group-hover:ml-0.5">
+        <span className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[15px] group-hover:opacity-100 group-hover:pr-1 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto shrink-0">
           <button
             type="button"
             aria-label={`Unbind ${shortcut}`}
@@ -148,7 +150,7 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
               e.stopPropagation();
               onRemove();
             }}
-            className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full text-red-500 hover:bg-red-500 hover:text-white cursor-pointer transition-colors shrink-0"
+            className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-[3px] text-red-500 dark:text-red-400 hover:bg-red-500/15 dark:hover:bg-red-500/25 cursor-pointer transition-colors shrink-0"
             title={`取消绑定: ${shortcut}`}
           >
             <X className="h-2.5 w-2.5 stroke-[2.5]" />
