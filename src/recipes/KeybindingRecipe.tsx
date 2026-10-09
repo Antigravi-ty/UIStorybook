@@ -121,6 +121,7 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
 }) => {
   return (
     <div 
+      data-element="keycap-wrapper"
       className="group inline-flex items-center shrink-0"
       title={`按键: ${shortcut} (Hover 内部红叉可取消绑定)`}
     >
@@ -134,13 +135,13 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
         {/* 
           Label container:
           - Symmetrical pl-1.5 pr-1.5 in resting state for true geometric centering.
-          - On hover: right padding smoothly collapses (group-hover:pr-0.5) as the cross expands,
-            eliminating redundant whitespace between letter and cross.
+          - On hover / expanded: right padding smoothly collapses to 0 (group-hover:pr-0 group-[.is-expanded]:pr-0)
+            as the cross expands, eliminating redundant whitespace between letter and cross.
           - Optical baseline correction via -translate-y-px.
         */}
         <span 
           data-element="keycap-label"
-          className="inline-flex items-center justify-center h-full pl-1.5 pr-1.5 group-hover:pr-0.5 text-[10px] font-mono font-semibold leading-none shrink-0 -translate-y-px select-none transition-all duration-200 ease-out"
+          className="inline-flex items-center justify-center h-full pl-1.5 pr-1.5 group-hover:pr-0 group-[.is-expanded]:pr-0 text-[10px] font-mono font-semibold leading-none shrink-0 -translate-y-px select-none transition-all duration-200 ease-out"
         >
           {shortcut}
         </span>
@@ -148,13 +149,14 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
         {/* 
           Inner deletion cross:
           - Default: w-0, opacity-0, overflow-hidden (zero footprint).
-          - On hover: expands smoothly to w-[19px] with pr-1 right margin to sit flush and unclipped.
+          - On hover / expanded: expands smoothly to w-[18px] (group-hover:w-[18px] group-[.is-expanded]:w-[18px]),
+            perfectly housing the 14px button with balanced 2px side margins.
           - Cross icon stays red (text-red-500) permanently.
           - On hover over cross: subtle rounded-rect soft red background (hover:bg-red-500/15).
         */}
         <span 
           data-element="unbind-container"
-          className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[19px] group-hover:opacity-100 group-hover:pr-1 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto shrink-0"
+          className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[18px] group-hover:opacity-100 group-[.is-expanded]:w-[18px] group-[.is-expanded]:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto group-[.is-expanded]:pointer-events-auto shrink-0"
         >
           <button
             type="button"
@@ -425,6 +427,7 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
 
     const rowRect = firstRowEl.getBoundingClientRect();
     const actionEl = firstRowEl.querySelector<HTMLElement>('[data-col="action"]');
+    const kbdWrapper = firstRowEl.querySelector<HTMLElement>('[data-element="keycap-wrapper"]');
     const firstKbd = firstRowEl.querySelector<HTMLElement>('[data-component="keycap-badge"]');
     const labelSpan = firstKbd?.querySelector<HTMLElement>('[data-element="keycap-label"]');
     const unbindSpan = firstKbd?.querySelector<HTMLElement>('[data-element="unbind-container"]');
@@ -443,14 +446,19 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
       lines.push(`• Action Cell:      ${getRectStr(actionEl.getBoundingClientRect())} | Text: "${actionEl.textContent?.trim()}"`);
     }
 
-    if (firstKbd) {
+    // Helper to capture a phase
+    const capturePhase = (phaseTitle: string) => {
+      lines.push('\n------------------------------------------------------------------------');
+      lines.push(` ${phaseTitle}`);
+      lines.push('------------------------------------------------------------------------');
+
+      if (!firstKbd) return;
       const kRect = firstKbd.getBoundingClientRect();
       const kStyle = window.getComputedStyle(firstKbd);
-      lines.push('\n[1. KEYCAP BADGE CONTAINER]');
+      lines.push('[1. KEYCAP BADGE CONTAINER]');
       lines.push(`  • Size & Pos:     ${getRectStr(kRect)}`);
       lines.push(`  • Padding:        top=${kStyle.paddingTop}, right=${kStyle.paddingRight}, bottom=${kStyle.paddingBottom}, left=${kStyle.paddingLeft}`);
       lines.push(`  • Border:         top=${kStyle.borderTopWidth}, right=${kStyle.borderRightWidth}, bottom=${kStyle.borderBottomWidth}, left=${kStyle.borderLeftWidth}`);
-      lines.push(`  • LineHeight:     ${kStyle.lineHeight} | FontSize: ${kStyle.fontSize}`);
 
       if (labelSpan) {
         const lRect = labelSpan.getBoundingClientRect();
@@ -459,8 +467,8 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
         const bottomGap = kRect.bottom - lRect.bottom;
         lines.push('\n[2. KEY LABEL (LETTER W)]');
         lines.push(`  • Size & Pos:     ${getRectStr(lRect)} | Char: "${labelSpan.textContent?.trim()}"`);
+        lines.push(`  • Padding:        left=${lStyle.paddingLeft}, right=${lStyle.paddingRight}`);
         lines.push(`  • Vertical Gap:   TopGap = ${Math.round(topGap * 10) / 10}px | BottomGap = ${Math.round(bottomGap * 10) / 10}px | Delta = ${Math.round((topGap - bottomGap) * 10) / 10}px`);
-        lines.push(`  • Transform:      ${lStyle.transform} | LineHeight: ${lStyle.lineHeight}`);
       }
 
       if (unbindSpan) {
@@ -468,7 +476,6 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
         const uStyle = window.getComputedStyle(unbindSpan);
         lines.push('\n[3. UNBIND CONTAINER (EXPANDING SPAN)]');
         lines.push(`  • Size & Pos:     ${getRectStr(uRect)}`);
-        lines.push(`  • Padding:        left=${uStyle.paddingLeft}, right=${uStyle.paddingRight}`);
         lines.push(`  • Overflow:       ${uStyle.overflow}`);
 
         if (unbindBtn) {
@@ -483,9 +490,26 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
           lines.push(`  • Clipping Test:  ClippedLeft = ${isClippedLeft} | ClippedRight = ${isClippedRight}`);
         }
       }
+    };
+
+    // Phase 1: Resting state (未悬浮状态 / 收起)
+    capturePhase('[PHASE 1: RESTING STATE (默认收起状态 / 零占位)]');
+
+    // Phase 2: Expanded hover state (展开悬浮态)
+    if (kbdWrapper) {
+      const allEls = [kbdWrapper, ...(kbdWrapper.querySelectorAll<HTMLElement>('*'))];
+      allEls.forEach(el => el.style.setProperty('transition', 'none', 'important'));
+      kbdWrapper.classList.add('is-expanded');
+      void kbdWrapper.offsetWidth; // force synchronous layout reflow
+
+      capturePhase('[PHASE 2: EXPANDED / HOVER STATE (展开态 / 红叉展开 & W右Padding归零)]');
+
+      // Cleanup & restore smooth transitions
+      kbdWrapper.classList.remove('is-expanded');
+      allEls.forEach(el => el.style.removeProperty('transition'));
     }
 
-    lines.push('========================================================================\n');
+    lines.push('\n========================================================================\n');
     const report = lines.join('\n');
     console.log(report);
 
