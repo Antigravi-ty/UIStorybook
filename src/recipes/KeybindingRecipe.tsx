@@ -120,37 +120,40 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
 }) => {
   return (
     <div 
-      className="group relative inline-flex items-center shrink-0 transition-all duration-200"
-      title={`按键: ${shortcut} (Hover 弹出红叉取消绑定)`}
+      className="group inline-flex items-center shrink-0"
+      title={`按键: ${shortcut} (Hover 内部红叉可取消绑定)`}
     >
       <KeycapBadge
         shortcut={shortcut}
         kind={kind}
         size="sm"
         isLight={isLight}
-        className="shrink-0 transition-transform group-hover:scale-[0.98]"
-      />
-      
-      {/* 
-        Zero-footprint unbind cross:
-        Consumes exactly 0px width by default (w-0, overflow-hidden, pointer-events-none).
-        On hover, the wrapper expands smoothly to width 18px (w-[18px]),
-        pushing subsequent badges and the '+' button to the right organically.
-      */}
-      <div className="w-0 overflow-hidden opacity-0 group-hover:w-[18px] group-hover:opacity-100 transition-all duration-200 ease-out flex items-center justify-end pointer-events-none group-hover:pointer-events-auto">
-        <button
-          type="button"
-          aria-label={`Unbind ${shortcut}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove();
-          }}
-          className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-red-500/15 hover:bg-red-500 text-red-500 hover:text-white cursor-pointer ml-1 shrink-0 transition-all transform scale-75 group-hover:scale-100 shadow-2xs"
-          title={`取消绑定: ${shortcut}`}
-        >
-          <X className="h-2.5 w-2.5 stroke-[2.5]" />
-        </button>
-      </div>
+        className="inline-flex items-center overflow-hidden transition-all duration-200 cursor-default select-none group-hover:border-red-500/50"
+      >
+        <span className="leading-none">{shortcut}</span>
+
+        {/* 
+          Integrated inner deletion cross:
+          Located ENTIRELY inside the keycap badge container.
+          Consumes 0px width by default (w-0, opacity-0, overflow-hidden).
+          When hovered, the keycap container itself expands to the right to reveal the red unbind cross,
+          pushing adjacent keys to the right with zero ambiguity about which key the cross belongs to.
+        */}
+        <span className="inline-flex items-center overflow-hidden w-0 opacity-0 group-hover:w-[15px] group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto">
+          <button
+            type="button"
+            aria-label={`Unbind ${shortcut}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="inline-flex items-center justify-center h-3 w-3 rounded-full hover:bg-red-500/20 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 cursor-pointer ml-1 shrink-0 transition-colors"
+            title={`取消绑定: ${shortcut}`}
+          >
+            <X className="h-2 w-2 stroke-[2.5]" />
+          </button>
+        </span>
+      </KeycapBadge>
     </div>
   );
 };

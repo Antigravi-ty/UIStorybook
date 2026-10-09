@@ -42,7 +42,7 @@ export const KeycapBadge: React.FC<KeycapBadgeProps> = ({
 
   // Gamepad specific coloring
   const isGamepad = kind === 'gamepad';
-  const label = typeof content === 'string' ? content.trim().toUpperCase() : '';
+  const label = (typeof shortcut === 'string' ? shortcut : typeof content === 'string' ? content : '').trim().toUpperCase();
 
   let gamepadAccent = '';
   if (isGamepad) {
