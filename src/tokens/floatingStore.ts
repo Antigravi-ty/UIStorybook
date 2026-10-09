@@ -38,6 +38,8 @@ export interface FloatingWindowState {
   focusedWindowId: string | null;
   /** Currently active spawning flight animation to top-right Stack */
   activeFlight: FlyingGhostState | null;
+  /** Counter signal to trigger animated batch minimization of all open windows */
+  batchMinimizeSignal: number;
 }
 
 let state: FloatingWindowState = {
@@ -47,6 +49,7 @@ let state: FloatingWindowState = {
   isStackDismissed: true,
   focusedWindowId: null,
   activeFlight: null,
+  batchMinimizeSignal: 0,
 };
 
 const listeners = new Set<() => void>();
@@ -254,10 +257,26 @@ export const floatingStore = {
     };
     notify();
   },
-  /** Minimize all currently open floating windows into the stack icon */
-  minimizeAllWindows: () => {
+  /** Batch minimize all currently open floating windows with 3-phase collective collapse animation */
+  triggerBatchMinimize: () => {
     const hasOpen = state.windows.some((w) => !w.isMinimized);
     if (!hasOpen) return;
+    state = {
+      ...state,
+      batchMinimizeSignal: state.batchMinimizeSignal + 1,
+      isStackDismissed: false, // Ensure stack icon appears at top-right to receive collapsed windows
+      isStackTrayOpen: false,
+    };
+    notify();
+  },
+  /** Minimize all currently open floating windows into the stack icon (defaults to animation) */
+  minimizeAllWindows: (immediate = false) => {
+    const hasOpen = state.windows.some((w) => !w.isMinimized);
+    if (!hasOpen) return;
+    if (!immediate) {
+      floatingStore.triggerBatchMinimize();
+      return;
+    }
     state = {
       ...state,
       windows: state.windows.map((w) => ({ ...w, isMinimized: true })),
@@ -331,6 +350,7 @@ export const useFloatingStore = () => {
     isStackDismissed: snapshot.isStackDismissed,
     focusedWindowId: snapshot.focusedWindowId,
     activeFlight: snapshot.activeFlight,
+    batchMinimizeSignal: snapshot.batchMinimizeSignal,
     minimizedCount,
     totalCount,
     spawnWindow: floatingStore.spawnWindow,
@@ -342,6 +362,7 @@ export const useFloatingStore = () => {
     updateSize: floatingStore.updateSize,
     minimizeWindow: floatingStore.minimizeWindow,
     minimizeAllWindows: floatingStore.minimizeAllWindows,
+    triggerBatchMinimize: floatingStore.triggerBatchMinimize,
     restoreWindow: floatingStore.restoreWindow,
     closeWindow: floatingStore.closeWindow,
     toggleStackTray: floatingStore.toggleStackTray,

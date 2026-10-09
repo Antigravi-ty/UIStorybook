@@ -15,7 +15,7 @@ export const FloatingWindowManager: React.FC<FloatingWindowManagerProps> = ({
   isLight = false,
   containerRef,
 }) => {
-  const { windows, windowOrder, bringToFront, minimizeWindow, closeWindow, updatePosition, updateSize } =
+  const { windows, windowOrder, bringToFront, minimizeWindow, closeWindow, updatePosition, updateSize, batchMinimizeSignal } =
     useFloatingStore();
   const visibleWindows = windows.filter((w) => !w.isMinimized);
 
@@ -24,12 +24,14 @@ export const FloatingWindowManager: React.FC<FloatingWindowManagerProps> = ({
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-[5]">
       <AnimatePresence>
-        {visibleWindows.map((win) => {
+        {visibleWindows.map((win, idx) => {
           const zIndex = 5 + Math.max(0, windowOrder.indexOf(win.id));
           return (
             <FloatingWindowInstance
               key={win.id}
               item={win}
+              index={idx}
+              batchMinimizeSignal={batchMinimizeSignal}
               isLight={isLight}
               zIndex={zIndex}
               containerRef={containerRef}
@@ -48,6 +50,8 @@ export const FloatingWindowManager: React.FC<FloatingWindowManagerProps> = ({
 
 interface FloatingWindowInstanceProps {
   item: FloatingWindowItem;
+  index: number;
+  batchMinimizeSignal?: number;
   isLight?: boolean;
   zIndex: number;
   containerRef?: React.RefObject<HTMLDivElement | null>;
@@ -60,6 +64,8 @@ interface FloatingWindowInstanceProps {
 
 const FloatingWindowInstance: React.FC<FloatingWindowInstanceProps> = ({
   item,
+  index,
+  batchMinimizeSignal,
   isLight = false,
   zIndex,
   containerRef,
@@ -106,6 +112,21 @@ const FloatingWindowInstance: React.FC<FloatingWindowInstanceProps> = ({
       setSize({ width: item.width, height: item.height });
     }
   }, [item.width, item.height]);
+
+  // Collective collapse signal listener (e.g. when menu opens with ESC key)
+  const lastSignalRef = useRef(batchMinimizeSignal);
+  useEffect(() => {
+    if (batchMinimizeSignal && batchMinimizeSignal !== lastSignalRef.current) {
+      lastSignalRef.current = batchMinimizeSignal;
+      if (minimizePhase === 'idle') {
+        const staggerDelay = Math.max(0, index) * 35;
+        const timer = setTimeout(() => {
+          handleTriggerMinimize();
+        }, staggerDelay);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [batchMinimizeSignal, minimizePhase, index]);
 
   // Handle Dragging by Titlebar
   const handleTitleBarMouseDown = (e: React.MouseEvent) => {

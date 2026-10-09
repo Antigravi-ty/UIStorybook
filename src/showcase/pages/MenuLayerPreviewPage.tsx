@@ -125,6 +125,12 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   const [isPillHovered, setIsPillHovered] = useState(false);
   const [ballSimSpeed, setBallSimSpeed] = useState(128);
 
+  // Floating Window 状态获取：用于光标显隐判断与批量折叠
+  const { isStackDismissed, minimizedCount } = useFloatingStore();
+  const hasStackIcon = !(isStackDismissed && minimizedCount === 0);
+  // 光标隐藏条件：仅当处于对局 Layer 0 状态且右上角无 Stack Icon 时隐藏光标
+  const isCursorHidden = currentRoute === 'layer-0' && !hasStackIcon;
+
   // SequencedStep 模式下的三段时序状态 (仅在 sequenced-step 模式下使用)
   const [stepPhase, setStepPhase] = useState<'idle' | 'fadeOut' | 'resize' | 'fadeIn'>('idle');
   const [displayedRoute, setDisplayedRoute] = useState<ActiveMenuRoute>('main-menu');
@@ -132,8 +138,25 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   // Stage 尺寸引用
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [stageSize, setStageSize] = useState({ width: 900, height: 620 });
-  // 中间菜单窗口震动反馈触发器（当用户在菜单打开状态误触 Stack Icon 时触发 Apple Sheet Shake）
-  const [shakeTrigger, setShakeTrigger] = useState(0);
+  
+  // 中间菜单窗口震动反馈状态（当用户在菜单打开状态误触 Stack Icon 时触发 Apple Sheet Shake）
+  const [isShaking, setIsShaking] = useState(false);
+  const shakeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerShake = () => {
+    if (isShaking) return;
+    setIsShaking(true);
+    if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+    shakeTimerRef.current = setTimeout(() => {
+      setIsShaking(false);
+    }, 360);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+    };
+  }, []);
 
   const showToast = (msg: string) => {
     setFeedbackToast(msg);
@@ -180,9 +203,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
       setLiveAnimPhase('expanded');
     }
 
-    // 从 Layer 0 呼出菜单时，自动将所有展开的浮动窗口收纳折叠回 Stack Icon
+    // 从 Layer 0 呼出菜单时，自动将所有展开的浮动窗口收纳折叠回 Stack Icon（触发集体收缩飞跃动画）
     if (currentRoute === 'layer-0' && targetRoute !== 'layer-0') {
-      floatingStore.minimizeAllWindows();
+      floatingStore.triggerBatchMinimize();
     }
 
     if (transitionMode === 'fluid-morph') {
@@ -253,12 +276,12 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
       } else if (e.key === 'Escape') {
         e.preventDefault();
         if (currentRoute === 'layer-0') {
-          floatingStore.minimizeAllWindows();
+          floatingStore.triggerBatchMinimize();
           handleSelectRoute('main-menu');
-          showToast('ESC: 呼出主菜单 (已折叠展开的悬浮窗，鼠标已显现)');
+          showToast('ESC: 呼出主菜单 (已折叠展开的悬浮窗)');
         } else if (currentRoute === 'main-menu') {
           handleSelectRoute('layer-0');
-          showToast('ESC: 返回对局 (Layer 0 · 鼠标已隐藏)');
+          showToast('ESC: 返回对局 (Layer 0)');
         } else if (
           currentRoute === 'play' ||
           currentRoute === 'garage' ||
@@ -743,7 +766,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
         id="storybook-preview-stage"
         ref={stageRef}
         className={`relative min-h-[620px] rounded-2xl border p-6 md:p-10 flex items-center justify-center overflow-hidden transition-colors ${
-          currentRoute === 'layer-0' ? 'cursor-none' : 'cursor-default'
+          isCursorHidden ? 'cursor-none' : 'cursor-default'
         } ${
           isLight 
             ? 'bg-neutral-100/70 border-neutral-200/90 shadow-inner' 
@@ -769,7 +792,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             </span>
             <span className="text-xs text-neutral-400 max-w-md text-center leading-relaxed">
               {currentRoute === 'layer-0'
-                ? '✨ Layer 0 状态：对局中无菜单遮挡，鼠标默认隐藏（手柄/对局模式）。按 ESC 唤出主菜单并恢复鼠标。'
+                ? hasStackIcon
+                  ? '✨ Layer 0 状态：右上角保留 Stack 栈图标，允许拖拽观测窗口（鼠标保持显示）。点击右上角 X 可关闭图标并隐藏鼠标。'
+                  : '✨ Layer 0 状态：无 Stack 图标，对局鼠标默认隐藏。按 ESC 呼出主菜单并恢复鼠标。'
                 : isDockState
                 ? '✨ Live Preview 已收缩至右侧 Dock 药丸：背景画面 100% 恢复渲染，无黑屏遮挡！'
                 : '中央面板展开状态：背景渲染自动变暗降噪，以聚焦精细参数控制器。'}
@@ -806,7 +831,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           isMenuOpen={currentRoute !== 'layer-0'}
           blockedTooltipText={currentRoute === 'settings' ? 'Please close settings window first' : 'Please close active menu first'}
           onBlockedClick={() => {
-            setShakeTrigger((k) => k + 1);
+            triggerShake();
             showToast('⚠️ Please close active menu first (已震动提示阻碍窗口)');
           }}
         />
@@ -819,12 +844,19 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <div className="flex flex-col">
               <span className="text-xs font-bold font-mono">Active Match (Layer 0 · In-Game Arena)</span>
-              <span className="text-[11px] text-neutral-400">当前处于无菜单对局状态（鼠标隐藏），按键盘 ESC 键呼出菜单</span>
+              <span className="text-[11px] text-neutral-400">
+                {hasStackIcon
+                  ? '右上角保留 Stack 栈图标：允许自由拖拽与调节参数（鼠标保持显示）。如需沉浸隐藏鼠标，可点击右上角图标将其关闭。'
+                  : '当前处于无菜单对局状态且无 Stack 图标（鼠标已隐藏）。按键盘 ESC 键呼出菜单'}
+              </span>
             </div>
             <div className="h-4 w-px bg-neutral-700" />
             <button
               type="button"
-              onClick={() => handleSelectRoute('main-menu')}
+              onClick={() => {
+                floatingStore.triggerBatchMinimize();
+                handleSelectRoute('main-menu');
+              }}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-white cursor-pointer transition-all active:scale-95 shadow-2xs"
             >
               <KeycapBadge shortcut="ESC" size="sm" isLight={false} />
@@ -836,38 +868,46 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
         {/* 
           统一形态解耦容器 (Decoupled Stage Container)
           - 采用绝对几何投影坐标 (x, y, width, height, borderRadius)
-          - 支持受互斥阻止时的 Apple Sheet Shake 左右轻微震颤
+          - 独立外层 Shake 包装器：支持受互斥阻止时的 Apple Sheet Shake 左右轻微震颤（360ms 自复位，绝不重置内部表单/选项卡状态）
         */}
         {currentRoute !== 'layer-0' && (
           <MorphContainerContext.Provider value={true}>
             <motion.div
-              key={`menu-container-${shakeTrigger}`}
-              data-morph-container="true"
-              data-panel="container"
-              initial={false}
-              animate={{
-                x: shakeTrigger > 0
-                  ? [targetX, targetX - 10, targetX + 10, targetX - 7, targetX + 7, targetX - 3, targetX + 3, targetX]
-                  : targetX,
-                y: targetY,
-                width: targetW,
-                height: targetH,
-                borderRadius: targetRadius,
-                opacity: 1,
-              }}
-              transition={{
-                x: shakeTrigger > 0 ? { duration: 0.35, ease: 'easeInOut' } : { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
-                y: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
-                width: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
-                height: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
-                borderRadius: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
-              }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-              }}
-              className={`select-none z-30 transition-shadow overflow-hidden flex flex-col ${
+              key="decoupled-menu-stage-wrapper"
+              animate={
+                isShaking
+                  ? { x: [0, -10, 10, -7, 7, -3, 3, 0] }
+                  : { x: 0 }
+              }
+              transition={{ duration: 0.35, ease: 'easeInOut' }}
+              className="absolute inset-0 pointer-events-none z-30"
+            >
+              <motion.div
+                key="decoupled-menu-stage-container"
+                data-morph-container="true"
+                data-panel="container"
+                initial={false}
+                animate={{
+                  x: targetX,
+                  y: targetY,
+                  width: targetW,
+                  height: targetH,
+                  borderRadius: targetRadius,
+                  opacity: 1,
+                }}
+                transition={{
+                  x: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
+                  y: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
+                  width: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
+                  height: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
+                  borderRadius: { duration: 0.28, ease: [0.2, 0.8, 0.25, 1] },
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }}
+                className={`pointer-events-auto select-none transition-shadow overflow-hidden flex flex-col ${
                 isDockState
                   ? isLight
                     ? 'border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_0_16px_rgba(0,0,0,0.15)] cursor-pointer'
@@ -1003,8 +1043,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 </div>
               )}
             </motion.div>
-          </MorphContainerContext.Provider>
-        )}
+          </motion.div>
+        </MorphContainerContext.Provider>
+      )}
       </div>
 
       {/* 底部引导栏 */}
