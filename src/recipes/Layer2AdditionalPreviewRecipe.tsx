@@ -4,6 +4,7 @@ import {
   AppWindow, 
   ArrowRight, 
   Plus, 
+  X,
   Sparkles, 
   Cpu, 
   Target, 
@@ -63,7 +64,7 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
 
   const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
 
-  const { minimizedCount, totalCount } = useFloatingStore();
+  const { windows, closeWindow, minimizedCount, totalCount } = useFloatingStore();
 
   const handleTabChange = (t: string) => {
     const valid = t as 'live-preview' | 'floating-windows';
@@ -276,29 +277,60 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Singleton vs Multi-Instance badge */}
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${
+                      preset.singleton 
+                        ? 'border-indigo-400/40 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' 
+                        : 'border-emerald-400/40 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30'
+                    }`}>
+                      {preset.singleton ? 'Singleton (1×)' : 'Multi (∞)'}
+                    </span>
+
                     {preset.resizable ? (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono border border-neutral-400/40 dark:border-neutral-600 text-neutral-600 dark:text-neutral-400">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono border border-neutral-400/40 dark:border-neutral-600 text-neutral-600 dark:text-neutral-400">
                         Resizable
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono opacity-50 text-neutral-500">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono opacity-50 text-neutral-500">
                         Fixed
                       </span>
                     )}
 
-                    <button
-                      type="button"
-                      onClick={(e) => onAddPresetWindow?.(preset, e)}
-                      title={`Spawn "${preset.title}" into top-right Stack`}
-                      className={`h-7 w-7 rounded-lg border flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 shrink-0 ${
-                        isLight
-                          ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-white shadow-2xs'
-                          : 'bg-neutral-100 hover:bg-white border-neutral-200 text-neutral-950 font-bold shadow-2xs'
-                      }`}
-                    >
-                      <Plus className="h-4 w-4 stroke-[2.5]" />
-                    </button>
+                    {(() => {
+                      const isSingleton = preset.singleton ?? false;
+                      const existingWindow = isSingleton
+                        ? windows.find((w) => w.id === preset.id || w.id.startsWith(preset.id))
+                        : null;
+
+                      if (existingWindow) {
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => closeWindow(existingWindow.id)}
+                            title={`Remove "${preset.title}" from stack`}
+                            className="h-7 w-7 rounded-lg border flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none bg-red-500/15 hover:bg-red-500/25 border-red-400/40 text-red-500 shrink-0"
+                          >
+                            <X className="h-3.5 w-3.5 stroke-[2.5]" />
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          type="button"
+                          onClick={(e) => onAddPresetWindow?.(preset, e)}
+                          title={`Spawn "${preset.title}" into top-right Stack`}
+                          className={`h-7 w-7 rounded-lg border flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 shrink-0 ${
+                            isLight
+                              ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-white shadow-2xs'
+                              : 'bg-neutral-100 hover:bg-white border-neutral-200 text-neutral-950 font-bold shadow-2xs'
+                          }`}
+                        >
+                          <Plus className="h-4 w-4 stroke-[2.5]" />
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               ))}

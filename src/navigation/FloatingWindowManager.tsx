@@ -22,10 +22,10 @@ export const FloatingWindowManager: React.FC<FloatingWindowManagerProps> = ({
   if (visibleWindows.length === 0) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-[5]">
       <AnimatePresence>
         {visibleWindows.map((win) => {
-          const zIndex = 10 + Math.max(0, windowOrder.indexOf(win.id));
+          const zIndex = 5 + Math.max(0, windowOrder.indexOf(win.id));
           return (
             <FloatingWindowInstance
               key={win.id}

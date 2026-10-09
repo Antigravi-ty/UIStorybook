@@ -31,6 +31,7 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
     minimizedCount,
     totalCount,
     spawnWithFlight,
+    closeWindow,
     clearAll,
   } = useFloatingStore();
 
@@ -163,45 +164,70 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
           </div>
 
           <div className="flex flex-col gap-1.5">
-            {PRESET_WINDOWS.map((preset) => (
-              <div
-                key={preset.id}
-                className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl border text-xs transition-colors ${
-                  isLight
-                    ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200'
-                    : 'bg-neutral-800/60 hover:bg-neutral-800 border-neutral-700/60'
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {getPresetIcon(preset.category)}
-                  <span className="font-medium truncate text-xs" title={preset.title}>
-                    {preset.title}
-                  </span>
-                  {preset.resizable ? (
-                    <span className="px-1 py-0.5 rounded text-[9px] font-mono shrink-0 border border-neutral-400/40 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400">
-                      Resize
-                    </span>
-                  ) : (
-                    <span className="px-1 py-0.5 rounded text-[9px] font-mono shrink-0 opacity-40 text-neutral-500">
-                      Fixed
-                    </span>
-                  )}
-                </div>
+            {PRESET_WINDOWS.map((preset) => {
+              const isSingleton = preset.singleton ?? false;
+              const existingWindow = isSingleton
+                ? windows.find((w) => w.id === preset.id || w.id.startsWith(preset.id))
+                : null;
 
-                <button
-                  type="button"
-                  onClick={(e) => handleAddPreset(preset, e)}
-                  title={`Enqueue ${preset.title} into top-right Stack`}
-                  className={`h-6 w-6 rounded-lg border flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 shrink-0 ${
+              return (
+                <div
+                  key={preset.id}
+                  className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl border text-xs transition-colors ${
                     isLight
-                      ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-white'
-                      : 'bg-neutral-100 hover:bg-white border-neutral-200 text-neutral-950 font-bold'
+                      ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200'
+                      : 'bg-neutral-800/60 hover:bg-neutral-800 border-neutral-700/60'
                   }`}
                 >
-                  <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    {getPresetIcon(preset.category)}
+                    <span className="font-medium truncate text-xs" title={preset.title}>
+                      {preset.title}
+                    </span>
+                    <span className={`px-1 py-0.2 rounded text-[8.5px] font-mono shrink-0 border ${
+                      preset.singleton 
+                        ? 'border-indigo-400/40 text-indigo-500' 
+                        : 'border-emerald-400/40 text-emerald-500'
+                    }`}>
+                      {preset.singleton ? '1×' : '∞'}
+                    </span>
+                    {preset.resizable ? (
+                      <span className="px-1 py-0.5 rounded text-[9px] font-mono shrink-0 border border-neutral-400/40 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400">
+                        Resize
+                      </span>
+                    ) : (
+                      <span className="px-1 py-0.5 rounded text-[9px] font-mono shrink-0 opacity-40 text-neutral-500">
+                        Fixed
+                      </span>
+                    )}
+                  </div>
+
+                  {existingWindow ? (
+                    <button
+                      type="button"
+                      onClick={() => closeWindow(existingWindow.id)}
+                      title={`Remove ${preset.title} from stack`}
+                      className="h-6 w-6 rounded-lg border flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none bg-red-500/15 hover:bg-red-500/25 border-red-400/40 text-red-500 shrink-0"
+                    >
+                      <X className="h-3.5 w-3.5 stroke-[2.5]" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(e) => handleAddPreset(preset, e)}
+                      title={`Enqueue ${preset.title} into top-right Stack`}
+                      className={`h-6 w-6 rounded-lg border flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 shrink-0 ${
+                        isLight
+                          ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-white'
+                          : 'bg-neutral-100 hover:bg-white border-neutral-200 text-neutral-950 font-bold'
+                      }`}
+                    >
+                      <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layers, X, Activity, Cpu, Monitor, Target, Sparkles, Sliders } from 'lucide-react';
@@ -12,6 +12,12 @@ export interface FloatingStackIconProps {
   absolute?: boolean;
   /** Ref to the active canvas container for computing relative coordinates */
   containerRef?: React.RefObject<HTMLDivElement | null>;
+  /** Whether an active menu/settings modal is currently open, blocking stack expansion */
+  isMenuOpen?: boolean;
+  /** Custom tooltip message when hover-blocked */
+  blockedTooltipText?: string;
+  /** Callback fired when user clicks the stack icon while blocked by an active menu */
+  onBlockedClick?: () => void;
 }
 
 /** Helper to pick a distinct colored icon without any background pill */
@@ -196,6 +202,9 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
   className = '',
   absolute = true,
   containerRef,
+  isMenuOpen = false,
+  blockedTooltipText,
+  onBlockedClick,
 }) => {
   const {
     windows,
@@ -291,9 +300,18 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
               animate={bounceTrigger > 0 ? { scale: [1, 1.15, 1] } : { scale: 1 }}
               transition={{ duration: 0.22, ease: [0.2, 0.8, 0.25, 1] }}
               type="button"
-              onClick={toggleStackTray}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isMenuOpen) {
+                  onBlockedClick?.();
+                  return;
+                }
+                toggleStackTray();
+              }}
               aria-label="Floating Diagnostic Window Stack"
               className={`relative h-10 w-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 active:scale-95 ${
+                isMenuOpen ? 'opacity-85' : ''
+              } ${
                 isLight
                   ? 'bg-white hover:bg-neutral-50 border-neutral-300 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_16px_rgba(0,0,0,0.12)]'
                   : 'bg-neutral-900 hover:bg-neutral-850 border-neutral-700 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_0_20px_rgba(0,0,0,0.7),0_0_28px_rgba(255,255,255,0.06)]'
@@ -324,7 +342,7 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
 
           {/* 3. Dismiss button 'X': exact same spring animation and dimensions as counter bubble */}
           <AnimatePresence>
-            {minimizedCount === 0 && isStackHovered && (
+            {minimizedCount === 0 && isStackHovered && !isMenuOpen && (
               <motion.button
                 key="dismiss-stack-btn"
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -341,6 +359,27 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
               >
                 <X className="h-3 w-3 stroke-[3]" />
               </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* 4. Blocked Tooltip when Hovering Stack with Open Menu */}
+          <AnimatePresence>
+            {isMenuOpen && isStackHovered && (
+              <motion.div
+                key="blocked-menu-tooltip"
+                initial={{ opacity: 0, y: 4, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 2, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className={`absolute top-full mt-2.5 right-0 px-3 py-1.5 rounded-xl border text-xs whitespace-nowrap shadow-xl pointer-events-none select-none z-50 flex items-center gap-1.5 font-medium backdrop-blur-md ${
+                  isLight
+                    ? 'bg-neutral-900/95 text-neutral-100 border-neutral-700 shadow-neutral-900/25'
+                    : 'bg-neutral-850/95 text-neutral-100 border-neutral-650 shadow-black/60'
+                }`}
+              >
+                <span className="text-amber-400 text-xs shrink-0">⚠️</span>
+                <span>{blockedTooltipText || 'Please close settings window first'}</span>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

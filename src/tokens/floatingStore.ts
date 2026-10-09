@@ -254,28 +254,56 @@ export const floatingStore = {
     };
     notify();
   },
+  /** Minimize all currently open floating windows into the stack icon */
+  minimizeAllWindows: () => {
+    const hasOpen = state.windows.some((w) => !w.isMinimized);
+    if (!hasOpen) return;
+    state = {
+      ...state,
+      windows: state.windows.map((w) => ({ ...w, isMinimized: true })),
+      windowOrder: [],
+      focusedWindowId: null,
+      isStackTrayOpen: false,
+      isStackDismissed: false,
+    };
+    notify();
+  },
   /** Complete flying animation and commit minimized window into store */
   completeFlight: () => {
     if (!state.activeFlight) return;
     const { preset } = state.activeFlight;
 
-    const newItem: FloatingWindowItem = {
-      id: `${preset.id}-${Date.now().toString().slice(-4)}`,
-      title: preset.title,
-      category: preset.category,
-      width: preset.width,
-      height: preset.height,
-      isMinimized: true,
-      resizable: preset.resizable,
-      position: {
-        x: 40 + (state.windows.length % 5) * 32,
-        y: 40 + (state.windows.length % 5) * 32,
-      },
-    };
+    const isSingleton = preset.singleton ?? false;
+    const winId = isSingleton ? preset.id : `${preset.id}-${Date.now().toString().slice(-4)}`;
+
+    // If singleton already exists, minimize it and focus it
+    const existingIndex = state.windows.findIndex((w) => w.id === winId);
+    let nextWindows = state.windows;
+
+    if (existingIndex >= 0) {
+      nextWindows = state.windows.map((w, idx) =>
+        idx === existingIndex ? { ...w, isMinimized: true } : w
+      );
+    } else {
+      const newItem: FloatingWindowItem = {
+        id: winId,
+        title: preset.title,
+        category: preset.category,
+        width: preset.width,
+        height: preset.height,
+        isMinimized: true,
+        resizable: preset.resizable,
+        position: {
+          x: 40 + (state.windows.length % 5) * 32,
+          y: 40 + (state.windows.length % 5) * 32,
+        },
+      };
+      nextWindows = [...state.windows, newItem];
+    }
 
     state = {
       ...state,
-      windows: [...state.windows, newItem],
+      windows: nextWindows,
       isStackDismissed: false,
       activeFlight: null,
     };
@@ -313,6 +341,7 @@ export const useFloatingStore = () => {
     updatePosition: floatingStore.updatePosition,
     updateSize: floatingStore.updateSize,
     minimizeWindow: floatingStore.minimizeWindow,
+    minimizeAllWindows: floatingStore.minimizeAllWindows,
     restoreWindow: floatingStore.restoreWindow,
     closeWindow: floatingStore.closeWindow,
     toggleStackTray: floatingStore.toggleStackTray,

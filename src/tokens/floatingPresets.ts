@@ -5,6 +5,7 @@ export interface PresetConfig {
   width: number;
   height: number;
   resizable: boolean;
+  singleton?: boolean;
 }
 
 export const PRESET_WINDOWS: PresetConfig[] = [
@@ -15,6 +16,7 @@ export const PRESET_WINDOWS: PresetConfig[] = [
     width: 320,
     height: 220,
     resizable: false,
+    singleton: true,
   },
   {
     id: 'pid-short-resizable',
@@ -23,6 +25,7 @@ export const PRESET_WINDOWS: PresetConfig[] = [
     width: 360,
     height: 240,
     resizable: true,
+    singleton: false,
   },
   {
     id: 'telemetry-long',
@@ -31,6 +34,7 @@ export const PRESET_WINDOWS: PresetConfig[] = [
     width: 480,
     height: 280,
     resizable: false,
+    singleton: true,
   },
   {
     id: 'aero-long-resizable',
@@ -39,5 +43,6 @@ export const PRESET_WINDOWS: PresetConfig[] = [
     width: 500,
     height: 320,
     resizable: true,
+    singleton: false,
   },
 ];
