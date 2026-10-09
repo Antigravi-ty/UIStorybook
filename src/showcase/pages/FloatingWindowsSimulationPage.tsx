@@ -23,16 +23,6 @@ export interface FloatingWindowsSimulationPageProps {
   isLight?: boolean;
 }
 
-interface FlyingGhost {
-  id: string;
-  startX: number;
-  startY: number;
-  startW: number;
-  startH: number;
-  destX: number;
-  destY: number;
-}
-
 export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPageProps> = ({
   isLight = false,
 }) => {
@@ -40,53 +30,16 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
     windows,
     minimizedCount,
     totalCount,
-    spawnWindow,
+    spawnWithFlight,
     clearAll,
   } = useFloatingStore();
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
-  // Flying ghost container state for '+' click animation directly into top-right Stack Icon
-  const [flyingGhost, setFlyingGhost] = useState<FlyingGhost | null>(null);
-
-  // Handle clicking '+' on a preset item in bottom-left
+  // Handle clicking '+' on a preset item in bottom-left: delegates directly to shared floatingStore & FloatingStackIcon
   const handleAddPreset = (preset: PresetConfig, e: React.MouseEvent<HTMLButtonElement>) => {
     if (!canvasRef.current) return;
-    const btnRect = e.currentTarget.getBoundingClientRect();
-    const canvasRect = canvasRef.current.getBoundingClientRect();
-
-    const startX = Math.round(btnRect.left - canvasRect.left);
-    const startY = Math.round(btnRect.top - canvasRect.top);
-    const startW = Math.round(btnRect.width);
-    const startH = Math.round(btnRect.height);
-
-    const destX = Math.round(canvasRect.width - 56);
-    const destY = 16;
-
-    const ghostId = `${preset.id}-${Date.now()}`;
-    setFlyingGhost({
-      id: ghostId,
-      startX,
-      startY,
-      startW,
-      startH,
-      destX,
-      destY,
-    });
-
-    // After 280ms sequenced transition completes, register minimized window in store
-    setTimeout(() => {
-      spawnWindow({
-        id: `${preset.id}-${Date.now().toString().slice(-4)}`,
-        title: preset.title,
-        category: preset.category,
-        width: preset.width,
-        height: preset.height,
-        resizable: preset.resizable,
-        startMinimized: true,
-      });
-      setFlyingGhost(null);
-    }, 280);
+    spawnWithFlight(preset, e.currentTarget, canvasRef.current);
   };
 
   const getPresetIcon = (category: string) => {
@@ -182,51 +135,7 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
           </span>
         </div>
 
-        {/* 
-          Spawning Ghost Container executing Sequenced Step Transition:
-          Button rect -> flies & resizes 4 corners to top-right Stack Icon rect (40x40)
-        */}
-        <AnimatePresence>
-          {flyingGhost && (
-            <motion.div
-              key={flyingGhost.id}
-              initial={{
-                x: flyingGhost.startX,
-                y: flyingGhost.startY,
-                width: flyingGhost.startW,
-                height: flyingGhost.startH,
-                borderRadius: 8,
-                opacity: 1,
-                scale: 1,
-              }}
-              animate={{
-                x: flyingGhost.destX,
-                y: flyingGhost.destY,
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                opacity: [1, 1, 0.9, 0],
-                scale: [1, 1.05, 0.95, 0.85],
-              }}
-              transition={{
-                duration: 0.28,
-                ease: [0.2, 0.8, 0.25, 1],
-              }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-              }}
-              className={`z-40 pointer-events-none border backdrop-blur-md overflow-hidden select-none flex items-center justify-center ${
-                isLight
-                  ? 'bg-white/95 border-neutral-300 text-neutral-900 shadow-[0_4px_24px_rgba(0,0,0,0.18)]'
-                  : 'bg-neutral-850/95 border-neutral-700 text-neutral-100 shadow-[0_4px_24px_rgba(0,0,0,0.7)]'
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* Floating Stack Icon positioned strictly in top-right of active canvas */}
         <FloatingStackIcon isLight={isLight} absolute={true} containerRef={canvasRef} />

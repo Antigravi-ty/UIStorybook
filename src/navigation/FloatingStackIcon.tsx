@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layers, X, Activity, Cpu, Monitor, Target, Sparkles, Sliders } from 'lucide-react';
-import { useFloatingStore, FloatingWindowItem } from '../tokens/floatingStore';
+import { useFloatingStore, FloatingWindowItem, FlyingGhostState } from '../tokens/floatingStore';
 import { UI_EASING } from '../tokens/easing';
 
 export interface FloatingStackIconProps {
@@ -31,6 +31,162 @@ const getWindowIcon = (category?: string, id?: string) => {
   return <Sparkles className="h-4 w-4 text-neutral-800 dark:text-neutral-200 shrink-0" />;
 };
 
+interface FlyingGhostElementProps {
+  flight: FlyingGhostState;
+  isLight: boolean;
+  onComplete: () => void;
+}
+
+/**
+ * FlyingGhostElement
+ * Unified component for fly-to-stack transition:
+ * - Mode A (Target already had Stack): Flies & absorbs smoothly into center, triggering Stack reception bounce.
+ * - Mode B (Target did NOT have Stack): Standard 3-stage morphing transition:
+ *   Stage 1: Fly with opacity 1 (never disappears!) -> Stage 2: Settle at dest 40x40 -> Stage 3: Smooth morph to Stack Icon (Layers + badge 1).
+ */
+const FlyingGhostElement: React.FC<FlyingGhostElementProps> = ({ flight, isLight, onComplete }) => {
+  const [isLanded, setIsLanded] = useState(false);
+
+  useEffect(() => {
+    if (flight.targetHadStack) {
+      const timer = setTimeout(() => {
+        onComplete();
+      }, 260);
+      return () => clearTimeout(timer);
+    } else {
+      const landTimer = setTimeout(() => {
+        setIsLanded(true);
+        const finishTimer = setTimeout(() => {
+          onComplete();
+        }, 120);
+        return () => clearTimeout(finishTimer);
+      }, 260);
+      return () => clearTimeout(landTimer);
+    }
+  }, [flight.targetHadStack, onComplete]);
+
+  if (flight.targetHadStack) {
+    return (
+      <motion.div
+        key={`flying-absorb-${flight.id}`}
+        initial={{
+          x: flight.startX,
+          y: flight.startY,
+          width: flight.startW,
+          height: flight.startH,
+          borderRadius: 8,
+          opacity: 1,
+          scale: 1,
+        }}
+        animate={{
+          x: flight.destX,
+          y: flight.destY,
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          opacity: [1, 1, 0.8, 0],
+          scale: [1, 1.05, 0.95, 0.85],
+        }}
+        transition={{
+          duration: 0.26,
+          ease: [0.2, 0.8, 0.25, 1],
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 45,
+          pointerEvents: 'none',
+        }}
+        className={`border backdrop-blur-md overflow-hidden select-none flex items-center justify-center ${
+          isLight
+            ? 'bg-white/95 border-neutral-300 text-neutral-900 shadow-[0_4px_24px_rgba(0,0,0,0.18)]'
+            : 'bg-neutral-850/95 border-neutral-700 text-neutral-100 shadow-[0_4px_24px_rgba(0,0,0,0.7)]'
+        }`}
+      >
+        <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      key={`flying-morph-${flight.id}`}
+      initial={{
+        x: flight.startX,
+        y: flight.startY,
+        width: flight.startW,
+        height: flight.startH,
+        borderRadius: 8,
+        opacity: 1,
+        scale: 1,
+      }}
+      animate={{
+        x: flight.destX,
+        y: flight.destY,
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        opacity: 1,
+        scale: 1,
+      }}
+      transition={{
+        duration: 0.26,
+        ease: [0.2, 0.8, 0.25, 1],
+      }}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 45,
+        pointerEvents: 'none',
+      }}
+      className={`border backdrop-blur-md overflow-hidden select-none flex items-center justify-center ${
+        isLight
+          ? 'bg-white border-neutral-300 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_16px_rgba(0,0,0,0.12)]'
+          : 'bg-neutral-900 border-neutral-700 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_0_20px_rgba(0,0,0,0.7),0_0_28px_rgba(255,255,255,0.06)]'
+      }`}
+    >
+      {!isLanded ? (
+        <motion.div
+          key="ghost-flight-icon"
+          initial={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="flex items-center justify-center"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="ghost-landed-icon"
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.12, ease: 'easeOut' }}
+          className="flex items-center justify-center"
+        >
+          <Layers className="h-5 w-5 text-neutral-900 dark:text-neutral-100" />
+        </motion.div>
+      )}
+
+      {isLanded && (
+        <motion.div
+          key="ghost-landed-bubble"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: [0, 1.25, 1], opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+          className={`absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 rounded-full border flex items-center justify-center font-mono font-bold text-[11px] pointer-events-none select-none ${
+            isLight
+              ? 'bg-white text-black border-black shadow-xs'
+              : 'bg-black text-white border-white shadow-xs'
+          }`}
+        >
+          1
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
 /**
  * FloatingStackIcon
  * Renders the top-right rounded-square stack icon and dropdown tray for minimized diagnostic windows.
@@ -46,6 +202,8 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
     isStackTrayOpen,
     isStackDismissed,
     minimizedCount,
+    activeFlight,
+    completeFlight,
     toggleStackTray,
     setStackTrayOpen,
     restoreWindow,
@@ -55,6 +213,7 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
 
   const [isStackHovered, setIsStackHovered] = useState(false);
   const [hoveredWindowId, setHoveredWindowId] = useState<string | null>(null);
+  const [bounceTrigger, setBounceTrigger] = useState(0);
 
   // Restoring state: tracks clicked item start rect in canvas space and destination window rect
   const [restoringWindow, setRestoringWindow] = useState<{
@@ -63,13 +222,15 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
     targetRect: { x: number; y: number; width: number; height: number };
   } | null>(null);
 
-  // If stack is dismissed and has no minimized windows, do not show
-  if (isStackDismissed && minimizedCount === 0) {
+  const isStackVisible = !(isStackDismissed && minimizedCount === 0);
+
+  // If stack is dismissed and has no minimized windows, AND no active flight, do not show
+  if (!isStackVisible && !activeFlight) {
     return null;
   }
 
-  // If no windows exist at all and stack is dismissed, hide
-  if (windows.length === 0 && isStackDismissed) {
+  // If no windows exist at all and stack is dismissed, AND no active flight, hide
+  if (windows.length === 0 && isStackDismissed && !activeFlight) {
     return null;
   }
 
@@ -113,29 +274,33 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
 
   return (
     <>
-      <div
-        className={`${
-          absolute ? 'absolute top-4 right-4' : 'fixed top-4 right-6'
-        } z-50 select-none flex flex-col items-end ${className}`}
-      >
-        {/* 1. Main Stack Square Button (Neutral Monochrome) */}
+      {isStackVisible && (
         <div
-          className="relative"
-          onMouseEnter={() => setIsStackHovered(true)}
-          onMouseLeave={() => setIsStackHovered(false)}
+          className={`${
+            absolute ? 'absolute top-4 right-4' : 'fixed top-4 right-6'
+          } z-50 select-none flex flex-col items-end ${className}`}
         >
-          <button
-            type="button"
-            onClick={toggleStackTray}
-            aria-label="Floating Diagnostic Window Stack"
-            className={`relative h-10 w-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 active:scale-95 ${
-              isLight
-                ? 'bg-white hover:bg-neutral-50 border-neutral-300 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_16px_rgba(0,0,0,0.12)]'
-                : 'bg-neutral-900 hover:bg-neutral-850 border-neutral-700 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_0_20px_rgba(0,0,0,0.7),0_0_28px_rgba(255,255,255,0.06)]'
-            }`}
+          {/* 1. Main Stack Square Button (Neutral Monochrome) */}
+          <div
+            className="relative"
+            onMouseEnter={() => setIsStackHovered(true)}
+            onMouseLeave={() => setIsStackHovered(false)}
           >
-            <Layers className="h-5 w-5 text-neutral-900 dark:text-neutral-100" />
-          </button>
+            <motion.button
+              key={`stack-btn-${bounceTrigger}`}
+              animate={bounceTrigger > 0 ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+              transition={{ duration: 0.22, ease: [0.2, 0.8, 0.25, 1] }}
+              type="button"
+              onClick={toggleStackTray}
+              aria-label="Floating Diagnostic Window Stack"
+              className={`relative h-10 w-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 active:scale-95 ${
+                isLight
+                  ? 'bg-white hover:bg-neutral-50 border-neutral-300 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_16px_rgba(0,0,0,0.12)]'
+                  : 'bg-neutral-900 hover:bg-neutral-850 border-neutral-700 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_0_20px_rgba(0,0,0,0.7),0_0_28px_rgba(255,255,255,0.06)]'
+              }`}
+            >
+              <Layers className="h-5 w-5 text-neutral-900 dark:text-neutral-100" />
+            </motion.button>
 
           {/* 2. Top-Right Bubble Counter (Strictly Neutral Monochrome: White/Black) */}
           <AnimatePresence>
@@ -267,6 +432,25 @@ export const FloatingStackIcon: React.FC<FloatingStackIconProps> = ({
           )}
         </AnimatePresence>
       </div>
+      )}
+
+      {/* 
+        Spawning Flight Animation Portal:
+        Executes standard 3-stage transition or absorption directly inside containerRef canvas.
+      */}
+      {activeFlight && containerRef?.current && createPortal(
+        <FlyingGhostElement
+          flight={activeFlight}
+          isLight={isLight}
+          onComplete={() => {
+            if (activeFlight.targetHadStack) {
+              setBounceTrigger((k) => k + 1);
+            }
+            completeFlight();
+          }}
+        />,
+        containerRef.current
+      )}
 
       {/* 
         Clicked Container 4-Corner Morphing Expansion:

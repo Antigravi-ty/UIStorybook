@@ -101,18 +101,6 @@ export type LivePreviewAnimPhase =
   | 'expanding_content'
   | 'expanding_resize';
 
-interface FlyingGhost {
-  id: string;
-  startX: number;
-  startY: number;
-  startW: number;
-  startH: number;
-  destX: number;
-  destY: number;
-  title?: string;
-  category?: string;
-}
-
 export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   isLight = true,
   onNavigateToReserved,
@@ -141,10 +129,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   const [stepPhase, setStepPhase] = useState<'idle' | 'fadeOut' | 'resize' | 'fadeIn'>('idle');
   const [displayedRoute, setDisplayedRoute] = useState<ActiveMenuRoute>('main-menu');
 
-  // Stage 尺寸与飞行幽灵状态（用于 '+' 点击加入 Stack 飞行动画）
+  // Stage 尺寸引用
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [stageSize, setStageSize] = useState({ width: 900, height: 620 });
-  const [flyingGhost, setFlyingGhost] = useState<FlyingGhost | null>(null);
 
   const showToast = (msg: string) => {
     setFeedbackToast(msg);
@@ -287,46 +274,11 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentRoute, liveAnimPhase, lastParentRoute]);
 
-  // 处理在 Additional Preview -> Floating Window 选项卡中点击 '+' 飞入 Stack 动画
+  // 处理在 Additional Preview -> Floating Window 选项卡中点击 '+' 飞入 Stack 动画（委托给统一解耦的 floatingStore 与 FloatingStackIcon）
   const handleAddPresetWindow = (preset: PresetConfig, e: React.MouseEvent<HTMLButtonElement>) => {
     if (!stageRef.current) return;
-    const btnRect = e.currentTarget.getBoundingClientRect();
-    const stageRect = stageRef.current.getBoundingClientRect();
-
-    const startX = Math.round(btnRect.left - stageRect.left);
-    const startY = Math.round(btnRect.top - stageRect.top);
-    const startW = Math.round(btnRect.width);
-    const startH = Math.round(btnRect.height);
-
-    const destX = Math.round(stageRect.width - 56);
-    const destY = 16;
-
-    const ghostId = `${preset.id}-${Date.now()}`;
-    setFlyingGhost({
-      id: ghostId,
-      startX,
-      startY,
-      startW,
-      startH,
-      destX,
-      destY,
-      title: preset.title,
-      category: preset.category,
-    });
-
-    setTimeout(() => {
-      floatingStore.spawnWindow({
-        id: `${preset.id}-${Date.now().toString().slice(-4)}`,
-        title: preset.title,
-        category: preset.category,
-        width: preset.width,
-        height: preset.height,
-        resizable: preset.resizable,
-        startMinimized: true,
-      });
-      setFlyingGhost(null);
-      showToast(`✓ 已将 "${preset.title}" 收缩压入右上角 Stack`);
-    }, 280);
+    floatingStore.spawnWithFlight(preset, e.currentTarget, stageRef.current);
+    showToast(`✓ 已将 "${preset.title}" 收缩压入右上角 Stack`);
   };
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -827,51 +779,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           }}
         />
 
-        {/* 
-          Spawning Ghost Container (点击 Floating Window '+' 时的飞入右上角 Stack 动效)
-          层级设为 z-40，严格位于半透明黑色遮罩 (z-10) 与中央菜单 (z-30) 之上，飞向最高层级的 Stack Icon (z-50)
-        */}
-        <AnimatePresence>
-          {flyingGhost && (
-            <motion.div
-              key={flyingGhost.id}
-              initial={{
-                x: flyingGhost.startX,
-                y: flyingGhost.startY,
-                width: flyingGhost.startW,
-                height: flyingGhost.startH,
-                borderRadius: 8,
-                opacity: 1,
-                scale: 1,
-              }}
-              animate={{
-                x: flyingGhost.destX,
-                y: flyingGhost.destY,
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                opacity: [1, 1, 0.9, 0],
-                scale: [1, 1.05, 0.95, 0.85],
-              }}
-              transition={{
-                duration: 0.28,
-                ease: [0.2, 0.8, 0.25, 1],
-              }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-              }}
-              className={`z-40 pointer-events-none border backdrop-blur-md overflow-hidden select-none flex items-center justify-center ${
-                isLight
-                  ? 'bg-white/95 border-neutral-300 text-neutral-900 shadow-[0_4px_24px_rgba(0,0,0,0.18)]'
-                  : 'bg-neutral-850/95 border-neutral-700 text-neutral-100 shadow-[0_4px_24px_rgba(0,0,0,0.7)]'
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* 舞台右上角常驻 Floating Stack Icon 栈托盘 */}
         <FloatingStackIcon isLight={isLight} absolute={true} containerRef={stageRef} />

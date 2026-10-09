@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import type { PresetConfig } from './floatingPresets';
 
 export interface FloatingWindowItem {
   id: string;
@@ -12,6 +13,18 @@ export interface FloatingWindowItem {
   resizable?: boolean;
 }
 
+export interface FlyingGhostState {
+  id: string;
+  startX: number;
+  startY: number;
+  startW: number;
+  startH: number;
+  destX: number;
+  destY: number;
+  preset: PresetConfig;
+  targetHadStack: boolean;
+}
+
 export interface FloatingWindowState {
   /** Map of registered floating windows */
   windows: FloatingWindowItem[];
@@ -23,6 +36,8 @@ export interface FloatingWindowState {
   isStackDismissed: boolean;
   /** Currently active (focused) restored window id */
   focusedWindowId: string | null;
+  /** Currently active spawning flight animation to top-right Stack */
+  activeFlight: FlyingGhostState | null;
 }
 
 let state: FloatingWindowState = {
@@ -31,6 +46,7 @@ let state: FloatingWindowState = {
   isStackTrayOpen: false,
   isStackDismissed: true,
   focusedWindowId: null,
+  activeFlight: null,
 };
 
 const listeners = new Set<() => void>();
@@ -198,6 +214,78 @@ export const floatingStore = {
       isStackTrayOpen: false,
       isStackDismissed: true,
       focusedWindowId: null,
+      activeFlight: null,
+    };
+    notify();
+  },
+  /** Start flying animation from source button to top-right Stack */
+  spawnWithFlight: (preset: PresetConfig, sourceEl: HTMLElement, containerEl: HTMLElement) => {
+    const srcRect = sourceEl.getBoundingClientRect();
+    const contRect = containerEl.getBoundingClientRect();
+
+    const startX = Math.round(srcRect.left - contRect.left);
+    const startY = Math.round(srcRect.top - contRect.top);
+    const startW = Math.round(srcRect.width);
+    const startH = Math.round(srcRect.height);
+
+    // Dest position: top-4 right-4 in container (h-10 w-10 = 40x40, top: 16px, right: 16px)
+    const destX = Math.max(16, Math.round(contRect.width - 56));
+    const destY = 16;
+
+    const minimizedCount = state.windows.filter((w) => w.isMinimized).length;
+    // Stack icon is already present if not dismissed or holding minimized items
+    const hasStack = !(state.isStackDismissed && minimizedCount === 0);
+
+    const flightId = `${preset.id}-${Date.now()}`;
+
+    state = {
+      ...state,
+      activeFlight: {
+        id: flightId,
+        startX,
+        startY,
+        startW,
+        startH,
+        destX,
+        destY,
+        preset,
+        targetHadStack: hasStack,
+      },
+    };
+    notify();
+  },
+  /** Complete flying animation and commit minimized window into store */
+  completeFlight: () => {
+    if (!state.activeFlight) return;
+    const { preset } = state.activeFlight;
+
+    const newItem: FloatingWindowItem = {
+      id: `${preset.id}-${Date.now().toString().slice(-4)}`,
+      title: preset.title,
+      category: preset.category,
+      width: preset.width,
+      height: preset.height,
+      isMinimized: true,
+      resizable: preset.resizable,
+      position: {
+        x: 40 + (state.windows.length % 5) * 32,
+        y: 40 + (state.windows.length % 5) * 32,
+      },
+    };
+
+    state = {
+      ...state,
+      windows: [...state.windows, newItem],
+      isStackDismissed: false,
+      activeFlight: null,
+    };
+    notify();
+  },
+  cancelFlight: () => {
+    if (!state.activeFlight) return;
+    state = {
+      ...state,
+      activeFlight: null,
     };
     notify();
   },
@@ -214,9 +302,13 @@ export const useFloatingStore = () => {
     isStackTrayOpen: snapshot.isStackTrayOpen,
     isStackDismissed: snapshot.isStackDismissed,
     focusedWindowId: snapshot.focusedWindowId,
+    activeFlight: snapshot.activeFlight,
     minimizedCount,
     totalCount,
     spawnWindow: floatingStore.spawnWindow,
+    spawnWithFlight: floatingStore.spawnWithFlight,
+    completeFlight: floatingStore.completeFlight,
+    cancelFlight: floatingStore.cancelFlight,
     bringToFront: floatingStore.bringToFront,
     updatePosition: floatingStore.updatePosition,
     updateSize: floatingStore.updateSize,
