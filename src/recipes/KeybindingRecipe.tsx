@@ -8,7 +8,8 @@ import {
   RotateCcw, 
   Sparkles, 
   Check, 
-  AlertCircle 
+  AlertCircle,
+  Ruler
 } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { KeycapBadge } from '../primitives/KeycapBadge';
@@ -130,21 +131,33 @@ const RemovableKeycap: React.FC<RemovableKeycapProps> = ({
         isLight={isLight}
         className="!p-0 !min-h-[20px] !h-5 inline-flex items-center overflow-hidden transition-all duration-200 cursor-default select-none"
       >
-        {/* Label container: optical true vertical and horizontal center */}
-        <span className="inline-flex items-center justify-center h-full px-1.5 text-[10px] font-mono font-semibold leading-none shrink-0">
+        {/* 
+          Label container:
+          - Symmetrical px-1.5 horizontal padding.
+          - Optical baseline correction via -translate-y-px, lifting capital letter W to exact visual center.
+        */}
+        <span 
+          data-element="keycap-label"
+          className="inline-flex items-center justify-center h-full px-1.5 text-[10px] font-mono font-semibold leading-none shrink-0 -translate-y-px select-none"
+        >
           {shortcut}
         </span>
 
         {/* 
           Inner deletion cross:
           - Default: w-0, opacity-0, overflow-hidden (zero footprint).
-          - On hover: expands smoothly, snug against right border (pr-1), eliminating oversized right gap.
-          - Cross icon stays red (text-red-500) both before and after hover.
-          - On hover: subtle rounded rectangular soft red background (hover:bg-red-500/15).
+          - On hover: expands smoothly to w-[18px], perfectly housing the 14px button.
+          - Button is centered with symmetric 2px margin on left & right, completely preventing the left/right edge from being clipped.
+          - Cross icon stays red (text-red-500) permanently.
+          - On hover over cross: subtle rounded-rect soft red background (hover:bg-red-500/15).
         */}
-        <span className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[15px] group-hover:opacity-100 group-hover:pr-1 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto shrink-0">
+        <span 
+          data-element="unbind-container"
+          className="inline-flex items-center justify-center overflow-hidden w-0 opacity-0 group-hover:w-[18px] group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto shrink-0"
+        >
           <button
             type="button"
+            data-element="unbind-button"
             aria-label={`Unbind ${shortcut}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -397,9 +410,99 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
     showFeedback('✓ 已恢复默认按键配置');
   };
 
+  const tableRef = useRef<HTMLDivElement | null>(null);
+
+  // Export mathematical layout telemetry of the first row (Throttle / Accelerate)
+  const handleExportFirstRowLayout = async () => {
+    if (!tableRef.current) return;
+
+    const firstRowEl = tableRef.current.querySelector<HTMLElement>('[data-row-id="throttle"], [data-row="binding-row"]');
+    if (!firstRowEl) {
+      showFeedback('未找到第一行元素');
+      return;
+    }
+
+    const rowRect = firstRowEl.getBoundingClientRect();
+    const actionEl = firstRowEl.querySelector<HTMLElement>('[data-col="action"]');
+    const firstKbd = firstRowEl.querySelector<HTMLElement>('[data-component="keycap-badge"]');
+    const labelSpan = firstKbd?.querySelector<HTMLElement>('[data-element="keycap-label"]');
+    const unbindSpan = firstKbd?.querySelector<HTMLElement>('[data-element="unbind-container"]');
+    const unbindBtn = firstKbd?.querySelector<HTMLElement>('[data-element="unbind-button"]');
+
+    const getRectStr = (r?: DOMRect | null) => 
+      r ? `${Math.round(r.width * 10) / 10}px × ${Math.round(r.height * 10) / 10}px (left: ${Math.round(r.left * 10) / 10}, top: ${Math.round(r.top * 10) / 10})` : 'N/A';
+
+    const lines: string[] = [];
+    lines.push('========================================================================');
+    lines.push(' [CONTROLS FIRST ROW LAYOUT INSPECTOR] ACTION: THROTTLE / ACCELERATE');
+    lines.push('========================================================================');
+    lines.push(`• Row Bounding Box: ${getRectStr(rowRect)}`);
+
+    if (actionEl) {
+      lines.push(`• Action Cell:      ${getRectStr(actionEl.getBoundingClientRect())} | Text: "${actionEl.textContent?.trim()}"`);
+    }
+
+    if (firstKbd) {
+      const kRect = firstKbd.getBoundingClientRect();
+      const kStyle = window.getComputedStyle(firstKbd);
+      lines.push('\n[1. KEYCAP BADGE CONTAINER]');
+      lines.push(`  • Size & Pos:     ${getRectStr(kRect)}`);
+      lines.push(`  • Padding:        top=${kStyle.paddingTop}, right=${kStyle.paddingRight}, bottom=${kStyle.paddingBottom}, left=${kStyle.paddingLeft}`);
+      lines.push(`  • Border:         top=${kStyle.borderTopWidth}, right=${kStyle.borderRightWidth}, bottom=${kStyle.borderBottomWidth}, left=${kStyle.borderLeftWidth}`);
+      lines.push(`  • LineHeight:     ${kStyle.lineHeight} | FontSize: ${kStyle.fontSize}`);
+
+      if (labelSpan) {
+        const lRect = labelSpan.getBoundingClientRect();
+        const lStyle = window.getComputedStyle(labelSpan);
+        const topGap = lRect.top - kRect.top;
+        const bottomGap = kRect.bottom - lRect.bottom;
+        lines.push('\n[2. KEY LABEL (LETTER W)]');
+        lines.push(`  • Size & Pos:     ${getRectStr(lRect)} | Char: "${labelSpan.textContent?.trim()}"`);
+        lines.push(`  • Vertical Gap:   TopGap = ${Math.round(topGap * 10) / 10}px | BottomGap = ${Math.round(bottomGap * 10) / 10}px | Delta = ${Math.round((topGap - bottomGap) * 10) / 10}px`);
+        lines.push(`  • Transform:      ${lStyle.transform} | LineHeight: ${lStyle.lineHeight}`);
+      }
+
+      if (unbindSpan) {
+        const uRect = unbindSpan.getBoundingClientRect();
+        const uStyle = window.getComputedStyle(unbindSpan);
+        lines.push('\n[3. UNBIND CONTAINER (EXPANDING SPAN)]');
+        lines.push(`  • Size & Pos:     ${getRectStr(uRect)}`);
+        lines.push(`  • Padding:        left=${uStyle.paddingLeft}, right=${uStyle.paddingRight}`);
+        lines.push(`  • Overflow:       ${uStyle.overflow}`);
+
+        if (unbindBtn) {
+          const bRect = unbindBtn.getBoundingClientRect();
+          const leftGap = bRect.left - uRect.left;
+          const rightGap = uRect.right - bRect.right;
+          const isClippedLeft = bRect.left < uRect.left;
+          const isClippedRight = bRect.right > uRect.right;
+          lines.push('\n[4. UNBIND BUTTON (RED CROSS CIRCLE)]');
+          lines.push(`  • Size & Pos:     ${getRectStr(bRect)}`);
+          lines.push(`  • Inner Gaps:     LeftGap = ${Math.round(leftGap * 10) / 10}px | RightGap = ${Math.round(rightGap * 10) / 10}px`);
+          lines.push(`  • Clipping Test:  ClippedLeft = ${isClippedLeft} | ClippedRight = ${isClippedRight}`);
+        }
+      }
+    }
+
+    lines.push('========================================================================\n');
+    const report = lines.join('\n');
+    console.log(report);
+
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(report);
+        showFeedback('✓ 第一行布局数据已输出至控制台并复制到剪贴板');
+      } catch (_) {
+        showFeedback('✓ 第一行布局数据已输出至控制台');
+      }
+    } else {
+      showFeedback('✓ 第一行布局数据已输出至控制台');
+    }
+  };
+
   return (
-    <div className={`flex flex-col w-full text-xs select-none ${className}`}>
-      {/* Table Subheader Toolbar: Status feedback + Reset action */}
+    <div ref={tableRef} className={`flex flex-col w-full text-xs select-none ${className}`}>
+      {/* Table Subheader Toolbar: Status feedback + Export & Reset actions */}
       <div className="flex items-center justify-between pb-2 mb-2 border-b border-neutral-200/80 dark:border-neutral-800">
         <div className="flex items-center gap-2">
           <span className={`text-[11px] font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
@@ -413,19 +516,36 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={handleResetDefaults}
-          className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer border ${
-            isLight
-              ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-300'
-              : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700'
-          }`}
-          title="重置所有按键为默认配置"
-        >
-          <RotateCcw className="h-3 w-3" />
-          <span>恢复默认</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Export Layout Metrics button */}
+          <button
+            type="button"
+            onClick={handleExportFirstRowLayout}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer border ${
+              isLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-300'
+                : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700'
+            }`}
+            title="检查并导出第一行 (Throttle) 按键与红叉的绝对坐标、Padding 及盒模型数据"
+          >
+            <Ruler className="h-3 w-3 text-amber-500" />
+            <span>导出第一行布局数据</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleResetDefaults}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer border ${
+              isLight
+                ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-300'
+                : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700'
+            }`}
+            title="重置所有按键为默认配置"
+          >
+            <RotateCcw className="h-3 w-3" />
+            <span>恢复默认</span>
+          </button>
+        </div>
       </div>
 
       {/* 3-Column Binding Table Header */}
@@ -466,12 +586,14 @@ export const ControlsBindingTable: React.FC<{ isLight?: boolean; className?: str
           return (
             <div
               key={b.id}
+              data-row="binding-row"
+              data-row-id={b.id}
               className={`grid grid-cols-12 items-center py-2.5 px-3 rounded-lg transition-colors duration-100 ${
                 isLight ? 'hover:bg-neutral-100/80' : 'hover:bg-neutral-800/40'
               }`}
             >
               {/* Col 1: Action Name */}
-              <div className="col-span-4 flex items-center gap-2 pr-2">
+              <div data-col="action" className="col-span-4 flex items-center gap-2 pr-2">
                 <span className={`font-medium truncate ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
                   {b.action}
                 </span>
