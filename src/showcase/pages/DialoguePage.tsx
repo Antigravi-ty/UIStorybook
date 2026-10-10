@@ -4,10 +4,6 @@ import {
   Plus,
   Trash2,
   ExternalLink,
-  AlertCircle,
-  AlertTriangle,
-  Info,
-  Flame,
   Check,
   Copy,
   Layers,
@@ -16,6 +12,7 @@ import {
   Box,
   Palette,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import {
   Dialogue,
@@ -23,50 +20,38 @@ import {
   type DialogueTone,
   type DialogueButtonConfig,
   type DialogueButtonVariant,
+  type DialogueIconVariant,
 } from '../../primitives/Dialogue';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
 import { SliderControl } from '../../primitives/SliderControl';
 import { CodeBlock } from '../CodeBlock';
 
-type IconKey = 'auto' | 'info' | 'alert-triangle' | 'flame' | 'alert-circle';
+const PRESET_ICONS = [
+  'alert-circle',
+  'triangle-alert',
+  'flame',
+  'info',
+  'bell',
+  'shield-alert',
+  'octagon-alert',
+  'check-circle',
+];
 
 export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) => {
   // ──────────────────────────────────────────────────────────────────────────
-  // Solidified Baseline Parameters (固化参数)
-  // ──────────────────────────────────────────────────────────────────────────
-  const titleFontSize = 32;
-  const titleLetterSpacing = 10;
-  const paddingY = 16;
-  const paddingX = 32;
-  const innerGlowBlur = 36;
-  const outerShadowBlur = 20;
-  const minHeight = 165;
-  const maxWidth = 560;
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // Active Configurable State
+  // Configurable Slots
   // ──────────────────────────────────────────────────────────────────────────
   const [title, setTitle] = useState<string>('ALERT');
-  // Weight options: 400 (细 · 当前默认), 600 (默认中), 800 (粗)
-  const [titleFontWeight, setTitleFontWeight] = useState<number>(400);
-  const [titleColorMode, setTitleColorMode] = useState<'muted' | 'content' | 'primary' | 'tone'>('content');
-
-  // Spacing & padding parameters brought back for fine tuning
-  const [paddingTop, setPaddingTop] = useState<number>(16);
-  const [paddingBottom, setPaddingBottom] = useState<number>(16);
-  const [titleMarginTop, setTitleMarginTop] = useState<number>(0);
-  const [titleMarginBottom, setTitleMarginBottom] = useState<number>(2);
-  const [contentMarginBottom, setContentMarginBottom] = useState<number>(16);
-
+  const [tone, setTone] = useState<DialogueTone>('error');
+  const [iconName, setIconName] = useState<string>('alert-circle');
+  const [iconVariant, setIconVariant] = useState<DialogueIconVariant>('container');
+  const [iconSize, setIconSize] = useState<number>(22);
   const [content, setContent] = useState<string>(
     'Failed to establish signaling server through WebSocket.'
   );
 
-  const [tone, setTone] = useState<DialogueTone>('error');
-  const [iconKey, setIconKey] = useState<IconKey>('auto');
-
-  // Dynamic Buttons
+  // Dynamic Action Buttons (Primary / Outline / Danger)
   const [buttons, setButtons] = useState<DialogueButtonConfig[]>([
     { key: 'btn-1', label: 'Primary', variant: 'primary' },
     { key: 'btn-2', label: 'Outline', variant: 'outline' },
@@ -79,19 +64,12 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [copiedParams, setCopiedParams] = useState<boolean>(false);
 
-  const renderSelectedIcon = () => {
-    switch (iconKey) {
-      case 'info':
-        return <Info className="h-5 w-5" />;
-      case 'alert-triangle':
-        return <AlertTriangle className="h-5 w-5" />;
-      case 'flame':
-        return <Flame className="h-5 w-5" />;
-      case 'alert-circle':
-        return <AlertCircle className="h-5 w-5" />;
-      case 'auto':
-      default:
-        return undefined;
+  const handleIconVariantChange = (nextVariant: DialogueIconVariant) => {
+    setIconVariant(nextVariant);
+    if (nextVariant === 'plain' && iconSize === 22) {
+      setIconSize(36);
+    } else if (nextVariant === 'container' && iconSize === 36) {
+      setIconSize(22);
     }
   };
 
@@ -123,73 +101,14 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     );
   };
 
-  // Presets
-  const applyPreset = (preset: 'info' | 'warning' | 'orange' | 'error') => {
-    switch (preset) {
-      case 'error':
-        setTitle('ALERT');
-        setContent('Failed to establish signaling server through WebSocket.');
-        setTone('error');
-        setIconKey('auto');
-        setButtons([
-          { key: 'err-1', label: 'Primary', variant: 'primary' },
-          { key: 'err-2', label: 'Outline', variant: 'outline' },
-          { key: 'err-3', label: 'Danger', variant: 'danger' },
-        ]);
-        break;
-      case 'warning':
-        setTitle('WARNING');
-        setContent('This action will reset all vehicle dynamics and recalibrate physical sub-ticks to 120Hz.\nAll uncommitted telemetry changes will be permanently discarded.');
-        setTone('warning');
-        setIconKey('auto');
-        setButtons([
-          { key: 'warn-1', label: 'Primary', variant: 'primary' },
-          { key: 'warn-2', label: 'Outline', variant: 'outline' },
-          { key: 'warn-3', label: 'Danger', variant: 'danger' },
-        ]);
-        break;
-      case 'orange':
-        setTitle('CAUTION');
-        setContent('An existing custom livery preset already exists in slot #04.\nContinuing will overwrite your aero balance and friction curve parameters.');
-        setTone('orange');
-        setIconKey('auto');
-        setButtons([
-          { key: 'ora-1', label: 'Primary', variant: 'primary' },
-          { key: 'ora-2', label: 'Outline', variant: 'outline' },
-        ]);
-        break;
-      case 'info':
-        setTitle('INFORMATION');
-        setContent('WebGPU pipeline cache warming complete (64/64 variants compiled).\nPhysics sub-tick dispatch latency stable at sub-5ms.');
-        setTone('info');
-        setIconKey('auto');
-        setButtons([
-          { key: 'info-1', label: 'Primary', variant: 'primary' },
-        ]);
-        break;
-    }
-  };
-
-  // Structured export object
+  // Structured export object containing active slots
   const currentParamsObject = {
     title,
-    titleFontSize,
-    titleLetterSpacing,
-    titleFontWeight,
-    titleMarginTop,
-    titleMarginBottom,
-    titleColorMode,
+    icon: iconName,
+    iconVariant,
+    iconSize,
     content,
-    contentMarginBottom,
     tone,
-    paddingTop,
-    paddingBottom,
-    paddingY: paddingTop === paddingBottom ? paddingTop : undefined,
-    paddingX,
-    innerGlowBlur,
-    outerShadowBlur,
-    minHeight,
-    maxWidth,
     buttons: buttons.map((b) => ({ label: b.label, variant: b.variant ?? 'outline' })),
   };
 
@@ -204,16 +123,11 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
 
 <Dialogue
   title="${title}"
-  titleFontWeight={${titleFontWeight}}
-  titleMarginTop={${titleMarginTop}}
-  titleMarginBottom={${titleMarginBottom}}
-  titleColorMode="${titleColorMode}"
+  icon="${iconName}"
+  iconVariant="${iconVariant}"
+  iconSize={${iconSize}}
   content="${content.replace(/\n/g, '\\n')}"
-  contentMarginBottom={${contentMarginBottom}}
   tone="${tone}"
-  paddingTop={${paddingTop}}
-  paddingBottom={${paddingBottom}}
-  paddingX={${paddingX}}
   buttons={[
 ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outline'}' }`).join(',\n')}
   ]}
@@ -234,11 +148,11 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
               <h1 className="text-2xl font-bold tracking-tight">Dialogue 对话框规范</h1>
               <Badge variant="primary" size="sm" isLight={isLight}>
-                Solidified Layout · SF Mono
+                SF Mono · Regular 400 · Solidified
               </Badge>
             </div>
             <p className={`text-xs ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-              已完成核心布局固化（32px 字号、10px 字间距、16×32px 内衬与双重阴影浮雕质感）。支持在细字重 (400)、标准中字重 (600) 与极粗字重 (800) 间即时对比大字号字重美感。
+              标题与正文色调已同调固化（32px 字号、10px 字间距、Regular 400 字重）。支持图标名称直接传递、带框/无框双变体与尺寸自由微调。
             </p>
           </div>
 
@@ -249,9 +163,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               isLight={isLight}
               icon={copiedParams ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
               onClick={handleCopyParams}
-              className="font-mono text-xs cursor-pointer"
             >
-              {copiedParams ? 'Parameters Copied!' : 'Copy Parameters (复制参数)'}
+              {copiedParams ? 'Copied JSON' : 'Export JSON'}
             </Button>
 
             <Button
@@ -260,79 +173,15 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               isLight={isLight}
               icon={<ExternalLink className="h-4 w-4" />}
               onClick={() => setIsModalOpen(true)}
-              className="shadow-md cursor-pointer"
             >
-              Launch Modal (居中模态)
+              Trigger Modal (无叉号 · 强制三选一)
             </Button>
           </div>
-        </div>
-
-        {/* Presets */}
-        <div className="flex items-center gap-2 overflow-x-auto pt-1 font-mono text-xs">
-          <span className={`shrink-0 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-            Presets:
-          </span>
-          <button
-            type="button"
-            onClick={() => applyPreset('error')}
-            className={`px-2.5 py-1 rounded-lg border transition-colors cursor-pointer flex items-center gap-1.5 ${
-              tone === 'error'
-                ? 'bg-red-500/15 border-red-500 text-red-600 dark:text-red-400 font-bold'
-                : isLight
-                ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
-                : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-            }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-red-500" />
-            <span>Error (红 · 当前ALERT固化)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('warning')}
-            className={`px-2.5 py-1 rounded-lg border transition-colors cursor-pointer flex items-center gap-1.5 ${
-              tone === 'warning'
-                ? 'bg-yellow-500/15 border-yellow-500 text-yellow-600 dark:text-yellow-400 font-bold'
-                : isLight
-                ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
-                : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-            }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-yellow-400" />
-            <span>Warning (黄)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('orange')}
-            className={`px-2.5 py-1 rounded-lg border transition-colors cursor-pointer flex items-center gap-1.5 ${
-              tone === 'orange'
-                ? 'bg-orange-500/15 border-orange-500 text-orange-600 dark:text-orange-400 font-bold'
-                : isLight
-                ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
-                : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-            }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-orange-500" />
-            <span>Orange (橙)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('info')}
-            className={`px-2.5 py-1 rounded-lg border transition-colors cursor-pointer flex items-center gap-1.5 ${
-              tone === 'info'
-                ? 'bg-neutral-500/15 border-neutral-400 text-neutral-800 dark:text-neutral-200 font-bold'
-                : isLight
-                ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
-                : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-            }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-neutral-400" />
-            <span>Info (灰)</span>
-          </button>
         </div>
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* Control Panel (精简收敛版) */}
+      {/* Slot Control Panel */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div
         className={`p-6 rounded-2xl border flex flex-col gap-6 shadow-sm ${
@@ -344,30 +193,21 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         <div className="flex items-center justify-between border-b pb-3 border-neutral-200/70 dark:border-neutral-800/70">
           <div className="flex items-center gap-2">
             <Sliders className="h-4 w-4 text-amber-500" />
-            <span className="font-bold text-sm tracking-tight">Dialogue 控制面板 (精简收敛)</span>
+            <span className="font-bold text-sm tracking-tight">Dialogue Slots 控制面板</span>
           </div>
-          <button
-            type="button"
-            onClick={handleCopyParams}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-mono transition-colors cursor-pointer ${
-              copiedParams
-                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 font-bold'
-                : isLight
-                ? 'bg-white border-neutral-300 hover:bg-neutral-100 text-neutral-700'
-                : 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300'
-            }`}
-          >
-            {copiedParams ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-            <span>{copiedParams ? 'Copied' : 'Copy All Params'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Badge variant="neutral" size="sm" isLight={isLight}>
+              Slots Only · Fixed 400 Weight
+            </Badge>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Column 1: Title Typography & Font Weight Options (400, 600, 800) */}
+          {/* Column 1: Title, Content & Color Level */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
               <Type className="h-3.5 w-3.5" />
-              <span>Title & Content Typography</span>
+              <span>Title, Tone & Content</span>
             </div>
 
             {/* Title Text Input */}
@@ -387,231 +227,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               />
             </div>
 
-            {/* Title Font Weight: 400 (细), 600 (默认标准中), 800 (粗 · 当前默认) */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold flex items-center justify-between">
-                <span>Title Font Weight (粗细对比)</span>
-                <span className="text-[10px] font-mono text-neutral-400">
-                  {titleFontWeight === 400 ? '400 (细 · 当前默认)' : titleFontWeight === 600 ? '600 (中)' : '800 (粗)'}
-                </span>
-              </label>
-              <div className="grid grid-cols-3 gap-1.5 font-mono text-[11px]">
-                <button
-                  type="button"
-                  onClick={() => setTitleFontWeight(400)}
-                  className={`py-2 px-1 rounded-lg border text-center transition-all cursor-pointer ${
-                    titleFontWeight === 400
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="font-normal block">400</span>
-                  <span className="text-[10px] opacity-75">细 Regular</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setTitleFontWeight(600)}
-                  className={`py-2 px-1 rounded-lg border text-center transition-all cursor-pointer ${
-                    titleFontWeight === 600
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="font-semibold block">600</span>
-                  <span className="text-[10px] opacity-75">中 Semibold</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setTitleFontWeight(800)}
-                  className={`py-2 px-1 rounded-lg border text-center transition-all cursor-pointer ${
-                    titleFontWeight === 800
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="font-extrabold block">800</span>
-                  <span className="text-[10px] opacity-75">粗 ExtraBold</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Title Color Mode */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold flex items-center justify-between">
-                <span>Title Color (标题色调抽取)</span>
-                <span className={`text-[10px] font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                  {titleColorMode === 'content' ? 'Content (正文色)' : titleColorMode}
-                </span>
-              </label>
-              <div className="grid grid-cols-2 gap-1.5 font-mono text-[11px]">
-                <button
-                  type="button"
-                  onClick={() => setTitleColorMode('muted')}
-                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
-                    titleColorMode === 'muted'
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-neutral-400 shrink-0" />
-                  <span className="truncate">Muted (暗灰)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setTitleColorMode('content')}
-                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
-                    titleColorMode === 'content'
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-neutral-500 shrink-0" />
-                  <span className="truncate">Content (同正文色)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setTitleColorMode('primary')}
-                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
-                    titleColorMode === 'primary'
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-neutral-900 dark:bg-neutral-100 shrink-0" />
-                  <span className="truncate">Contrast (纯黑白)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setTitleColorMode('tone')}
-                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
-                    titleColorMode === 'tone'
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                  <span className="truncate">Tone (跟随调性)</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Window Padding & Margins (窗口内边距与标题/内容间距调节) */}
-            <div className="flex flex-col gap-2.5 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/60">
-              <SliderControl
-                label="Padding Top (窗口上内边距)"
-                value={paddingTop}
-                min={0}
-                max={48}
-                step={1}
-                unit="px"
-                isLight={isLight}
-                onChange={setPaddingTop}
-              />
-
-              <SliderControl
-                label="Padding Bottom (窗口下内边距)"
-                value={paddingBottom}
-                min={0}
-                max={48}
-                step={1}
-                unit="px"
-                isLight={isLight}
-                onChange={setPaddingBottom}
-              />
-
-              <SliderControl
-                label="Title Margin Top (标题上间距 / 顶边距，可为负)"
-                value={titleMarginTop}
-                min={-16}
-                max={40}
-                step={1}
-                unit="px"
-                isLight={isLight}
-                onChange={setTitleMarginTop}
-              />
-
-              <SliderControl
-                label="Title Margin Bottom (标题下间距 / 与内容间距)"
-                value={titleMarginBottom}
-                min={0}
-                max={40}
-                step={1}
-                unit="px"
-                isLight={isLight}
-                onChange={setTitleMarginBottom}
-              />
-
-              <SliderControl
-                label="Content Margin Bottom (内容下间距 / 与按钮间距)"
-                value={contentMarginBottom}
-                min={0}
-                max={40}
-                step={1}
-                unit="px"
-                isLight={isLight}
-                onChange={setContentMarginBottom}
-              />
-            </div>
-
-            {/* Content Textarea */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold">Content (英文信息正文)</label>
-              <textarea
-                rows={3}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Type informative English content..."
-                style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
-                className={`w-full px-3 py-2 rounded-xl text-xs border outline-none transition-colors resize-none leading-relaxed ${
-                  isLight
-                    ? 'bg-white border-neutral-300 focus:border-amber-500 text-neutral-900'
-                    : 'bg-neutral-950 border-neutral-700/80 focus:border-amber-500 text-neutral-100'
-                }`}
-              />
-            </div>
-          </div>
-
-          {/* Column 2: Tone & Solidified Metrics */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
-              <Palette className="h-3.5 w-3.5" />
-              <span>Color Level & Solidified Layout</span>
-            </div>
-
-            {/* Tone Selector */}
+            {/* Color Level (Tone) */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold">Color Level (4级调性: 灰黄橙红)</label>
               <div className="grid grid-cols-4 gap-1.5 font-mono text-xs">
@@ -644,25 +260,59 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
             </div>
 
-            {/* Left Icon Selection */}
+            {/* Content Textarea */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold">Left Icon (左侧垂直居中图标)</label>
-              <div className="grid grid-cols-5 gap-1.5 font-mono text-[11px]">
-                {(
-                  [
-                    { key: 'auto', label: 'Auto' },
-                    { key: 'alert-circle', label: 'Error' },
-                    { key: 'alert-triangle', label: 'Warn' },
-                    { key: 'flame', label: 'Flame' },
-                    { key: 'info', label: 'Info' },
-                  ] as const
-                ).map((item) => (
+              <label className="text-xs font-semibold">Content (正文内容)</label>
+              <textarea
+                rows={4}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Type informative English content..."
+                style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
+                className={`w-full px-3 py-2 rounded-xl text-xs border outline-none transition-colors resize-none leading-relaxed ${
+                  isLight
+                    ? 'bg-white border-neutral-300 focus:border-amber-500 text-neutral-900'
+                    : 'bg-neutral-950 border-neutral-700/80 focus:border-amber-500 text-neutral-100'
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* Column 2: Icon Variation & Sizing */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Icon Variations & Sizing</span>
+            </div>
+
+            {/* Icon Name Input */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold flex items-center justify-between">
+                <span>Lucide Icon Name (图标名称)</span>
+                <span className="text-[10px] font-mono text-neutral-400">{iconName}</span>
+              </label>
+              <input
+                type="text"
+                value={iconName}
+                onChange={(e) => setIconName(e.target.value)}
+                placeholder="alert-circle"
+                style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
+                className={`w-full px-3 py-2 rounded-xl text-xs border outline-none transition-colors ${
+                  isLight
+                    ? 'bg-white border-neutral-300 focus:border-amber-500 text-neutral-900'
+                    : 'bg-neutral-950 border-neutral-700/80 focus:border-amber-500 text-neutral-100'
+                }`}
+              />
+
+              {/* Quick Pick Icon Chips */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {PRESET_ICONS.map((preset) => (
                   <button
-                    key={item.key}
+                    key={preset}
                     type="button"
-                    onClick={() => setIconKey(item.key)}
-                    className={`py-1.5 rounded-lg border text-center transition-all cursor-pointer ${
-                      iconKey === item.key
+                    onClick={() => setIconName(preset)}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all cursor-pointer ${
+                      iconName === preset
                         ? isLight
                           ? 'bg-neutral-900 text-white border-neutral-900 font-bold'
                           : 'bg-white text-neutral-900 border-white font-bold'
@@ -671,34 +321,78 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                         : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
                     }`}
                   >
-                    {item.label}
+                    {preset}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Solidified Metrics Card */}
+            {/* Icon Variation Toggle: Container vs Plain */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold">Icon Variation (图标外框变体)</label>
+              <div className="grid grid-cols-2 gap-2 font-mono text-xs">
+                <button
+                  type="button"
+                  onClick={() => handleIconVariantChange('container')}
+                  className={`py-2 px-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                    iconVariant === 'container'
+                      ? isLight
+                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
+                      : isLight
+                      ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
+                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
+                  }`}
+                >
+                  <span className="font-semibold">Container</span>
+                  <span className="text-[10px] opacity-75">带背景框容器</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleIconVariantChange('plain')}
+                  className={`py-2 px-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                    iconVariant === 'plain'
+                      ? isLight
+                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
+                      : isLight
+                      ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
+                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
+                  }`}
+                >
+                  <span className="font-semibold">Plain</span>
+                  <span className="text-[10px] opacity-75">纯图标无外框</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Icon Size Slider */}
+            <div className="flex flex-col gap-2 pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60">
+              <SliderControl
+                label={`Icon Size (${iconVariant === 'plain' ? '纯图标放大评估' : '容器内图标大小'})`}
+                value={iconSize}
+                min={16}
+                max={64}
+                step={2}
+                unit="px"
+                isLight={isLight}
+                onChange={setIconSize}
+              />
+            </div>
+
+            {/* Solidified Metrics Notice */}
             <div
-              className={`p-3.5 rounded-xl border text-xs font-mono flex flex-col gap-2 ${
-                isLight ? 'bg-white border-neutral-200 text-neutral-700' : 'bg-neutral-950 border-neutral-800 text-neutral-300'
+              className={`p-3 rounded-xl border text-[11px] font-mono flex flex-col gap-1 ${
+                isLight ? 'bg-white border-neutral-200 text-neutral-600' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
               }`}
             >
-              <div className="flex items-center justify-between border-b pb-2 border-neutral-200 dark:border-neutral-800">
-                <span className="font-bold flex items-center gap-1.5 text-emerald-500">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span>Solidified Metrics (已固化参数)</span>
-                </span>
-                <span className="text-[10px] text-neutral-400">Locked</span>
+              <div className="flex items-center gap-1.5 font-bold text-emerald-500">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Solidified Metrics (已固化规范)</span>
               </div>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-                <div>• Font Size: <span className="font-bold">32px</span></div>
-                <div>• Letter Spacing: <span className="font-bold">10px</span></div>
-                <div>• Padding: <span className="font-bold">16px × 32px</span></div>
-                <div>• Title Margin: <span className="font-bold">2px</span></div>
-                <div>• Content Margin: <span className="font-bold">16px</span></div>
-                <div>• Inner Glow: <span className="font-bold">36px</span></div>
-                <div>• Outer 360°: <span className="font-bold">20px</span></div>
-                <div>• Min Height: <span className="font-bold">165px</span></div>
+              <div className="text-[10px] leading-relaxed opacity-80">
+                Title 32px / Spacing 10px / Weight 400 / TitleMargin 0×10px / ContentMargin 20px / Padding 10×16×32px / Dual Elevation 36+20px
               </div>
             </div>
           </div>
@@ -841,7 +535,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             </h2>
           </div>
           <span className={`text-xs font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-            32px Font · 10px Spacing · Muted Title · 36/20px Dual Elevation
+            Variation: {iconVariant} · Size: {iconSize}px · Weight: 400
           </span>
         </div>
 
@@ -867,25 +561,13 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             >
               <Dialogue
                 title={title}
-                titleFontSize={titleFontSize}
-                titleLetterSpacing={titleLetterSpacing}
-                titleFontWeight={titleFontWeight}
-                titleMarginTop={titleMarginTop}
-                titleMarginBottom={titleMarginBottom}
-                titleColorMode={titleColorMode}
                 content={content}
-                contentMarginBottom={contentMarginBottom}
-                icon={renderSelectedIcon()}
+                icon={iconName}
+                iconVariant={iconVariant}
+                iconSize={iconSize}
                 tone={tone}
                 buttons={buttons}
                 isLight={true}
-                paddingTop={paddingTop}
-                paddingBottom={paddingBottom}
-                paddingX={paddingX}
-                innerGlowBlur={innerGlowBlur}
-                outerShadowBlur={outerShadowBlur}
-                minHeight={minHeight}
-                maxWidth={maxWidth}
               />
             </div>
           </div>
@@ -911,25 +593,13 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             >
               <Dialogue
                 title={title}
-                titleFontSize={titleFontSize}
-                titleLetterSpacing={titleLetterSpacing}
-                titleFontWeight={titleFontWeight}
-                titleMarginTop={titleMarginTop}
-                titleMarginBottom={titleMarginBottom}
-                titleColorMode={titleColorMode}
                 content={content}
-                contentMarginBottom={contentMarginBottom}
-                icon={renderSelectedIcon()}
+                icon={iconName}
+                iconVariant={iconVariant}
+                iconSize={iconSize}
                 tone={tone}
                 buttons={buttons}
                 isLight={false}
-                paddingTop={paddingTop}
-                paddingBottom={paddingBottom}
-                paddingX={paddingX}
-                innerGlowBlur={innerGlowBlur}
-                outerShadowBlur={outerShadowBlur}
-                minHeight={minHeight}
-                maxWidth={maxWidth}
               />
             </div>
           </div>
@@ -984,30 +654,18 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* Centered Modal Overlay */}
+      {/* Centered Modal Overlay (无右上角叉号，强制三选一) */}
       {/* ───────────────────────────────────────────────────────────── */}
       <DialogueModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={title}
-        titleFontSize={titleFontSize}
-        titleLetterSpacing={titleLetterSpacing}
-        titleFontWeight={titleFontWeight}
-        titleMarginTop={titleMarginTop}
-        titleMarginBottom={titleMarginBottom}
-        titleColorMode={titleColorMode}
         content={content}
-        contentMarginBottom={contentMarginBottom}
-        icon={renderSelectedIcon()}
+        icon={iconName}
+        iconVariant={iconVariant}
+        iconSize={iconSize}
         tone={tone}
         isLight={isLight}
-        paddingTop={paddingTop}
-        paddingBottom={paddingBottom}
-        paddingX={paddingX}
-        innerGlowBlur={innerGlowBlur}
-        outerShadowBlur={outerShadowBlur}
-        minHeight={minHeight}
-        maxWidth={maxWidth}
         buttons={buttons.map((b) => ({
           ...b,
           onClick: () => {

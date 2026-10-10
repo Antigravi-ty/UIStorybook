@@ -1,15 +1,17 @@
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
+import * as LucideIcons from 'lucide-react';
 import { 
   AlertCircle, 
   AlertTriangle, 
   Info, 
   Flame,
-  X
+  X 
 } from 'lucide-react';
 import { UI_RADIUS } from '../tokens/radius';
 
 export type DialogueTone = 'info' | 'warning' | 'orange' | 'error';
 export type DialogueButtonVariant = 'primary' | 'outline' | 'danger';
+export type DialogueIconVariant = 'container' | 'plain';
 
 export interface DialogueButtonConfig {
   key?: string;
@@ -22,15 +24,15 @@ export interface DialogueButtonConfig {
 export interface DialogueProps {
   /** Centered title text */
   title: string;
-  /** Title font size in px (default: 28) */
+  /** Title font size in px (default: 32) */
   titleFontSize?: number;
-  /** Title letter spacing in px or string (default: 4) */
+  /** Title letter spacing in px or string (default: 10) */
   titleLetterSpacing?: number | string;
   /** Title font weight (default: 400) */
   titleFontWeight?: number | string;
   /** Title top margin in px (default: 0) */
   titleMarginTop?: number;
-  /** Title bottom margin in px (default: 2) */
+  /** Title bottom margin in px (default: 10) */
   titleMarginBottom?: number;
   /** Title color mode: 'content' (matches body text), 'muted', 'primary', 'tone' (default: 'content') */
   titleColorMode?: 'content' | 'muted' | 'primary' | 'tone';
@@ -38,10 +40,14 @@ export interface DialogueProps {
   titleColor?: string;
   /** Information body text / node, vertically centered with left icon */
   content: React.ReactNode;
-  /** Content bottom margin (gap before buttons) in px (default: 16) */
+  /** Content bottom margin (gap before buttons) in px (default: 20) */
   contentMarginBottom?: number;
-  /** Left icon, vertically centered relative to content */
-  icon?: React.ReactNode;
+  /** Left icon: Lucide icon name (string, e.g. 'alert-circle', 'bell') or ReactNode */
+  icon?: string | React.ReactNode;
+  /** Icon variation: 'container' (with background frame box) or 'plain' (bare icon only) (default: 'container') */
+  iconVariant?: DialogueIconVariant;
+  /** Icon size in px (default: 22 for container, 36 for plain) */
+  iconSize?: number;
   /** Tone level: info (grey), warning (yellow), orange (orange), error (red) */
   tone?: DialogueTone;
   /** Action buttons, centered, compact, equal width */
@@ -142,6 +148,23 @@ const buildCombinedShadow = (
   return parts.length > 0 ? parts.join(', ') : 'none';
 };
 
+const toPascalCase = (str: string): string => {
+  return str
+    .replace(/[-_ ]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+    .replace(/^(.)/, (c) => c.toUpperCase());
+};
+
+export const getLucideIconComponent = (name: string): React.ComponentType<any> | null => {
+  if (!name || typeof name !== 'string') return null;
+  const pascal = toPascalCase(name.trim());
+  const comp =
+    (LucideIcons as Record<string, any>)[pascal] ||
+    (LucideIcons as Record<string, any>)[name.trim()] ||
+    (LucideIcons.icons as Record<string, any>)?.[pascal] ||
+    (LucideIcons.icons as Record<string, any>)?.[name.trim()];
+  return comp && (typeof comp === 'function' || typeof comp === 'object') ? comp : null;
+};
+
 /**
  * Tone configuration for the 4 levels (Grey, Yellow, Orange, Red)
  */
@@ -149,38 +172,42 @@ const getToneConfig = (tone: DialogueTone, isLight: boolean) => {
   switch (tone) {
     case 'error':
       return {
-        defaultIcon: <AlertCircle className="h-5 w-5" />,
+        defaultIconComponent: AlertCircle,
         iconContainerClass: isLight
           ? 'bg-red-50 text-red-600 border border-red-200/90'
           : 'bg-red-950/70 text-red-400 border border-red-800/80',
+        plainIconColorClass: isLight ? 'text-red-600' : 'text-red-400',
         cardBorderClass: isLight ? 'border-red-300/80' : 'border-red-900/60',
         defaultButtonVariant: 'danger' as DialogueButtonVariant,
       };
     case 'orange':
       return {
-        defaultIcon: <Flame className="h-5 w-5" />,
+        defaultIconComponent: Flame,
         iconContainerClass: isLight
           ? 'bg-orange-50 text-orange-600 border border-orange-200/90'
           : 'bg-orange-950/70 text-orange-400 border border-orange-800/80',
+        plainIconColorClass: isLight ? 'text-orange-600' : 'text-orange-400',
         cardBorderClass: isLight ? 'border-orange-300/80' : 'border-orange-900/60',
         defaultButtonVariant: 'primary' as DialogueButtonVariant,
       };
     case 'warning':
       return {
-        defaultIcon: <AlertTriangle className="h-5 w-5" />,
+        defaultIconComponent: AlertTriangle,
         iconContainerClass: isLight
           ? 'bg-yellow-50 text-yellow-600 border border-yellow-200/90'
           : 'bg-yellow-950/70 text-yellow-400 border border-yellow-800/80',
+        plainIconColorClass: isLight ? 'text-yellow-600' : 'text-yellow-400',
         cardBorderClass: isLight ? 'border-yellow-300/80' : 'border-yellow-900/60',
         defaultButtonVariant: 'primary' as DialogueButtonVariant,
       };
     case 'info':
     default:
       return {
-        defaultIcon: <Info className="h-5 w-5" />,
+        defaultIconComponent: Info,
         iconContainerClass: isLight
           ? 'bg-neutral-100 text-neutral-600 border border-neutral-300/80'
           : 'bg-neutral-800 text-neutral-300 border border-neutral-700/80',
+        plainIconColorClass: isLight ? 'text-neutral-600' : 'text-neutral-400',
         cardBorderClass: isLight ? 'border-neutral-300/80' : 'border-neutral-800/80',
         defaultButtonVariant: 'primary' as DialogueButtonVariant,
       };
@@ -198,12 +225,14 @@ export const Dialogue: React.FC<DialogueProps> = ({
   titleLetterSpacing = 10,
   titleFontWeight = 400,
   titleMarginTop = 0,
-  titleMarginBottom = 2,
+  titleMarginBottom = 10,
   titleColorMode = 'content',
   titleColor,
   content = 'Failed to establish signaling server through WebSocket.',
-  contentMarginBottom = 16,
+  contentMarginBottom = 20,
   icon,
+  iconVariant = 'container',
+  iconSize,
   tone = 'error',
   buttons = [
     { label: 'Primary', variant: 'primary' },
@@ -211,8 +240,8 @@ export const Dialogue: React.FC<DialogueProps> = ({
     { label: 'Danger', variant: 'danger' },
   ],
   isLight = false,
-  paddingTop,
-  paddingBottom,
+  paddingTop = 10,
+  paddingBottom = 16,
   paddingY = 16,
   paddingX = 32,
   dialoguePadding,
@@ -228,15 +257,39 @@ export const Dialogue: React.FC<DialogueProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [equalButtonWidth, setEqualButtonWidth] = useState<number | null>(null);
 
-  const effectivePaddingTop = paddingTop ?? paddingY ?? dialoguePadding ?? 16;
+  const effectivePaddingTop = paddingTop ?? paddingY ?? dialoguePadding ?? 10;
   const effectivePaddingBottom = paddingBottom ?? paddingY ?? dialoguePadding ?? 16;
   const effectivePaddingX = paddingX ?? (dialoguePadding ? Math.round(dialoguePadding * 1.25) : 32);
   const effectiveTitleMarginTop = titleMarginTop ?? 0;
-  const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 2;
-  const effectiveContentMarginBottom = contentMarginBottom ?? sectionGap ?? 16;
+  const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 10;
+  const effectiveContentMarginBottom = contentMarginBottom ?? sectionGap ?? 20;
+
+  const effectiveIconSize = iconSize ?? (iconVariant === 'plain' ? 36 : 22);
 
   const toneConfig = getToneConfig(tone, isLight);
   const combinedShadow = buildCombinedShadow(tone, isLight, innerGlowBlur, outerShadowBlur);
+
+  // Dynamically resolve icon element
+  let resolvedIconNode: React.ReactNode = null;
+  if (typeof icon === 'string' && icon.trim()) {
+    const IconComponent = getLucideIconComponent(icon.trim());
+    if (IconComponent) {
+      resolvedIconNode = <IconComponent size={effectiveIconSize} className="shrink-0 transition-all" />;
+    } else {
+      const FallbackIcon = toneConfig.defaultIconComponent;
+      resolvedIconNode = <FallbackIcon size={effectiveIconSize} className="shrink-0 transition-all" />;
+    }
+  } else if (React.isValidElement(icon)) {
+    resolvedIconNode = React.cloneElement(icon as React.ReactElement<any>, {
+      size: effectiveIconSize,
+      className: `${(icon.props as any).className || ''} shrink-0 transition-all`,
+    });
+  } else if (icon) {
+    resolvedIconNode = icon;
+  } else {
+    const DefaultToneIcon = toneConfig.defaultIconComponent;
+    resolvedIconNode = <DefaultToneIcon size={effectiveIconSize} className="shrink-0 transition-all" />;
+  }
 
   const getTitleColorClass = () => {
     if (titleColor) return '';
@@ -414,11 +467,19 @@ export const Dialogue: React.FC<DialogueProps> = ({
         style={{ marginBottom: `${effectiveContentMarginBottom}px` }}
       >
         {/* Left Side: Icon Vertically Centered */}
-        <div
-          className={`shrink-0 h-10 w-10 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center transition-transform ${toneConfig.iconContainerClass}`}
-        >
-          {icon ?? toneConfig.defaultIcon}
-        </div>
+        {iconVariant === 'container' ? (
+          <div
+            className={`shrink-0 rounded-xl flex items-center justify-center p-2.5 transition-transform select-none ${toneConfig.iconContainerClass}`}
+          >
+            {resolvedIconNode}
+          </div>
+        ) : (
+          <div
+            className={`shrink-0 flex items-center justify-center select-none transition-transform ${toneConfig.plainIconColorClass}`}
+          >
+            {resolvedIconNode}
+          </div>
+        )}
 
         {/* Right Side: Multi-line Content */}
         <div className="flex-1 min-w-0 text-left">
