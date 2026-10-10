@@ -227,6 +227,15 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 ### 6.5 全局视觉基调 (Global Visual & Accent Theme)
 - 系统优先使用 **Neutral (无饱和度黑白)** 与 **Warm Amber (暖橙黄色)** 作为核心视觉主色调，相比原蓝色更柔和舒适，并内置视觉基调切换器供全局实时切换。
 
+### 6.6 纯净标准化对话框 (`Dialogue` / `DialogueModal` / `dialogue.show`)
+- **零暗色背景遮罩 (Zero Background Mask)**：Dialogue 凭借内发光 (`inset 0 0 36px`) 与 360° 全方向外凸阴影 (`0 0 20px`) 自带高阶浮雕悬浮感。弹窗模式下采用透明背景（`bg-transparent pointer-events-none`），**绝不使用暗色遮罩使底层变暗**，杜绝层级昏暗感。
+- **叠层支持与顶层优先渲染 (Stackable Multi-Dialogue)**：支持任意多次并发调用生成多个对话框。最新生成的对话框自动具备递增的 `zIndex` 并渲染在最顶层，底层已有对话框清晰可见。
+- **固化标准化规范 (Zero-Config Solidified Specs)**：
+  - **字体与版式**：采用 `'SF Mono', 'JetBrains Mono'`，字号 `32px`、字间距 `10px`、字重固化为 `Regular 400`（细体视觉更轻盈）。标题颜色与正文同调 (`titleColorMode: 'content'`)。
+  - **图标标准**：默认采用 `Plain` 无外框纯图标（`46px`），支持直接传递 Lucide 图标字符串名称（如 `'octagon-alert'`、`'triangle-alert'`、`'flame'`、`'bell'` 等），颜色自动跟随调性文本色。
+  - **按钮规范**：支持 `primary`、`outline`、`danger` 三种变体，居中紧凑等宽对齐；原生支持 `disabled: true`（光标变 `not-allowed` 且阻断交互）。
+  - **调用方式**：既支持声明式 `<Dialogue>` / `<DialogueModal>`，亦支持一行代码调用 `dialogue.show({ title, icon, content, tone, buttons })`。
+
 ---
 
 ## 7. 界面双分层架构 (Dual-Layer Architecture: Menu Layer vs HUD Layer)

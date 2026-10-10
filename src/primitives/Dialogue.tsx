@@ -1,7 +1,8 @@
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { 
-  AlertCircle, 
+  OctagonAlert, 
+  AlertCircle,
   AlertTriangle, 
   Info, 
   Flame,
@@ -11,7 +12,7 @@ import { UI_RADIUS } from '../tokens/radius';
 
 export type DialogueTone = 'info' | 'warning' | 'orange' | 'error';
 export type DialogueButtonVariant = 'primary' | 'outline' | 'danger';
-export type DialogueIconVariant = 'container' | 'plain';
+export type DialogueIconVariant = 'plain' | 'container';
 
 export interface DialogueButtonConfig {
   key?: string;
@@ -22,8 +23,8 @@ export interface DialogueButtonConfig {
 }
 
 export interface DialogueProps {
-  /** Centered title text */
-  title: string;
+  /** Centered title text (default: 'ALERT') */
+  title?: string;
   /** Title font size in px (default: 32) */
   titleFontSize?: number;
   /** Title letter spacing in px or string (default: 10) */
@@ -39,24 +40,24 @@ export interface DialogueProps {
   /** Optional explicit title color string (e.g. hex or rgba) */
   titleColor?: string;
   /** Information body text / node, vertically centered with left icon */
-  content: React.ReactNode;
+  content?: React.ReactNode;
   /** Content bottom margin (gap before buttons) in px (default: 20) */
   contentMarginBottom?: number;
-  /** Left icon: Lucide icon name (string, e.g. 'alert-circle', 'bell') or ReactNode */
+  /** Left icon: Lucide icon name (string, e.g. 'octagon-alert', 'bell') or ReactNode (default: 'octagon-alert') */
   icon?: string | React.ReactNode;
-  /** Icon variation: 'container' (with background frame box) or 'plain' (bare icon only) (default: 'container') */
+  /** Icon variation: 'plain' (bare icon only) or 'container' (with frame box) (default: 'plain') */
   iconVariant?: DialogueIconVariant;
-  /** Icon size in px (default: 22 for container, 36 for plain) */
+  /** Icon size in px (default: 46) */
   iconSize?: number;
-  /** Tone level: info (grey), warning (yellow), orange (orange), error (red) */
+  /** Tone level: error (red), warning (yellow), orange (orange), info (grey) (default: 'error') */
   tone?: DialogueTone;
   /** Action buttons, centered, compact, equal width */
   buttons?: DialogueButtonConfig[];
   /** Light / Dark theme */
   isLight?: boolean;
-  /** Dialogue container top padding (上内衬) in px */
+  /** Dialogue container top padding (上内衬) in px (default: 10) */
   paddingTop?: number;
-  /** Dialogue container bottom padding (下内衬) in px */
+  /** Dialogue container bottom padding (下内衬) in px (default: 16) */
   paddingBottom?: number;
   /** Dialogue container vertical padding (上下内衬) in px (default: 16) */
   paddingY?: number;
@@ -76,14 +77,14 @@ export interface DialogueProps {
   maxWidth?: number | string;
   /** Optional custom class name */
   className?: string;
-  /** Whether to show top-right close icon (default: false, user must pick a button action) */
+  /** Whether to show top-right close icon (default: false) */
   showCloseButton?: boolean;
   /** Optional close handler */
   onClose?: () => void;
 }
 
 /**
- * Build combined box-shadow: inner glow (inset) + omnidirectional floating outer shadow
+ * Build combined box-shadow: inner glow (inset) + omnidirectional 360-degree floating outer shadow
  */
 const buildCombinedShadow = (
   tone: DialogueTone,
@@ -93,7 +94,7 @@ const buildCombinedShadow = (
 ): string => {
   const parts: string[] = [];
 
-  // 1. Inner Glow
+  // 1. Inner Glow (inset)
   if (innerGlowBlur > 0) {
     switch (tone) {
       case 'error':
@@ -121,14 +122,14 @@ const buildCombinedShadow = (
       default:
         parts.push(
           isLight
-            ? `inset 0 0 ${innerGlowBlur}px rgba(0, 0, 0, 0.08)`
+            ? `inset 0 0 ${innerGlowBlur}px rgba(163, 163, 163, 0.18)`
             : `inset 0 0 ${Math.round(innerGlowBlur * 1.2)}px rgba(255, 255, 255, 0.08)`
         );
         break;
     }
   }
 
-  // 2. Omnidirectional 360-degree floating outer shadow (similar to Menu Layer shell elevation)
+  // 2. Omnidirectional 360-degree floating outer shadow
   if (outerShadowBlur > 0) {
     if (isLight) {
       parts.push(
@@ -172,7 +173,7 @@ const getToneConfig = (tone: DialogueTone, isLight: boolean) => {
   switch (tone) {
     case 'error':
       return {
-        defaultIconComponent: AlertCircle,
+        defaultIconComponent: OctagonAlert,
         iconContainerClass: isLight
           ? 'bg-red-50 text-red-600 border border-red-200/90'
           : 'bg-red-950/70 text-red-400 border border-red-800/80',
@@ -217,7 +218,7 @@ const getToneConfig = (tone: DialogueTone, isLight: boolean) => {
 const MONO_FONT_STACK = "'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Monaco, Consolas, monospace";
 
 /**
- * Dialogue Presentation Component
+ * Standardized Dialogue Presentation Component
  */
 export const Dialogue: React.FC<DialogueProps> = ({
   title = 'ALERT',
@@ -230,9 +231,9 @@ export const Dialogue: React.FC<DialogueProps> = ({
   titleColor,
   content = 'Failed to establish signaling server through WebSocket.',
   contentMarginBottom = 20,
-  icon,
-  iconVariant = 'container',
-  iconSize,
+  icon = 'octagon-alert',
+  iconVariant = 'plain',
+  iconSize = 46,
   tone = 'error',
   buttons = [
     { label: 'Primary', variant: 'primary' },
@@ -264,7 +265,7 @@ export const Dialogue: React.FC<DialogueProps> = ({
   const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 10;
   const effectiveContentMarginBottom = contentMarginBottom ?? sectionGap ?? 20;
 
-  const effectiveIconSize = iconSize ?? (iconVariant === 'plain' ? 36 : 22);
+  const effectiveIconSize = iconSize ?? (iconVariant === 'plain' ? 46 : 22);
 
   const toneConfig = getToneConfig(tone, isLight);
   const combinedShadow = buildCombinedShadow(tone, isLight, innerGlowBlur, outerShadowBlur);
@@ -305,15 +306,13 @@ export const Dialogue: React.FC<DialogueProps> = ({
         return isLight ? 'text-neutral-600' : 'text-neutral-300';
       case 'content':
       default:
-        // Harmonizes with body content text (text-neutral-600 in light, text-neutral-300 in dark)
         return isLight ? 'text-neutral-600' : 'text-neutral-300';
     }
   };
 
-  // Measure widest button to enforce equal width
+  // Measure all buttons and enforce uniform compact width based on the longest label
   useLayoutEffect(() => {
-    if (!containerRef.current || buttons.length === 0) return;
-
+    if (!containerRef.current) return;
     const btnElements = containerRef.current.querySelectorAll<HTMLButtonElement>('button[data-dialogue-btn="true"]');
     if (btnElements.length === 0) return;
 
@@ -381,18 +380,27 @@ export const Dialogue: React.FC<DialogueProps> = ({
         : 'bg-transparent text-neutral-200 hover:bg-white/10 border-neutral-700';
     }
 
+    const isDisabled = Boolean(btn.disabled);
+
     return (
       <button
         key={btn.key ?? `${btn.label}-${index}`}
         data-dialogue-btn="true"
         type="button"
-        disabled={btn.disabled}
-        onClick={btn.onClick}
+        disabled={isDisabled}
+        onClick={(e) => {
+          if (isDisabled) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          if (btn.onClick) btn.onClick();
+        }}
         style={{
           width: equalButtonWidth ? `${equalButtonWidth}px` : undefined,
           fontFamily: MONO_FONT_STACK,
         }}
-        className={`inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg border select-none transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:pointer-events-none truncate text-center ${variantClasses}`}
+        className={`inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg border select-none transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 active:scale-[0.98] cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed disabled:active:scale-100 truncate text-center ${variantClasses}`}
       >
         {btn.label}
       </button>
@@ -513,13 +521,18 @@ export interface DialogueModalProps extends DialogueProps {
   /** Whether the modal is open */
   open: boolean;
   /** Callback to close modal */
-  onClose: () => void;
+  onClose?: () => void;
   /** Whether clicking overlay closes modal (default: false, forces action button selection) */
   closeOnClickOutside?: boolean;
   /** Whether pressing Esc closes modal (default: false, forces action button selection) */
   closeOnEsc?: boolean;
+  /** Custom z-index (default: 800) */
+  zIndex?: number;
 }
 
+/**
+ * Centered Dialogue Modal Overlay (Zero background darkening mask, stackable)
+ */
 export const DialogueModal: React.FC<DialogueModalProps> = ({
   open,
   onClose,
@@ -527,10 +540,11 @@ export const DialogueModal: React.FC<DialogueModalProps> = ({
   closeOnEsc = false,
   isLight = false,
   showCloseButton = false,
+  zIndex = 800,
   ...dialogueProps
 }) => {
   useEffect(() => {
-    if (!open || !closeOnEsc) return;
+    if (!open || !closeOnEsc || !onClose) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -548,15 +562,16 @@ export const DialogueModal: React.FC<DialogueModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[800] flex items-center justify-center p-4 sm:p-6 select-none bg-black/65 backdrop-blur-[2px] transition-opacity duration-200"
+      style={{ zIndex }}
+      className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 select-none bg-transparent pointer-events-none transition-opacity duration-200"
       onClick={(e) => {
-        if (closeOnClickOutside && e.target === e.currentTarget) {
+        if (closeOnClickOutside && onClose && e.target === e.currentTarget) {
           onClose();
         }
       }}
     >
       <div
-        className="w-full flex items-center justify-center cursor-default animate-in fade-in zoom-in-95 duration-150"
+        className="w-full flex items-center justify-center pointer-events-auto cursor-default animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         <Dialogue
@@ -567,5 +582,133 @@ export const DialogueModal: React.FC<DialogueModalProps> = ({
         />
       </div>
     </div>
+  );
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// Programmatic Dialogue Stacking Manager
+// Supports multiple concurrent dialogues layered on top without background mask
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface StackedDialogueOptions extends Omit<DialogueProps, 'isLight'> {
+  id?: string;
+  isLight?: boolean;
+}
+
+export interface DialogueStackItem extends StackedDialogueOptions {
+  id: string;
+  zIndex: number;
+}
+
+type StackListener = (items: DialogueStackItem[]) => void;
+let stackListeners: StackListener[] = [];
+let activeDialogueStack: DialogueStackItem[] = [];
+let stackCounter = 1;
+
+export const dialogue = {
+  /**
+   * Spawn a new dialogue on top of the stack.
+   * Generates at the top layer with an incremented z-index and no background darkening.
+   */
+  show: (options: StackedDialogueOptions): string => {
+    const id = options.id || `dialogue-${Date.now()}-${stackCounter++}`;
+    const baseZIndex = 800 + activeDialogueStack.length * 10;
+    const newItem: DialogueStackItem = {
+      ...options,
+      id,
+      zIndex: baseZIndex,
+    };
+    activeDialogueStack = [...activeDialogueStack, newItem];
+    stackListeners.forEach((fn) => fn(activeDialogueStack));
+    return id;
+  },
+
+  /** Dismiss a specific dialogue by ID */
+  dismiss: (id: string) => {
+    activeDialogueStack = activeDialogueStack.filter((item) => item.id !== id);
+    stackListeners.forEach((fn) => fn(activeDialogueStack));
+  },
+
+  /** Clear all stacked dialogues */
+  clear: () => {
+    activeDialogueStack = [];
+    stackListeners.forEach((fn) => fn(activeDialogueStack));
+  },
+
+  /** Get current stack count */
+  getCount: () => activeDialogueStack.length,
+};
+
+/**
+ * Hook to subscribe to dialogue stack updates
+ */
+export const useDialogueStack = () => {
+  const [stack, setStack] = useState<DialogueStackItem[]>(activeDialogueStack);
+
+  useEffect(() => {
+    const listener: StackListener = (newStack) => setStack(newStack);
+    stackListeners.push(listener);
+    return () => {
+      stackListeners = stackListeners.filter((fn) => fn !== listener);
+    };
+  }, []);
+
+  return {
+    stack,
+    show: dialogue.show,
+    dismiss: dialogue.dismiss,
+    clear: dialogue.clear,
+  };
+};
+
+/**
+ * Global or page container that renders stacked dialogues.
+ * No background mask darkening is applied, rendering layered dialogues cleanly.
+ */
+export const DialogueStackContainer: React.FC<{ isLight?: boolean }> = ({ isLight = false }) => {
+  const { stack, dismiss } = useDialogueStack();
+
+  if (stack.length === 0) return null;
+
+  return (
+    <>
+      {stack.map((item, index) => {
+        // Subtle vertical lift per layer underneath so user can appreciate the stack
+        const layerDepth = stack.length - 1 - index;
+        const translateY = -layerDepth * 10;
+        const scale = 1 - layerDepth * 0.02;
+
+        return (
+          <div
+            key={item.id}
+            role="dialog"
+            aria-modal="true"
+            style={{ zIndex: item.zIndex }}
+            className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 select-none bg-transparent pointer-events-none transition-all duration-200"
+          >
+            <div
+              style={{
+                transform: `translateY(${translateY}px) scale(${scale})`,
+              }}
+              className="w-full flex items-center justify-center pointer-events-auto cursor-default animate-in fade-in zoom-in-95 duration-150 transition-transform"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Dialogue
+                {...item}
+                isLight={item.isLight ?? isLight}
+                buttons={item.buttons?.map((b) => ({
+                  ...b,
+                  onClick: () => {
+                    if (b.disabled) return;
+                    if (b.onClick) b.onClick();
+                    dismiss(item.id);
+                  },
+                }))}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </>
   );
 };

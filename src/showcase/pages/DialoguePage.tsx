@@ -13,65 +13,59 @@ import {
   Palette,
   CheckCircle2,
   Sparkles,
+  Layers3,
+  Ban,
 } from 'lucide-react';
 import {
   Dialogue,
   DialogueModal,
+  dialogue,
+  DialogueStackContainer,
+  useDialogueStack,
   type DialogueTone,
   type DialogueButtonConfig,
   type DialogueButtonVariant,
-  type DialogueIconVariant,
 } from '../../primitives/Dialogue';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
-import { SliderControl } from '../../primitives/SliderControl';
 import { CodeBlock } from '../CodeBlock';
 
 const PRESET_ICONS = [
-  'alert-circle',
+  'octagon-alert',
   'triangle-alert',
   'flame',
   'info',
   'bell',
   'shield-alert',
-  'octagon-alert',
   'check-circle',
 ];
 
 export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) => {
   // ──────────────────────────────────────────────────────────────────────────
-  // Configurable Slots
+  // Configurable Standardized Slots
   // ──────────────────────────────────────────────────────────────────────────
   const [title, setTitle] = useState<string>('ALERT');
   const [tone, setTone] = useState<DialogueTone>('error');
-  const [iconName, setIconName] = useState<string>('alert-circle');
-  const [iconVariant, setIconVariant] = useState<DialogueIconVariant>('container');
-  const [iconSize, setIconSize] = useState<number>(22);
+  const [iconName, setIconName] = useState<string>('octagon-alert');
   const [content, setContent] = useState<string>(
     'Failed to establish signaling server through WebSocket.'
   );
 
-  // Dynamic Action Buttons (Primary / Outline / Danger)
+  // Dynamic Action Buttons (Primary / Outline / Danger with disabled support)
   const [buttons, setButtons] = useState<DialogueButtonConfig[]>([
-    { key: 'btn-1', label: 'Primary', variant: 'primary' },
-    { key: 'btn-2', label: 'Outline', variant: 'outline' },
-    { key: 'btn-3', label: 'Danger', variant: 'danger' },
+    { key: 'btn-1', label: 'Primary', variant: 'primary', disabled: false },
+    { key: 'btn-2', label: 'Outline', variant: 'outline', disabled: false },
+    { key: 'btn-3', label: 'Danger', variant: 'danger', disabled: false },
   ]);
 
   const [newButtonLabel, setNewButtonLabel] = useState<string>('Primary');
   const [newButtonVariant, setNewButtonVariant] = useState<DialogueButtonVariant>('outline');
+  const [newButtonDisabled, setNewButtonDisabled] = useState<boolean>(false);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [copiedParams, setCopiedParams] = useState<boolean>(false);
 
-  const handleIconVariantChange = (nextVariant: DialogueIconVariant) => {
-    setIconVariant(nextVariant);
-    if (nextVariant === 'plain' && iconSize === 22) {
-      setIconSize(36);
-    } else if (nextVariant === 'container' && iconSize === 36) {
-      setIconSize(22);
-    }
-  };
+  const { stack } = useDialogueStack();
 
   const handleAddButton = () => {
     const trimmed = newButtonLabel.trim();
@@ -80,9 +74,11 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
       key: `btn-${Date.now()}`,
       label: trimmed,
       variant: newButtonVariant,
+      disabled: newButtonDisabled,
     };
     setButtons((prev) => [...prev, newBtn]);
     setNewButtonLabel('Primary');
+    setNewButtonDisabled(false);
   };
 
   const handleRemoveButton = (index: number) => {
@@ -101,15 +97,45 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     );
   };
 
-  // Structured export object containing active slots
+  const handleToggleButtonDisabled = (index: number) => {
+    setButtons((prev) =>
+      prev.map((btn, i) => (i === index ? { ...btn, disabled: !btn.disabled } : btn))
+    );
+  };
+
+  // Spawn a stacked dialogue with current configuration
+  const handleSpawnStackedDialogue = () => {
+    const stackIndex = dialogue.getCount() + 1;
+    dialogue.show({
+      title: stackIndex === 1 ? title : `${title} #${stackIndex}`,
+      icon: iconName,
+      iconVariant: 'plain',
+      iconSize: 46,
+      content: stackIndex === 1 ? content : `[Stack #${stackIndex}] ${content}`,
+      tone,
+      isLight,
+      buttons: buttons.map((b) => ({
+        ...b,
+        onClick: () => {
+          if (b.onClick) b.onClick();
+        },
+      })),
+    });
+  };
+
+  // Structured export object matching standardized spec
   const currentParamsObject = {
     title,
     icon: iconName,
-    iconVariant,
-    iconSize,
+    iconVariant: 'plain',
+    iconSize: 46,
     content,
     tone,
-    buttons: buttons.map((b) => ({ label: b.label, variant: b.variant ?? 'outline' })),
+    buttons: buttons.map((b) => ({
+      label: b.label,
+      variant: b.variant ?? 'outline',
+      ...(b.disabled ? { disabled: true } : {}),
+    })),
   };
 
   const handleCopyParams = () => {
@@ -119,20 +145,34 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   };
 
   // Generated Recipe
-  const generatedCode = `import { Dialogue, DialogueModal } from '@/components/primitives';
+  const generatedCode = `import { Dialogue, dialogue, DialogueStackContainer } from '@/components/primitives';
 
+// 1. Direct Component Usage (声明式使用)
 <Dialogue
   title="${title}"
   icon="${iconName}"
-  iconVariant="${iconVariant}"
-  iconSize={${iconSize}}
+  iconVariant="plain"
+  iconSize={46}
   content="${content.replace(/\n/g, '\\n')}"
   tone="${tone}"
   buttons={[
-${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outline'}' }`).join(',\n')}
+${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outline'}'${b.disabled ? ', disabled: true' : ''} }`).join(',\n')}
   ]}
   isLight={${isLight}}
-/>`;
+/>
+
+// 2. Programmatic Stacking (函数式多层叠加，无背景遮罩，最顶层渲染)
+dialogue.show({
+  title: "${title}",
+  icon: "${iconName}",
+  content: "${content.replace(/\n/g, '\\n')}",
+  tone: "${tone}",
+  buttons: [
+    { label: 'Primary', variant: 'primary', onClick: () => console.log('Confirmed') },
+    { label: 'Outline', variant: 'outline' },
+    { label: 'Danger', variant: 'danger', disabled: true }
+  ]
+});`;
 
   return (
     <div className="flex flex-col gap-10 max-w-6xl w-full pb-16 font-sans">
@@ -148,15 +188,15 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
               <h1 className="text-2xl font-bold tracking-tight">Dialogue 对话框规范</h1>
               <Badge variant="primary" size="sm" isLight={isLight}>
-                SF Mono · Regular 400 · Solidified
+                Standardized Component · Plain 46px · Stackable
               </Badge>
             </div>
             <p className={`text-xs ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-              标题与正文色调已同调固化（32px 字号、10px 字间距、Regular 400 字重）。支持图标名称直接传递、带框/无框双变体与尺寸自由微调。
+              标准独立组件。支持正文、Lucide 图标名、标题、4色调性与按钮变体/禁用态（disabled）。自带全方向浮雕阴影与内发光，弹窗模式无背景变暗遮罩（Zero Mask），支持多层叠加并在最顶层生成。
             </p>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2.5">
+          <div className="shrink-0 flex items-center gap-2.5 flex-wrap">
             <Button
               variant="outline"
               size="md"
@@ -171,17 +211,46 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               variant="primary"
               size="md"
               isLight={isLight}
+              icon={<Layers3 className="h-4 w-4" />}
+              onClick={handleSpawnStackedDialogue}
+            >
+              Spawn Stacked (+1 叠加弹窗)
+            </Button>
+
+            <Button
+              variant="outline"
+              size="md"
+              isLight={isLight}
               icon={<ExternalLink className="h-4 w-4" />}
               onClick={() => setIsModalOpen(true)}
             >
-              Trigger Modal (无叉号 · 强制三选一)
+              Single Modal (单弹窗)
             </Button>
           </div>
         </div>
+
+        {/* Stack Status Banner if dialogues are active */}
+        {stack.length > 0 && (
+          <div className={`p-3 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
+            isLight ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-amber-950/40 border-amber-800 text-amber-200'
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>当前已堆叠 <strong>{stack.length}</strong> 个对话框（最顶层优先渲染，无暗色背景遮罩）</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => dialogue.clear()}
+              className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 font-semibold cursor-pointer transition-colors"
+            >
+              全部关闭 (Clear All)
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* Slot Control Panel */}
+      {/* Standardized Slot Control Panel */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div
         className={`p-6 rounded-2xl border flex flex-col gap-6 shadow-sm ${
@@ -193,21 +262,21 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         <div className="flex items-center justify-between border-b pb-3 border-neutral-200/70 dark:border-neutral-800/70">
           <div className="flex items-center gap-2">
             <Sliders className="h-4 w-4 text-amber-500" />
-            <span className="font-bold text-sm tracking-tight">Dialogue Slots 控制面板</span>
+            <span className="font-bold text-sm tracking-tight">Dialogue 标准 Slots 参数输入</span>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="neutral" size="sm" isLight={isLight}>
-              Slots Only · Fixed 400 Weight
+              Plain 46px · Zero Mask · Stackable
             </Badge>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Column 1: Title, Content & Color Level */}
+          {/* Column 1: Title & Tone */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
               <Type className="h-3.5 w-3.5" />
-              <span>Title, Tone & Content</span>
+              <span>Title & Tone</span>
             </div>
 
             {/* Title Text Input */}
@@ -227,7 +296,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               />
             </div>
 
-            {/* Color Level (Tone) */}
+            {/* Tone Selector */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold">Color Level (4级调性: 灰黄橙红)</label>
               <div className="grid grid-cols-4 gap-1.5 font-mono text-xs">
@@ -260,42 +329,47 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
             </div>
 
-            {/* Content Textarea */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold">Content (正文内容)</label>
-              <textarea
-                rows={4}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Type informative English content..."
-                style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
-                className={`w-full px-3 py-2 rounded-xl text-xs border outline-none transition-colors resize-none leading-relaxed ${
-                  isLight
-                    ? 'bg-white border-neutral-300 focus:border-amber-500 text-neutral-900'
-                    : 'bg-neutral-950 border-neutral-700/80 focus:border-amber-500 text-neutral-100'
-                }`}
-              />
+            {/* Solidified Specification Badge Card */}
+            <div
+              className={`p-3 rounded-xl border text-[11px] font-mono flex flex-col gap-1.5 ${
+                isLight ? 'bg-white border-neutral-200 text-neutral-600' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 font-bold text-emerald-500">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Standardized Specs (已固化标准)</span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] leading-relaxed">
+                <div>• Icon Variation: <strong>Plain</strong></div>
+                <div>• Icon Size: <strong>46px</strong></div>
+                <div>• Title Size: <strong>32px</strong></div>
+                <div>• Letter Spacing: <strong>10px</strong></div>
+                <div>• Title Weight: <strong>Regular 400</strong></div>
+                <div>• Title Color: <strong>Content Sync</strong></div>
+                <div>• Padding: <strong>10×16×32px</strong></div>
+                <div>• Background Mask: <strong>None (0% Dim)</strong></div>
+              </div>
             </div>
           </div>
 
-          {/* Column 2: Icon Variation & Sizing */}
+          {/* Column 2: Icon Name & Content */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Icon Variations & Sizing</span>
+              <span>Icon (46px Plain) & Content</span>
             </div>
 
             {/* Icon Name Input */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold flex items-center justify-between">
-                <span>Lucide Icon Name (图标名称)</span>
-                <span className="text-[10px] font-mono text-neutral-400">{iconName}</span>
+                <span>Lucide Icon Name (直接传图标名)</span>
+                <span className="text-[10px] font-mono text-neutral-400">{iconName} (46px)</span>
               </label>
               <input
                 type="text"
                 value={iconName}
                 onChange={(e) => setIconName(e.target.value)}
-                placeholder="alert-circle"
+                placeholder="octagon-alert"
                 style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
                 className={`w-full px-3 py-2 rounded-xl text-xs border outline-none transition-colors ${
                   isLight
@@ -327,87 +401,35 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
             </div>
 
-            {/* Icon Variation Toggle: Container vs Plain */}
+            {/* Content Textarea */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold">Icon Variation (图标外框变体)</label>
-              <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-                <button
-                  type="button"
-                  onClick={() => handleIconVariantChange('container')}
-                  className={`py-2 px-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                    iconVariant === 'container'
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="font-semibold">Container</span>
-                  <span className="text-[10px] opacity-75">带背景框容器</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleIconVariantChange('plain')}
-                  className={`py-2 px-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                    iconVariant === 'plain'
-                      ? isLight
-                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
-                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
-                      : isLight
-                      ? 'bg-white hover:bg-neutral-100 border-neutral-200 text-neutral-600'
-                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
-                  }`}
-                >
-                  <span className="font-semibold">Plain</span>
-                  <span className="text-[10px] opacity-75">纯图标无外框</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Icon Size Slider */}
-            <div className="flex flex-col gap-2 pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60">
-              <SliderControl
-                label={`Icon Size (${iconVariant === 'plain' ? '纯图标放大评估' : '容器内图标大小'})`}
-                value={iconSize}
-                min={16}
-                max={64}
-                step={2}
-                unit="px"
-                isLight={isLight}
-                onChange={setIconSize}
+              <label className="text-xs font-semibold">Content (正文内容)</label>
+              <textarea
+                rows={4}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Type informative English content..."
+                style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
+                className={`w-full px-3 py-2 rounded-xl text-xs border outline-none transition-colors resize-none leading-relaxed ${
+                  isLight
+                    ? 'bg-white border-neutral-300 focus:border-amber-500 text-neutral-900'
+                    : 'bg-neutral-950 border-neutral-700/80 focus:border-amber-500 text-neutral-100'
+                }`}
               />
-            </div>
-
-            {/* Solidified Metrics Notice */}
-            <div
-              className={`p-3 rounded-xl border text-[11px] font-mono flex flex-col gap-1 ${
-                isLight ? 'bg-white border-neutral-200 text-neutral-600' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 font-bold text-emerald-500">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Solidified Metrics (已固化规范)</span>
-              </div>
-              <div className="text-[10px] leading-relaxed opacity-80">
-                Title 32px / Spacing 10px / Weight 400 / TitleMargin 0×10px / ContentMargin 20px / Padding 10×16×32px / Dual Elevation 36+20px
-              </div>
             </div>
           </div>
 
-          {/* Column 3: Button Manager (Primary, Outline, Danger) */}
+          {/* Column 3: Button Manager with Disabled Support */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
               <Box className="h-3.5 w-3.5" />
-              <span>Button Manager (Primary / Outline / Danger)</span>
+              <span>Button Manager (with disabled support)</span>
             </div>
 
             {/* Active Buttons List */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs font-semibold">
-                <span>Active Buttons (等长紧凑对齐)</span>
+                <span>Active Buttons (等长紧凑居中)</span>
                 <span className="text-[10px] font-mono text-neutral-400">{buttons.length} items</span>
               </div>
 
@@ -416,6 +438,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                   <div
                     key={btn.key ?? index}
                     className={`flex items-center gap-2 p-2 rounded-xl border text-xs transition-colors ${
+                      btn.disabled ? 'opacity-65' : ''
+                    } ${
                       isLight ? 'bg-white border-neutral-200' : 'bg-neutral-950 border-neutral-800'
                     }`}
                   >
@@ -439,7 +463,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                     <select
                       value={btn.variant ?? 'outline'}
                       onChange={(e) => handleUpdateButtonVariant(index, e.target.value as DialogueButtonVariant)}
-                      className={`px-2 py-1 rounded-lg border text-[11px] font-mono outline-none cursor-pointer shrink-0 ${
+                      className={`px-1.5 py-1 rounded-lg border text-[11px] font-mono outline-none cursor-pointer shrink-0 ${
                         isLight
                           ? 'bg-neutral-50 border-neutral-300 text-neutral-800'
                           : 'bg-neutral-900 border-neutral-700 text-neutral-200'
@@ -449,6 +473,22 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                       <option value="outline">outline</option>
                       <option value="danger">danger</option>
                     </select>
+
+                    {/* Disabled Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleButtonDisabled(index)}
+                      className={`px-1.5 py-1 rounded-lg text-[10px] font-mono border transition-colors cursor-pointer shrink-0 ${
+                        btn.disabled
+                          ? 'bg-rose-500/15 border-rose-500 text-rose-500 font-bold'
+                          : isLight
+                          ? 'bg-neutral-100 border-neutral-300 text-neutral-500'
+                          : 'bg-neutral-800 border-neutral-700 text-neutral-400'
+                      }`}
+                      title={btn.disabled ? 'Button is disabled' : 'Click to disable button'}
+                    >
+                      {btn.disabled ? 'Disabled' : 'Enabled'}
+                    </button>
 
                     <button
                       type="button"
@@ -488,7 +528,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                   }}
                   placeholder="Primary"
                   style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
-                  className={`flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border text-xs outline-none ${
+                  className={`flex-1 min-w-0 px-2 py-1 rounded-lg border text-xs outline-none ${
                     isLight ? 'bg-white border-neutral-300' : 'bg-neutral-900 border-neutral-700'
                   }`}
                 />
@@ -496,7 +536,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 <select
                   value={newButtonVariant}
                   onChange={(e) => setNewButtonVariant(e.target.value as DialogueButtonVariant)}
-                  className={`px-2 py-1.5 rounded-lg border text-[11px] font-mono outline-none cursor-pointer shrink-0 ${
+                  className={`px-1.5 py-1 rounded-lg border text-[11px] font-mono outline-none cursor-pointer shrink-0 ${
                     isLight
                       ? 'bg-white border-neutral-300 text-neutral-800'
                       : 'bg-neutral-900 border-neutral-700 text-neutral-200'
@@ -506,6 +546,16 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                   <option value="outline">outline</option>
                   <option value="danger">danger</option>
                 </select>
+
+                <label className="flex items-center gap-1 text-[10px] font-mono cursor-pointer shrink-0 select-none">
+                  <input
+                    type="checkbox"
+                    checked={newButtonDisabled}
+                    onChange={(e) => setNewButtonDisabled(e.target.checked)}
+                    className="cursor-pointer"
+                  />
+                  <span>Disabled</span>
+                </label>
 
                 <Button
                   variant="primary"
@@ -535,7 +585,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             </h2>
           </div>
           <span className={`text-xs font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-            Variation: {iconVariant} · Size: {iconSize}px · Weight: 400
+            Plain 46px · Zero Mask · Solidified Dual Elevation
           </span>
         </div>
 
@@ -563,8 +613,6 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 title={title}
                 content={content}
                 icon={iconName}
-                iconVariant={iconVariant}
-                iconSize={iconSize}
                 tone={tone}
                 buttons={buttons}
                 isLight={true}
@@ -595,8 +643,6 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 title={title}
                 content={content}
                 icon={iconName}
-                iconVariant={iconVariant}
-                iconSize={iconSize}
                 tone={tone}
                 buttons={buttons}
                 isLight={false}
@@ -612,7 +658,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold tracking-tight font-mono uppercase text-neutral-400">
-            Exported Parameters JSON (调整后可一键复制并粘贴回对话固化)
+            Exported Parameters JSON (符合要求的标准化参数对象)
           </h3>
           <button
             type="button"
@@ -648,13 +694,13 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         <h3 className="text-sm font-bold tracking-tight">Agent Code Recipe (代码引用范例)</h3>
         <CodeBlock
           isLight={isLight}
-          title="Dialogue / DialogueModal Recipe"
+          title="Dialogue / dialogue.show Recipe"
           code={generatedCode}
         />
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* Centered Modal Overlay (无右上角叉号，强制三选一) */}
+      {/* Centered Modal Overlay (无暗色背景遮罩，透明层，强制选按键) */}
       {/* ───────────────────────────────────────────────────────────── */}
       <DialogueModal
         open={isModalOpen}
@@ -662,18 +708,22 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         title={title}
         content={content}
         icon={iconName}
-        iconVariant={iconVariant}
-        iconSize={iconSize}
         tone={tone}
         isLight={isLight}
         buttons={buttons.map((b) => ({
           ...b,
           onClick: () => {
+            if (b.disabled) return;
             if (b.onClick) b.onClick();
             setIsModalOpen(false);
           },
         }))}
       />
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* Dialogue Stack Container (支持任意多次调用并多层叠加，无背景遮罩) */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <DialogueStackContainer isLight={isLight} />
     </div>
   );
 };
