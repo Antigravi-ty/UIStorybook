@@ -17,7 +17,8 @@ import {
   AppWindow,
   Gauge,
   Loader2,
-  Crosshair
+  Crosshair,
+  MessageSquare
 } from 'lucide-react';
 import { useAccentStore } from '../tokens';
 import { AccentColor } from '../tokens/colors';
@@ -30,6 +31,7 @@ export type ShowcaseTab =
   | 'stacks' 
   | 'cards' 
   | 'panels' 
+  | 'dialogue'
   | 'layer-preview'
   | 'hud-preview'
   | 'loading-preview'
@@ -63,6 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'stacks', label: 'Stack 栅格布局 (H/V/Grid)', icon: <Layers className="h-4 w-4" />, category: 'Layout Primitives' },
     { id: 'cards', label: 'Card 卡片与选择器', icon: <Square className="h-4 w-4" />, category: 'Layout Primitives' },
     { id: 'panels', label: '3-Stage Compound 面板', icon: <LayoutTemplate className="h-4 w-4" />, category: 'Compound Widgets' },
+    { id: 'dialogue', label: 'Dialogue 弹窗对话框', icon: <MessageSquare className="h-4 w-4 text-amber-500" />, category: 'Compound Widgets' },
     { id: 'layer-preview', label: 'Menu Layer 实时预览', icon: <Layers className="h-4 w-4" />, category: 'Navigation & Motion' },
     { id: 'hud-preview', label: 'Match HUD 实时预览', icon: <Gauge className="h-4 w-4 text-emerald-500" />, category: 'Navigation & Motion' },
     { id: 'loading-preview', label: 'Loading 加载与双层进度条', icon: <Loader2 className="h-4 w-4 text-sky-500" />, category: 'Navigation & Motion' },

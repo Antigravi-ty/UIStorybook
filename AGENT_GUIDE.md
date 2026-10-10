@@ -199,6 +199,7 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 | 水平流布局 | `<HStack>` | `src/layout/HStack.tsx` |
 | 网格流布局 | `<GridStack>` | `src/layout/GridStack.tsx` |
 | 3-Stage Compound 面板 | `<PanelContainer>` | `src/layout/Panel.tsx` |
+| 纯净三段式弹窗对话框 | `<Dialogue>` / `<DialogueModal>` | `src/primitives/Dialogue.tsx` |
 | 双动效弹窗外壳 | `<MorphingShell>` | `src/navigation/MorphingShell.tsx` |
 
 ---

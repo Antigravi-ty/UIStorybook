@@ -6,3 +6,4 @@ export * from './SegmentedSwitch';
 export * from './SliderControl';
 export * from './ToggleSwitch';
 export * from './UnderConstructionPlaceholder';
+export * from './Dialogue';
