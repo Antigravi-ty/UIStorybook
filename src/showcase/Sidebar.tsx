@@ -16,7 +16,8 @@ import {
   Eye,
   AppWindow,
   Gauge,
-  Loader2
+  Loader2,
+  Crosshair
 } from 'lucide-react';
 import { useAccentStore } from '../tokens';
 import { AccentColor } from '../tokens/colors';
@@ -25,6 +26,7 @@ export type ShowcaseTab =
   | 'overview' 
   | 'badges' 
   | 'tabs' 
+  | 'hud-elements'
   | 'stacks' 
   | 'cards' 
   | 'panels' 
@@ -57,6 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'overview', label: '设计理念与架构思路', icon: <BookOpen className="h-4 w-4" />, category: 'Core Architecture' },
     { id: 'badges', label: 'Badge & Keycap 徽章与键位', icon: <Tag className="h-4 w-4" />, category: 'Atomic Primitives' },
     { id: 'tabs', label: 'Tabs & Controls 控件', icon: <Sliders className="h-4 w-4" />, category: 'Atomic Primitives' },
+    { id: 'hud-elements', label: 'HUD Elements 独立仪表', icon: <Crosshair className="h-4 w-4 text-red-500" />, category: 'Atomic Primitives' },
     { id: 'stacks', label: 'Stack 栅格布局 (H/V/Grid)', icon: <Layers className="h-4 w-4" />, category: 'Layout Primitives' },
     { id: 'cards', label: 'Card 卡片与选择器', icon: <Square className="h-4 w-4" />, category: 'Layout Primitives' },
     { id: 'panels', label: '3-Stage Compound 面板', icon: <LayoutTemplate className="h-4 w-4" />, category: 'Compound Widgets' },

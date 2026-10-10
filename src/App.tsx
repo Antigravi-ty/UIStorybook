@@ -6,6 +6,7 @@ import { TabsPage } from './showcase/pages/TabsPage';
 import { StacksPage } from './showcase/pages/StacksPage';
 import { CardsPage } from './showcase/pages/CardsPage';
 import { PanelsPage } from './showcase/pages/PanelsPage';
+import { HudElementsPage } from './showcase/pages/HudElementsPage';
 import { MenusPage } from './showcase/pages/MenusPage';
 import { MenuLayerPreviewPage } from './showcase/pages/MenuLayerPreviewPage';
 import { MatchHudPreviewPage } from './showcase/pages/MatchHudPreviewPage';
@@ -135,6 +136,7 @@ export const App: React.FC = () => {
               {activeTab === 'overview' && <OverviewPage isLight={isLight} />}
               {activeTab === 'badges' && <BadgesPage isLight={isLight} />}
               {activeTab === 'tabs' && <TabsPage isLight={isLight} />}
+              {activeTab === 'hud-elements' && <HudElementsPage isLight={isLight} />}
               {activeTab === 'stacks' && <StacksPage isLight={isLight} />}
               {activeTab === 'cards' && <CardsPage isLight={isLight} />}
               {activeTab === 'panels' && <PanelsPage isLight={isLight} />}

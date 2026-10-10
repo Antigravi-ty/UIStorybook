@@ -10,3 +10,6 @@ export * from './QuickChatHUD';
 export * from './NetworkDiagnosticsHUD';
 export * from './MatchHudContainer';
 export * from './ArenaBackdrop';
+export * from './BallCameraIndicator';
+export * from './VelocityProgressBar';
+export * from './CircularBoostGauge';
