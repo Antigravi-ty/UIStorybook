@@ -22,14 +22,18 @@ export interface DialogueButtonConfig {
 export interface DialogueProps {
   /** Centered title text */
   title: string;
-  /** Title font size in px (default: 18) */
+  /** Title font size in px (default: 28) */
   titleFontSize?: number;
-  /** Title letter spacing in px or string (default: 0) */
+  /** Title letter spacing in px or string (default: 4) */
   titleLetterSpacing?: number | string;
-  /** Title font weight (default: 700) */
+  /** Title font weight (800+, default: 800) */
   titleFontWeight?: number | string;
+  /** Title bottom margin in px (default: 10) */
+  titleMarginBottom?: number;
   /** Information body text / node, vertically centered with left icon */
   content: React.ReactNode;
+  /** Content bottom margin (gap before buttons) in px (default: 10) */
+  contentMarginBottom?: number;
   /** Left icon, vertically centered relative to content */
   icon?: React.ReactNode;
   /** Tone level: info (grey), warning (yellow), orange (orange), error (red) */
@@ -38,15 +42,21 @@ export interface DialogueProps {
   buttons?: DialogueButtonConfig[];
   /** Light / Dark theme */
   isLight?: boolean;
-  /** Dialogue container outer padding in px (default: 24) */
+  /** Dialogue container vertical padding (上下内衬) in px (default: 16) */
+  paddingY?: number;
+  /** Dialogue container horizontal padding (左右内衬) in px (default: 20) */
+  paddingX?: number;
+  /** Legacy unified dialogue padding in px */
   dialoguePadding?: number;
-  /** Vertical gap between top, middle, and bottom sections in px (default: 20) */
+  /** Legacy unified section gap in px */
   sectionGap?: number;
-  /** Inner glow blur radius in px (default: 20, 0 to disable) */
+  /** Inner glow blur radius in px (default: 40, 0 to disable) */
   innerGlowBlur?: number;
-  /** Minimum container height (default: 210) */
+  /** Omnidirectional outer shadow blur in px (default: 50, 0 to disable) */
+  outerShadowBlur?: number;
+  /** Minimum container height (default: 160) */
   minHeight?: number | string;
-  /** Maximum container width (default: 460) */
+  /** Maximum container width (default: 560) */
   maxWidth?: number | string;
   /** Optional custom class name */
   className?: string;
@@ -55,10 +65,75 @@ export interface DialogueProps {
 }
 
 /**
- * Tone configuration for the 4 levels (Grey, Yellow, Orange, Red)
- * Implements inner glow (box-shadow: inset ...) instead of outer glow.
+ * Build combined box-shadow: inner glow (inset) + omnidirectional floating outer shadow
  */
-const getToneConfig = (tone: DialogueTone, isLight: boolean, innerGlowBlur: number = 20) => {
+const buildCombinedShadow = (
+  tone: DialogueTone,
+  isLight: boolean,
+  innerGlowBlur: number,
+  outerShadowBlur: number
+): string => {
+  const parts: string[] = [];
+
+  // 1. Inner Glow
+  if (innerGlowBlur > 0) {
+    switch (tone) {
+      case 'error':
+        parts.push(
+          isLight
+            ? `inset 0 0 ${innerGlowBlur}px rgba(239, 68, 68, 0.16)`
+            : `inset 0 0 ${Math.round(innerGlowBlur * 1.2)}px rgba(239, 68, 68, 0.25)`
+        );
+        break;
+      case 'orange':
+        parts.push(
+          isLight
+            ? `inset 0 0 ${innerGlowBlur}px rgba(249, 115, 22, 0.16)`
+            : `inset 0 0 ${Math.round(innerGlowBlur * 1.2)}px rgba(249, 115, 22, 0.25)`
+        );
+        break;
+      case 'warning':
+        parts.push(
+          isLight
+            ? `inset 0 0 ${innerGlowBlur}px rgba(234, 179, 8, 0.16)`
+            : `inset 0 0 ${Math.round(innerGlowBlur * 1.2)}px rgba(234, 179, 8, 0.25)`
+        );
+        break;
+      case 'info':
+      default:
+        parts.push(
+          isLight
+            ? `inset 0 0 ${innerGlowBlur}px rgba(0, 0, 0, 0.08)`
+            : `inset 0 0 ${Math.round(innerGlowBlur * 1.2)}px rgba(255, 255, 255, 0.08)`
+        );
+        break;
+    }
+  }
+
+  // 2. Omnidirectional 360-degree floating outer shadow (similar to Menu Layer shell elevation)
+  if (outerShadowBlur > 0) {
+    if (isLight) {
+      parts.push(
+        `0 0 0 1px rgba(0, 0, 0, 0.08)`,
+        `0 0 ${outerShadowBlur}px rgba(0, 0, 0, 0.16)`,
+        `0 ${Math.round(outerShadowBlur * 0.4)}px ${Math.round(outerShadowBlur * 1.2)}px rgba(0, 0, 0, 0.14)`
+      );
+    } else {
+      parts.push(
+        `0 0 0 1px rgba(255, 255, 255, 0.14)`,
+        `0 0 ${outerShadowBlur}px rgba(0, 0, 0, 0.85)`,
+        `0 ${Math.round(outerShadowBlur * 0.4)}px ${Math.round(outerShadowBlur * 1.2)}px rgba(0, 0, 0, 0.95)`
+      );
+    }
+  }
+
+  return parts.length > 0 ? parts.join(', ') : 'none';
+};
+
+/**
+ * Tone configuration for the 4 levels (Grey, Yellow, Orange, Red)
+ */
+const getToneConfig = (tone: DialogueTone, isLight: boolean) => {
   switch (tone) {
     case 'error':
       return {
@@ -67,11 +142,6 @@ const getToneConfig = (tone: DialogueTone, isLight: boolean, innerGlowBlur: numb
           ? 'bg-red-50 text-red-600 border border-red-200/90'
           : 'bg-red-950/70 text-red-400 border border-red-800/80',
         cardBorderClass: isLight ? 'border-red-300/80' : 'border-red-900/60',
-        innerGlowStyle: innerGlowBlur > 0
-          ? isLight
-            ? `inset 0 0 ${innerGlowBlur}px rgba(239, 68, 68, 0.12)`
-            : `inset 0 0 ${innerGlowBlur * 1.2}px rgba(239, 68, 68, 0.18)`
-          : 'none',
         defaultButtonVariant: 'danger' as DialogueButtonVariant,
       };
     case 'orange':
@@ -81,11 +151,6 @@ const getToneConfig = (tone: DialogueTone, isLight: boolean, innerGlowBlur: numb
           ? 'bg-orange-50 text-orange-600 border border-orange-200/90'
           : 'bg-orange-950/70 text-orange-400 border border-orange-800/80',
         cardBorderClass: isLight ? 'border-orange-300/80' : 'border-orange-900/60',
-        innerGlowStyle: innerGlowBlur > 0
-          ? isLight
-            ? `inset 0 0 ${innerGlowBlur}px rgba(249, 115, 22, 0.12)`
-            : `inset 0 0 ${innerGlowBlur * 1.2}px rgba(249, 115, 22, 0.18)`
-          : 'none',
         defaultButtonVariant: 'primary' as DialogueButtonVariant,
       };
     case 'warning':
@@ -95,11 +160,6 @@ const getToneConfig = (tone: DialogueTone, isLight: boolean, innerGlowBlur: numb
           ? 'bg-yellow-50 text-yellow-600 border border-yellow-200/90'
           : 'bg-yellow-950/70 text-yellow-400 border border-yellow-800/80',
         cardBorderClass: isLight ? 'border-yellow-300/80' : 'border-yellow-900/60',
-        innerGlowStyle: innerGlowBlur > 0
-          ? isLight
-            ? `inset 0 0 ${innerGlowBlur}px rgba(234, 179, 8, 0.12)`
-            : `inset 0 0 ${innerGlowBlur * 1.2}px rgba(234, 179, 8, 0.18)`
-          : 'none',
         defaultButtonVariant: 'primary' as DialogueButtonVariant,
       };
     case 'info':
@@ -110,55 +170,53 @@ const getToneConfig = (tone: DialogueTone, isLight: boolean, innerGlowBlur: numb
           ? 'bg-neutral-100 text-neutral-600 border border-neutral-300/80'
           : 'bg-neutral-800 text-neutral-300 border border-neutral-700/80',
         cardBorderClass: isLight ? 'border-neutral-300/80' : 'border-neutral-800/80',
-        innerGlowStyle: innerGlowBlur > 0
-          ? isLight
-            ? `inset 0 0 ${innerGlowBlur}px rgba(0, 0, 0, 0.05)`
-            : `inset 0 0 ${innerGlowBlur * 1.2}px rgba(255, 255, 255, 0.05)`
-          : 'none',
         defaultButtonVariant: 'primary' as DialogueButtonVariant,
       };
   }
 };
 
-/**
- * Standard font stack: 'SF Mono', 'JetBrains Mono', fallback ui-monospace
- */
 const MONO_FONT_STACK = "'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Monaco, Consolas, monospace";
 
 /**
  * Dialogue Presentation Component
- *
- * Requirements:
- * 1. Typography: SF Mono with JetBrains Mono fallback across all text.
- * 2. 3-part seamless structure: Centered title, middle content, compact equal-length buttons.
- * 3. No divider lines.
- * 4. Middle icon vertically centered with content (even with 5+ rows).
- * 5. Inner glow (box-shadow: inset ...) instead of outer glow.
- * 6. 3 button variants: primary, outline, danger.
- * 7. Configurable padding and section spacing.
  */
 export const Dialogue: React.FC<DialogueProps> = ({
   title,
-  titleFontSize = 18,
-  titleLetterSpacing = 0,
-  titleFontWeight = 700,
+  titleFontSize = 28,
+  titleLetterSpacing = 4,
+  titleFontWeight = 800,
+  titleMarginBottom,
   content,
+  contentMarginBottom,
   icon,
-  tone = 'info',
-  buttons = [{ label: 'Primary', variant: 'primary' }],
+  tone = 'warning',
+  buttons = [
+    { label: 'Primary', variant: 'primary' },
+    { label: 'Outline', variant: 'outline' },
+    { label: 'Danger', variant: 'danger' },
+  ],
   isLight = false,
-  dialoguePadding = 24,
-  sectionGap = 20,
-  innerGlowBlur = 20,
-  minHeight = 210,
-  maxWidth = 460,
+  paddingY,
+  paddingX,
+  dialoguePadding,
+  sectionGap,
+  innerGlowBlur = 40,
+  outerShadowBlur = 50,
+  minHeight = 160,
+  maxWidth = 560,
   className = '',
   onClose,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [equalButtonWidth, setEqualButtonWidth] = useState<number | null>(null);
 
-  const toneConfig = getToneConfig(tone, isLight, innerGlowBlur);
+  const effectivePaddingY = paddingY ?? dialoguePadding ?? 16;
+  const effectivePaddingX = paddingX ?? (dialoguePadding ? Math.round(dialoguePadding * 1.25) : 20);
+  const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 10;
+  const effectiveContentMarginBottom = contentMarginBottom ?? sectionGap ?? 10;
+
+  const toneConfig = getToneConfig(tone, isLight);
+  const combinedShadow = buildCombinedShadow(tone, isLight, innerGlowBlur, outerShadowBlur);
 
   // Measure widest button to enforce equal width
   useLayoutEffect(() => {
@@ -180,7 +238,7 @@ export const Dialogue: React.FC<DialogueProps> = ({
     if (maxW > 0) {
       setEqualButtonWidth(Math.ceil(Math.max(maxW, 92)));
     }
-  }, [buttons, isLight, title, content, maxWidth, dialoguePadding]);
+  }, [buttons, isLight, title, content, maxWidth, effectivePaddingX]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -211,7 +269,6 @@ export const Dialogue: React.FC<DialogueProps> = ({
   const maxWidthStyle = typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth;
   const letterSpacingStyle = typeof titleLetterSpacing === 'number' ? `${titleLetterSpacing}px` : titleLetterSpacing;
 
-  // Render button with standard 3 variants
   const renderButton = (btn: DialogueButtonConfig, index: number) => {
     const variant: DialogueButtonVariant =
       btn.variant ?? (index === 0 ? toneConfig.defaultButtonVariant : 'outline');
@@ -226,7 +283,7 @@ export const Dialogue: React.FC<DialogueProps> = ({
         ? 'bg-red-600 text-white hover:bg-red-700 border-red-600 shadow-xs'
         : 'bg-red-500/20 text-red-300 hover:bg-red-500/30 border-red-500/40 shadow-xs';
     } else {
-      // outline (clean transparent outline)
+      // outline
       variantClasses = isLight
         ? 'bg-transparent text-neutral-800 hover:bg-neutral-100/90 border-neutral-300'
         : 'bg-transparent text-neutral-200 hover:bg-white/10 border-neutral-700';
@@ -258,8 +315,11 @@ export const Dialogue: React.FC<DialogueProps> = ({
       style={{
         minHeight: minHeightStyle,
         maxWidth: maxWidthStyle,
-        padding: `${dialoguePadding}px`,
-        boxShadow: toneConfig.innerGlowStyle,
+        paddingTop: `${effectivePaddingY}px`,
+        paddingBottom: `${effectivePaddingY}px`,
+        paddingLeft: `${effectivePaddingX}px`,
+        paddingRight: `${effectivePaddingX}px`,
+        boxShadow: combinedShadow,
         fontFamily: MONO_FONT_STACK,
       }}
       className={`relative w-full flex flex-col justify-between ${UI_RADIUS.xl} border transition-all duration-150 select-none ${
@@ -285,17 +345,17 @@ export const Dialogue: React.FC<DialogueProps> = ({
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 1. TOP: Centered Large Title */}
+      {/* 1. TOP: Centered Large Title with Separated Margin Bottom */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div 
         className="w-full shrink-0 flex items-center justify-center text-center px-2"
-        style={{ marginBottom: `${sectionGap}px` }}
+        style={{ marginBottom: `${effectiveTitleMarginBottom}px` }}
       >
         <h2
           style={{
             fontSize: `${titleFontSize}px`,
             letterSpacing: letterSpacingStyle,
-            fontWeight: Number(titleFontWeight) || 700,
+            fontWeight: Number(titleFontWeight) || 800,
           }}
           className="text-center tracking-tight truncate leading-tight"
         >
@@ -308,9 +368,9 @@ export const Dialogue: React.FC<DialogueProps> = ({
       {/* ───────────────────────────────────────────────────────────── */}
       <div 
         className="flex-1 min-h-0 flex items-center gap-4 sm:gap-4.5 px-1"
-        style={{ marginBottom: `${sectionGap}px` }}
+        style={{ marginBottom: `${effectiveContentMarginBottom}px` }}
       >
-        {/* Left Side: Icon Container Vertically Centered */}
+        {/* Left Side: Icon Vertically Centered */}
         <div
           className={`shrink-0 h-10 w-10 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center transition-transform ${toneConfig.iconContainerClass}`}
         >
@@ -354,10 +414,6 @@ export interface DialogueModalProps extends DialogueProps {
   closeOnClickOutside?: boolean;
 }
 
-/**
- * DialogueModal Wrapper
- * Strictly centered on screen, non-draggable.
- */
 export const DialogueModal: React.FC<DialogueModalProps> = ({
   open,
   onClose,

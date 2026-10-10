@@ -15,6 +15,7 @@ import {
   Type,
   Box,
   Palette,
+  Maximize2,
 } from 'lucide-react';
 import {
   Dialogue,
@@ -32,31 +33,31 @@ type IconKey = 'auto' | 'info' | 'alert-triangle' | 'flame' | 'alert-circle';
 
 export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) => {
   // ──────────────────────────────────────────────────────────────────────────
-  // State: Parameters
+  // Default Parameters (Preset by user's configuration)
   // ──────────────────────────────────────────────────────────────────────────
-  // 1. Text & Content (Pure English, meaningful context)
-  const [title, setTitle] = useState<string>('CONFIRMATION REQUIRED');
+  const [title, setTitle] = useState<string>('WARNING');
+  const [titleFontSize, setTitleFontSize] = useState<number>(28);
+  const [titleLetterSpacing, setTitleLetterSpacing] = useState<number>(4);
+  const [titleFontWeight, setTitleFontWeight] = useState<number>(800);
+  const [titleMarginBottom, setTitleMarginBottom] = useState<number>(10);
+
   const [content, setContent] = useState<string>(
     'This action will reset all vehicle dynamics and recalibrate physical sub-ticks to 120Hz.\nAll uncommitted telemetry changes will be permanently discarded.'
   );
+  const [contentMarginBottom, setContentMarginBottom] = useState<number>(10);
 
-  // 2. Title Typography Controls
-  const [titleFontSize, setTitleFontSize] = useState<number>(18);
-  const [titleLetterSpacing, setTitleLetterSpacing] = useState<number>(0.5);
-  const [titleFontWeight, setTitleFontWeight] = useState<number>(700);
-
-  // 3. Color Tone (4 levels: Grey, Yellow, Orange, Red)
   const [tone, setTone] = useState<DialogueTone>('warning');
   const [iconKey, setIconKey] = useState<IconKey>('auto');
 
-  // 4. Layout & Padding
-  const [dialoguePadding, setDialoguePadding] = useState<number>(24);
-  const [sectionGap, setSectionGap] = useState<number>(20);
-  const [innerGlowBlur, setInnerGlowBlur] = useState<number>(20);
-  const [minHeight, setMinHeight] = useState<number>(210);
-  const [maxWidth, setMaxWidth] = useState<number>(460);
+  // Separated Paddings & Shadows
+  const [paddingY, setPaddingY] = useState<number>(16);
+  const [paddingX, setPaddingX] = useState<number>(20);
+  const [innerGlowBlur, setInnerGlowBlur] = useState<number>(40);
+  const [outerShadowBlur, setOuterShadowBlur] = useState<number>(50);
+  const [minHeight, setMinHeight] = useState<number>(160);
+  const [maxWidth, setMaxWidth] = useState<number>(560);
 
-  // 5. Dynamic Buttons (3 variants: primary, outline, danger)
+  // Dynamic Buttons
   const [buttons, setButtons] = useState<DialogueButtonConfig[]>([
     { key: 'btn-1', label: 'Primary', variant: 'primary' },
     { key: 'btn-2', label: 'Outline', variant: 'outline' },
@@ -66,13 +67,9 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   const [newButtonLabel, setNewButtonLabel] = useState<string>('Primary');
   const [newButtonVariant, setNewButtonVariant] = useState<DialogueButtonVariant>('outline');
 
-  // Modal open state for live centered popup
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  // Copied state for parameter export
   const [copiedParams, setCopiedParams] = useState<boolean>(false);
 
-  // Helper to resolve custom icon
   const renderSelectedIcon = () => {
     switch (iconKey) {
       case 'info':
@@ -89,7 +86,6 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     }
   };
 
-  // Add button handler
   const handleAddButton = () => {
     const trimmed = newButtonLabel.trim();
     if (!trimmed) return;
@@ -102,31 +98,33 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     setNewButtonLabel('Primary');
   };
 
-  // Remove button handler
   const handleRemoveButton = (index: number) => {
     setButtons((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Update button label
   const handleUpdateButtonLabel = (index: number, newLabel: string) => {
     setButtons((prev) =>
       prev.map((btn, i) => (i === index ? { ...btn, label: newLabel } : btn))
     );
   };
 
-  // Update button variant
   const handleUpdateButtonVariant = (index: number, newVariant: DialogueButtonVariant) => {
     setButtons((prev) =>
       prev.map((btn, i) => (i === index ? { ...btn, variant: newVariant } : btn))
     );
   };
 
-  // Scenario presets (Grey, Yellow, Orange, Red)
+  // Presets
   const applyPreset = (preset: 'info' | 'warning' | 'orange' | 'error') => {
     switch (preset) {
       case 'info':
-        setTitle('PHYSICS PIPELINE READY');
+        setTitle('INFORMATION');
+        setTitleFontSize(28);
+        setTitleLetterSpacing(4);
+        setTitleFontWeight(800);
+        setTitleMarginBottom(10);
         setContent('WebGPU pipeline cache warming complete (64/64 variants compiled).\nPhysics sub-tick dispatch latency stable at sub-5ms.');
+        setContentMarginBottom(10);
         setTone('info');
         setIconKey('auto');
         setButtons([
@@ -134,8 +132,13 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
         ]);
         break;
       case 'warning':
-        setTitle('CONFIRMATION REQUIRED');
+        setTitle('WARNING');
+        setTitleFontSize(28);
+        setTitleLetterSpacing(4);
+        setTitleFontWeight(800);
+        setTitleMarginBottom(10);
         setContent('This action will reset all vehicle dynamics and recalibrate physical sub-ticks to 120Hz.\nAll uncommitted telemetry changes will be permanently discarded.');
+        setContentMarginBottom(10);
         setTone('warning');
         setIconKey('auto');
         setButtons([
@@ -145,8 +148,13 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
         ]);
         break;
       case 'orange':
-        setTitle('OVERWRITE VEHICLE PRESET');
+        setTitle('CAUTION');
+        setTitleFontSize(28);
+        setTitleLetterSpacing(4);
+        setTitleFontWeight(800);
+        setTitleMarginBottom(10);
         setContent('An existing custom livery preset already exists in slot #04.\nContinuing will overwrite your aero balance and friction curve parameters.');
+        setContentMarginBottom(10);
         setTone('orange');
         setIconKey('auto');
         setButtons([
@@ -155,8 +163,13 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
         ]);
         break;
       case 'error':
-        setTitle('CONNECTION TIMEOUT (ERR_CONN_DROPPED)');
+        setTitle('CRITICAL ERROR');
+        setTitleFontSize(28);
+        setTitleLetterSpacing(4);
+        setTitleFontWeight(800);
+        setTitleMarginBottom(10);
         setContent('Fatal packet drop detected during physical state synchronization.\nCompetitive matchmaking session terminated to prevent desync penalty.');
+        setContentMarginBottom(10);
         setTone('error');
         setIconKey('auto');
         setButtons([
@@ -167,17 +180,20 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     }
   };
 
-  // JSON export of current parameters for easy copy-paste
+  // Structured export object
   const currentParamsObject = {
     title,
     titleFontSize,
     titleLetterSpacing,
     titleFontWeight,
+    titleMarginBottom,
     content,
+    contentMarginBottom,
     tone,
-    dialoguePadding,
-    sectionGap,
+    paddingY,
+    paddingX,
     innerGlowBlur,
+    outerShadowBlur,
     minHeight,
     maxWidth,
     buttons: buttons.map((b) => ({ label: b.label, variant: b.variant ?? 'outline' })),
@@ -189,46 +205,27 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     setTimeout(() => setCopiedParams(false), 2200);
   };
 
-  // Recipe code snippet
+  // Generated Recipe
   const generatedCode = `import { Dialogue, DialogueModal } from '@/components/primitives';
 
-// 1. Decoupled Dialogue (SF Mono & JetBrains Mono typography)
 <Dialogue
   title="${title}"
   titleFontSize={${titleFontSize}}
   titleLetterSpacing={${titleLetterSpacing}}
   titleFontWeight={${titleFontWeight}}
+  titleMarginBottom={${titleMarginBottom}}
   content="${content.replace(/\n/g, '\\n')}"
+  contentMarginBottom={${contentMarginBottom}}
   tone="${tone}"
-  dialoguePadding={${dialoguePadding}}
-  sectionGap={${sectionGap}}
+  paddingY={${paddingY}}
+  paddingX={${paddingX}}
   innerGlowBlur={${innerGlowBlur}}
+  outerShadowBlur={${outerShadowBlur}}
   minHeight={${minHeight}}
   maxWidth={${maxWidth}}
   isLight={${isLight}}
   buttons={[
 ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outline'}' }`).join(',\n')}
-  ]}
-/>
-
-// 2. Centered Modal Overlay (Esc key & backdrop dismiss supported)
-<DialogueModal
-  open={isOpen}
-  onClose={() => setIsOpen(false)}
-  title="${title}"
-  titleFontSize={${titleFontSize}}
-  titleLetterSpacing={${titleLetterSpacing}}
-  titleFontWeight={${titleFontWeight}}
-  content="${content.replace(/\n/g, '\\n')}"
-  tone="${tone}"
-  dialoguePadding={${dialoguePadding}}
-  sectionGap={${sectionGap}}
-  innerGlowBlur={${innerGlowBlur}}
-  minHeight={${minHeight}}
-  maxWidth={${maxWidth}}
-  isLight={${isLight}}
-  buttons={[
-${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outline'}', onClick: () => setIsOpen(false) }`).join(',\n')}
   ]}
 />`;
 
@@ -246,11 +243,11 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
               <h1 className="text-2xl font-bold tracking-tight">Dialogue 对话框规范</h1>
               <Badge variant="primary" size="sm" isLight={isLight}>
-                SF Mono / JetBrains Mono
+                Elevated 3D Pop · SF Mono
               </Badge>
             </div>
             <p className={`text-xs ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-              全英文排版规范，字体采用 SF Mono (fallback JetBrains Mono)。无显式分割线，左侧图标与多行正文垂直居中对齐，支持灰黄橙红 4 级内发光调性，底部提供 primary、outline、danger 紧凑等长按键组。
+              全英文排版与 SF Mono 字体规范。支持内外双阴影叠加（内发光 + 360° 全方向外凸起阴影），分离上下/左右 Padding 与 Title/Content 间距调节，粗体权重 800+，提供 Primary / Outline / Danger 等长按键组。
             </p>
           </div>
 
@@ -279,10 +276,10 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
           </div>
         </div>
 
-        {/* 4 Tone Scenario Presets: Grey, Yellow, Orange, Red */}
+        {/* Presets */}
         <div className="flex items-center gap-2 overflow-x-auto pt-1 font-mono text-xs">
           <span className={`shrink-0 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-            Presets (灰黄橙红):
+            Presets:
           </span>
           <button
             type="button"
@@ -296,7 +293,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-neutral-400" />
-            <span>Info (灰 · Grey)</span>
+            <span>Info (灰)</span>
           </button>
           <button
             type="button"
@@ -310,7 +307,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-yellow-400" />
-            <span>Warning (黄 · Yellow)</span>
+            <span>Warning (黄 · 当前固化)</span>
           </button>
           <button
             type="button"
@@ -324,7 +321,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-orange-500" />
-            <span>Orange (橙 · Alert)</span>
+            <span>Orange (橙)</span>
           </button>
           <button
             type="button"
@@ -338,13 +335,13 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-red-500" />
-            <span>Error (红 · Red)</span>
+            <span>Error (红)</span>
           </button>
         </div>
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* Control Panel (细节参数控制面板) */}
+      {/* Control Panel */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div
         className={`p-6 rounded-2xl border flex flex-col gap-6 shadow-sm ${
@@ -356,7 +353,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         <div className="flex items-center justify-between border-b pb-3 border-neutral-200/70 dark:border-neutral-800/70">
           <div className="flex items-center gap-2">
             <Sliders className="h-4 w-4 text-amber-500" />
-            <span className="font-bold text-sm tracking-tight">Dialogue 细节调节控制台</span>
+            <span className="font-bold text-sm tracking-tight">Dialogue 细节调节控制台 (Fine-grained Controller)</span>
           </div>
           <button
             type="button"
@@ -375,21 +372,21 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Column 1: Typography & Text Inputs */}
+          {/* Column 1: Title Typography & Weight (800+) */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
               <Type className="h-3.5 w-3.5" />
-              <span>Title & Content Typography</span>
+              <span>Title Typography (800+ Weight & Spacing)</span>
             </div>
 
             {/* Title Text */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold">Title (英文大标题)</label>
+              <label className="text-xs font-semibold">Title (大标题文案)</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="CONFIRMATION REQUIRED"
+                placeholder="WARNING"
                 style={{ fontFamily: "'SF Mono', 'JetBrains Mono', monospace" }}
                 className={`w-full px-3 py-2 rounded-xl text-xs border outline-none transition-colors ${
                   isLight
@@ -399,38 +396,38 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               />
             </div>
 
-            {/* Title Font Size */}
+            {/* Title Font Size (20px - 56px) */}
             <SliderControl
               label="Title Font Size (字号)"
               value={titleFontSize}
-              min={14}
-              max={28}
+              min={20}
+              max={56}
               step={1}
               unit="px"
               isLight={isLight}
               onChange={setTitleFontSize}
             />
 
-            {/* Title Letter Spacing */}
+            {/* Title Letter Spacing (0px - 16px) */}
             <SliderControl
               label="Title Letter Spacing (字间距)"
               value={titleLetterSpacing}
-              min={-1}
-              max={4}
-              step={0.25}
+              min={0}
+              max={16}
+              step={0.5}
               unit="px"
               isLight={isLight}
               onChange={setTitleLetterSpacing}
             />
 
-            {/* Title Font Weight */}
+            {/* Title Font Weight: 800+ Options */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold flex items-center justify-between">
-                <span>Title Font Weight (粗细)</span>
+                <span>Title Font Weight (粗细 · 800+)</span>
                 <span className="text-[10px] font-mono text-neutral-400">{titleFontWeight}</span>
               </label>
-              <div className="grid grid-cols-5 gap-1 font-mono text-[10px]">
-                {[400, 500, 600, 700, 800].map((w) => (
+              <div className="grid grid-cols-4 gap-1.5 font-mono text-[11px]">
+                {[800, 850, 900, 950].map((w) => (
                   <button
                     key={w}
                     type="button"
@@ -438,8 +435,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                     className={`py-1.5 rounded-lg border transition-all cursor-pointer ${
                       titleFontWeight === w
                         ? isLight
-                          ? 'bg-neutral-900 text-white border-neutral-900 font-bold'
-                          : 'bg-white text-neutral-900 border-white font-bold'
+                          ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                          : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
                         : isLight
                         ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
                         : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
@@ -450,6 +447,18 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 ))}
               </div>
             </div>
+
+            {/* Title Bottom Margin */}
+            <SliderControl
+              label="Title Margin Bottom (标题下外边距)"
+              value={titleMarginBottom}
+              min={0}
+              max={40}
+              step={2}
+              unit="px"
+              isLight={isLight}
+              onChange={setTitleMarginBottom}
+            />
 
             {/* Content Textarea */}
             <div className="flex flex-col gap-1.5">
@@ -467,16 +476,75 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 }`}
               />
             </div>
+
+            {/* Content Bottom Margin */}
+            <SliderControl
+              label="Content Margin Bottom (内容下外边距 / 按钮上间距)"
+              value={contentMarginBottom}
+              min={0}
+              max={40}
+              step={2}
+              unit="px"
+              isLight={isLight}
+              onChange={setContentMarginBottom}
+            />
           </div>
 
-          {/* Column 2: Tone & Inner Glow & Geometry */}
+          {/* Column 2: Separated Paddings, Dual Shadows & Tone */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
-              <Palette className="h-3.5 w-3.5" />
-              <span>Tone, Inner Glow & Geometry</span>
+              <Maximize2 className="h-3.5 w-3.5" />
+              <span>Separated Paddings & Dual Elevation</span>
             </div>
 
-            {/* Tone Selector: 4 levels (灰、黄、橙、红) */}
+            {/* Separated Paddings: Y and X */}
+            <div className="grid grid-cols-2 gap-3">
+              <SliderControl
+                label="上下 Padding (Y)"
+                value={paddingY}
+                min={4}
+                max={48}
+                step={2}
+                unit="px"
+                isLight={isLight}
+                onChange={setPaddingY}
+              />
+              <SliderControl
+                label="左右 Padding (X)"
+                value={paddingX}
+                min={8}
+                max={60}
+                step={2}
+                unit="px"
+                isLight={isLight}
+                onChange={setPaddingX}
+              />
+            </div>
+
+            {/* Dual Shadows: Inner Glow Blur & Outer Omnidirectional Shadow Blur */}
+            <SliderControl
+              label="Inner Glow Blur (内发光强度)"
+              value={innerGlowBlur}
+              min={0}
+              max={60}
+              step={2}
+              unit="px"
+              isLight={isLight}
+              onChange={setInnerGlowBlur}
+            />
+
+            <SliderControl
+              label="Outer 360° Shadow Blur (全方向外凸阴影)"
+              value={outerShadowBlur}
+              min={0}
+              max={80}
+              step={5}
+              unit="px"
+              isLight={isLight}
+              onChange={setOuterShadowBlur}
+            />
+
+            {/* Tone Selector */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold">Color Level (4级调性: 灰黄橙红)</label>
               <div className="grid grid-cols-4 gap-1.5 font-mono text-xs">
@@ -509,49 +577,13 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
             </div>
 
-            {/* Inner Glow Blur Slider */}
-            <SliderControl
-              label="Inner Glow Blur (内发光强度)"
-              value={innerGlowBlur}
-              min={0}
-              max={40}
-              step={2}
-              unit="px"
-              isLight={isLight}
-              onChange={setInnerGlowBlur}
-            />
-
-            {/* Outer Dialogue Padding */}
-            <SliderControl
-              label="Dialogue Padding (外边距内衬)"
-              value={dialoguePadding}
-              min={16}
-              max={44}
-              step={2}
-              unit="px"
-              isLight={isLight}
-              onChange={setDialoguePadding}
-            />
-
-            {/* Section Gap */}
-            <SliderControl
-              label="Section Gap (上中下段间距)"
-              value={sectionGap}
-              min={10}
-              max={36}
-              step={2}
-              unit="px"
-              isLight={isLight}
-              onChange={setSectionGap}
-            />
-
             {/* Container Geometry */}
             <div className="grid grid-cols-2 gap-3">
               <SliderControl
                 label="Min Height"
-                value={typeof minHeight === 'number' ? minHeight : 210}
-                min={160}
-                max={300}
+                value={typeof minHeight === 'number' ? minHeight : 160}
+                min={120}
+                max={320}
                 step={5}
                 unit="px"
                 isLight={isLight}
@@ -559,9 +591,9 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               />
               <SliderControl
                 label="Max Width"
-                value={typeof maxWidth === 'number' ? maxWidth : 460}
+                value={typeof maxWidth === 'number' ? maxWidth : 560}
                 min={360}
-                max={560}
+                max={720}
                 step={10}
                 unit="px"
                 isLight={isLight}
@@ -570,17 +602,17 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             </div>
           </div>
 
-          {/* Column 3: Buttons Manager (Only 3 Variants: Primary, Outline, Danger) */}
+          {/* Column 3: Button Manager (Primary, Outline, Danger) */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-neutral-400">
               <Box className="h-3.5 w-3.5" />
               <span>Button Manager (Primary / Outline / Danger)</span>
             </div>
 
-            {/* Current Button List */}
+            {/* Active Buttons List */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs font-semibold">
-                <span>Active Buttons (自动等长对齐)</span>
+                <span>Active Buttons (等长紧凑对齐)</span>
                 <span className="text-[10px] font-mono text-neutral-400">{buttons.length} items</span>
               </div>
 
@@ -598,7 +630,6 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                       #{index + 1}
                     </span>
 
-                    {/* Button Text */}
                     <input
                       type="text"
                       value={btn.label}
@@ -610,7 +641,6 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                       }`}
                     />
 
-                    {/* Only 3 Button Variants: primary, outline, danger */}
                     <select
                       value={btn.variant ?? 'outline'}
                       onChange={(e) => handleUpdateButtonVariant(index, e.target.value as DialogueButtonVariant)}
@@ -625,7 +655,6 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                       <option value="danger">danger</option>
                     </select>
 
-                    {/* Delete Button */}
                     <button
                       type="button"
                       onClick={() => handleRemoveButton(index)}
@@ -646,7 +675,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 )}
               </div>
 
-              {/* Add New Button Input */}
+              {/* Add Button Input */}
               <div
                 className={`flex items-center gap-2 p-2 rounded-xl border border-dashed mt-1 ${
                   isLight ? 'bg-neutral-100/60 border-neutral-300' : 'bg-neutral-950/60 border-neutral-700'
@@ -711,12 +740,12 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             </h2>
           </div>
           <span className={`text-xs font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-            SF Mono · Inner Glow · Centered Icon · Equal-width Buttons
+            Inner Glow + 360° Omnidirectional Elevation
           </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 1. Light Mode Canvas (White) */}
+          {/* Light Mode Canvas */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
@@ -729,7 +758,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             </div>
 
             <div
-              className="w-full min-h-[380px] p-6 sm:p-8 rounded-2xl border border-neutral-200/90 bg-[#f8f9fb] flex items-center justify-center relative overflow-hidden shadow-inner"
+              className="w-full min-h-[400px] p-6 sm:p-10 rounded-2xl border border-neutral-200/90 bg-[#f8f9fb] flex items-center justify-center relative overflow-hidden shadow-inner"
               style={{
                 backgroundImage: 'radial-gradient(#e2e4e8 1px, transparent 1px)',
                 backgroundSize: '16px 16px',
@@ -740,21 +769,24 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 titleFontSize={titleFontSize}
                 titleLetterSpacing={titleLetterSpacing}
                 titleFontWeight={titleFontWeight}
+                titleMarginBottom={titleMarginBottom}
                 content={content}
+                contentMarginBottom={contentMarginBottom}
                 icon={renderSelectedIcon()}
                 tone={tone}
                 buttons={buttons}
                 isLight={true}
-                dialoguePadding={dialoguePadding}
-                sectionGap={sectionGap}
+                paddingY={paddingY}
+                paddingX={paddingX}
                 innerGlowBlur={innerGlowBlur}
+                outerShadowBlur={outerShadowBlur}
                 minHeight={minHeight}
                 maxWidth={maxWidth}
               />
             </div>
           </div>
 
-          {/* 2. Dark Mode Canvas (Black) */}
+          {/* Dark Mode Canvas */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
@@ -767,7 +799,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
             </div>
 
             <div
-              className="w-full min-h-[380px] p-6 sm:p-8 rounded-2xl border border-neutral-800 bg-[#08080a] flex items-center justify-center relative overflow-hidden shadow-inner"
+              className="w-full min-h-[400px] p-6 sm:p-10 rounded-2xl border border-neutral-800 bg-[#08080a] flex items-center justify-center relative overflow-hidden shadow-inner"
               style={{
                 backgroundImage: 'radial-gradient(#27272a 1px, transparent 1px)',
                 backgroundSize: '16px 16px',
@@ -778,14 +810,17 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 titleFontSize={titleFontSize}
                 titleLetterSpacing={titleLetterSpacing}
                 titleFontWeight={titleFontWeight}
+                titleMarginBottom={titleMarginBottom}
                 content={content}
+                contentMarginBottom={contentMarginBottom}
                 icon={renderSelectedIcon()}
                 tone={tone}
                 buttons={buttons}
                 isLight={false}
-                dialoguePadding={dialoguePadding}
-                sectionGap={sectionGap}
+                paddingY={paddingY}
+                paddingX={paddingX}
                 innerGlowBlur={innerGlowBlur}
+                outerShadowBlur={outerShadowBlur}
                 minHeight={minHeight}
                 maxWidth={maxWidth}
               />
@@ -851,13 +886,16 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         titleFontSize={titleFontSize}
         titleLetterSpacing={titleLetterSpacing}
         titleFontWeight={titleFontWeight}
+        titleMarginBottom={titleMarginBottom}
         content={content}
+        contentMarginBottom={contentMarginBottom}
         icon={renderSelectedIcon()}
         tone={tone}
         isLight={isLight}
-        dialoguePadding={dialoguePadding}
-        sectionGap={sectionGap}
+        paddingY={paddingY}
+        paddingX={paddingX}
         innerGlowBlur={innerGlowBlur}
+        outerShadowBlur={outerShadowBlur}
         minHeight={minHeight}
         maxWidth={maxWidth}
         buttons={buttons.map((b) => ({
