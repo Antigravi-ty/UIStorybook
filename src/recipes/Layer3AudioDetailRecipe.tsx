@@ -42,7 +42,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
         isLight={isLight}
       />
 
-      <PanelContent scrollable={true} className="flex flex-col gap-4 h-[360px] overflow-y-auto">
+      <PanelContent scrollable={true} className="flex flex-col gap-4">
         {/* Dynamic Range Switcher */}
         <div
           className="flex flex-col gap-1.5"

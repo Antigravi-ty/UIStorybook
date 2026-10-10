@@ -77,7 +77,7 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
         }
       />
 
-      <PanelContent scrollable className="p-6 h-[380px] overflow-y-auto">
+      <PanelContent scrollable className="p-6">
         <VStack gap="lg" isLight={isLight}>
           {/* Live Preview Notification Pill */}
           <div

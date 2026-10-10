@@ -139,7 +139,7 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
         />
       </div>
 
-      <PanelContent scrollable className="p-6 h-[400px] overflow-y-auto">
+      <PanelContent scrollable className="p-6">
         {/* 1. CAR TAB: 8 Cards (4 columns x 2 rows), fits completely without scroll */}
         {activeTab === 'car' && (
           <div className="flex flex-col gap-3">

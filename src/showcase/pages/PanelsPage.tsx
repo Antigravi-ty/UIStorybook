@@ -11,7 +11,7 @@ export const PanelsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false })
       <div>
         <h1 className="text-2xl font-bold tracking-tight">3-Stage Compound 面板</h1>
         <p className={`text-xs mt-1 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-          从 SimpleUI 完整吸收的标准面板规范。包含明确的头部区 (px-6 py-4)、内容缓冲躯干 (p-6) 与次级表面底部 (px-6 py-3.5)。
+          标准三段式弹性面板规范：顶栏 (Header · shrink-0) 从上往下取高，底栏 (Footer · shrink-0 mt-auto) 从下往上锚定底边，中段内容 (Content · flex-1 min-h-0) 弹性吃满所有剩余垂直空间并独立滚动，彻底解耦容器尺寸与各业务配方。
         </p>
       </div>
 

@@ -28,7 +28,7 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
     <div
       data-ui-element="panel-header"
       data-panel-section="header"
-      className={`flex items-center justify-between ${UI_SPACING.panel.header} border-b select-none transition-colors duration-150 ${
+      className={`flex items-center justify-between ${UI_SPACING.panel.header} border-b select-none shrink-0 transition-colors duration-150 ${
         isLight
           ? 'border-neutral-200/90 bg-neutral-100/50 text-neutral-900'
           : 'border-neutral-800/80 bg-neutral-950/40 text-white'
@@ -82,6 +82,7 @@ export interface PanelContentProps {
  * 3-Stage Compound Panel Content Body
  * Standardized SimpleUI .ui-panel__content pattern (p-6 / 24px uniform padding)
  * Ensures components breathe comfortably without clipping borders or scrollbars.
+ * flex-1 min-h-0 allows it to automatically absorb all remaining vertical space.
  */
 export const PanelContent: React.FC<PanelContentProps> = ({
   children,
@@ -92,8 +93,8 @@ export const PanelContent: React.FC<PanelContentProps> = ({
     <div
       data-ui-element="panel-content"
       data-panel-section="content"
-      className={`flex flex-col ${UI_SPACING.panel.body} w-full box-border ${
-        scrollable ? 'overflow-y-auto max-h-[540px]' : ''
+      className={`flex flex-col flex-1 min-h-0 ${UI_SPACING.panel.body} w-full box-border ${
+        scrollable ? 'overflow-y-auto' : ''
       } ${className}`}
     >
       {children}
@@ -111,6 +112,7 @@ export interface PanelFooterProps {
 /**
  * 3-Stage Compound Panel Footer
  * Standardized SimpleUI .ui-panel__footer pattern (px-6 py-3.5) with secondary surface background.
+ * Fixed shrink-0 with mt-auto strictly anchored to the container bottom.
  */
 export const PanelFooter: React.FC<PanelFooterProps> = ({
   children,
@@ -122,7 +124,7 @@ export const PanelFooter: React.FC<PanelFooterProps> = ({
     <div
       data-ui-element="panel-footer"
       data-panel-section="footer"
-      className={`flex items-center justify-between ${UI_SPACING.panel.footer} border-t text-xs select-none transition-colors duration-150 ${
+      className={`flex items-center justify-between ${UI_SPACING.panel.footer} border-t text-xs select-none shrink-0 mt-auto transition-colors duration-150 ${
         isLight
           ? 'border-neutral-200/90 text-neutral-600 bg-neutral-100/60'
           : 'border-neutral-800/80 text-neutral-400 bg-neutral-950/50'
@@ -173,7 +175,7 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
   return (
     <div
       data-panel="container"
-      className={`flex flex-col w-full overflow-hidden transition-colors ${
+      className={`flex flex-col h-full w-full overflow-hidden transition-colors ${
         isTransparent
           ? 'bg-transparent border-0 ring-0 shadow-none'
           : `${UI_RADIUS.xl} border shadow-2xl ${

@@ -119,7 +119,7 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
         />
       </div>
 
-      <PanelContent scrollable className="p-6 h-[400px] overflow-y-auto" data-ui-element="panel-content">
+      <PanelContent scrollable className="p-6" data-ui-element="panel-content">
         {/* 1. LIVE PREVIEW TAB */}
         {currentTab === 'live-preview' && (
           <VStack gap="lg" isLight={isLight}>

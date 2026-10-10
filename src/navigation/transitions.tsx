@@ -274,7 +274,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
                 duration: activeFluidDuration * 0.6,
                 ease: activeFluidEase,
               }}
-              className="w-full flex flex-col"
+              className="w-full h-full flex flex-col min-h-0"
             >
               {children}
             </motion.div>
@@ -339,7 +339,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
                   ? `opacity ${activeFadeInDuration}s ${easeCss}`
                   : 'none',
             }}
-            className="w-full flex flex-col"
+            className="w-full h-full flex flex-col min-h-0"
           >
             {displayedContent}
           </div>

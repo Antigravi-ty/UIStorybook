@@ -732,7 +732,7 @@ export const KeybindingRecipe: React.FC<KeybindingRecipeProps> = ({
         isLight={isLight}
       />
 
-      <PanelContent scrollable className="p-6 h-[400px] overflow-y-auto">
+      <PanelContent scrollable className="p-6">
         <ControlsBindingTable isLight={isLight} />
       </PanelContent>
 
