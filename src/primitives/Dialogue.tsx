@@ -190,7 +190,7 @@ export const Dialogue: React.FC<DialogueProps> = ({
   titleLetterSpacing = 10,
   titleFontWeight = 800,
   titleMarginBottom = 2,
-  titleColorMode = 'content',
+  titleColorMode = 'muted',
   titleColor,
   content = 'Failed to establish signaling server through WebSocket.',
   contentMarginBottom = 16,
