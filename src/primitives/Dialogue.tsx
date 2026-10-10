@@ -28,11 +28,15 @@ export interface DialogueProps {
   titleLetterSpacing?: number | string;
   /** Title font weight (800+, default: 800) */
   titleFontWeight?: number | string;
-  /** Title bottom margin in px (default: 10) */
+  /** Title bottom margin in px (default: 2) */
   titleMarginBottom?: number;
+  /** Title color mode: 'content' (matches body text), 'muted', 'primary', 'tone' (default: 'content') */
+  titleColorMode?: 'content' | 'muted' | 'primary' | 'tone';
+  /** Optional explicit title color string (e.g. hex or rgba) */
+  titleColor?: string;
   /** Information body text / node, vertically centered with left icon */
   content: React.ReactNode;
-  /** Content bottom margin (gap before buttons) in px (default: 10) */
+  /** Content bottom margin (gap before buttons) in px (default: 16) */
   contentMarginBottom?: number;
   /** Left icon, vertically centered relative to content */
   icon?: React.ReactNode;
@@ -181,28 +185,30 @@ const MONO_FONT_STACK = "'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Monac
  * Dialogue Presentation Component
  */
 export const Dialogue: React.FC<DialogueProps> = ({
-  title,
-  titleFontSize = 28,
-  titleLetterSpacing = 4,
+  title = 'ALERT',
+  titleFontSize = 32,
+  titleLetterSpacing = 10,
   titleFontWeight = 800,
-  titleMarginBottom,
-  content,
-  contentMarginBottom,
+  titleMarginBottom = 2,
+  titleColorMode = 'content',
+  titleColor,
+  content = 'Failed to establish signaling server through WebSocket.',
+  contentMarginBottom = 16,
   icon,
-  tone = 'warning',
+  tone = 'error',
   buttons = [
     { label: 'Primary', variant: 'primary' },
     { label: 'Outline', variant: 'outline' },
     { label: 'Danger', variant: 'danger' },
   ],
   isLight = false,
-  paddingY,
-  paddingX,
+  paddingY = 16,
+  paddingX = 32,
   dialoguePadding,
   sectionGap,
-  innerGlowBlur = 40,
-  outerShadowBlur = 50,
-  minHeight = 160,
+  innerGlowBlur = 36,
+  outerShadowBlur = 20,
+  minHeight = 165,
   maxWidth = 560,
   className = '',
   onClose,
@@ -211,12 +217,31 @@ export const Dialogue: React.FC<DialogueProps> = ({
   const [equalButtonWidth, setEqualButtonWidth] = useState<number | null>(null);
 
   const effectivePaddingY = paddingY ?? dialoguePadding ?? 16;
-  const effectivePaddingX = paddingX ?? (dialoguePadding ? Math.round(dialoguePadding * 1.25) : 20);
-  const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 10;
-  const effectiveContentMarginBottom = contentMarginBottom ?? sectionGap ?? 10;
+  const effectivePaddingX = paddingX ?? (dialoguePadding ? Math.round(dialoguePadding * 1.25) : 32);
+  const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 2;
+  const effectiveContentMarginBottom = contentMarginBottom ?? sectionGap ?? 16;
 
   const toneConfig = getToneConfig(tone, isLight);
   const combinedShadow = buildCombinedShadow(tone, isLight, innerGlowBlur, outerShadowBlur);
+
+  const getTitleColorClass = () => {
+    if (titleColor) return '';
+    switch (titleColorMode) {
+      case 'muted':
+        return isLight ? 'text-neutral-500' : 'text-neutral-400';
+      case 'primary':
+        return isLight ? 'text-neutral-900' : 'text-neutral-100';
+      case 'tone':
+        if (tone === 'error') return isLight ? 'text-red-600' : 'text-red-400';
+        if (tone === 'orange') return isLight ? 'text-orange-600' : 'text-orange-400';
+        if (tone === 'warning') return isLight ? 'text-yellow-600' : 'text-yellow-400';
+        return isLight ? 'text-neutral-600' : 'text-neutral-300';
+      case 'content':
+      default:
+        // Harmonizes with body content text (text-neutral-600 in light, text-neutral-300 in dark)
+        return isLight ? 'text-neutral-600' : 'text-neutral-300';
+    }
+  };
 
   // Measure widest button to enforce equal width
   useLayoutEffect(() => {
@@ -356,8 +381,9 @@ export const Dialogue: React.FC<DialogueProps> = ({
             fontSize: `${titleFontSize}px`,
             letterSpacing: letterSpacingStyle,
             fontWeight: Number(titleFontWeight) || 800,
+            color: titleColor || undefined,
           }}
-          className="text-center tracking-tight truncate leading-tight"
+          className={`text-center tracking-tight truncate leading-tight transition-colors ${getTitleColorClass()}`}
         >
           {title}
         </h2>

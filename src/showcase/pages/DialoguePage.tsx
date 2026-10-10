@@ -33,28 +33,30 @@ type IconKey = 'auto' | 'info' | 'alert-triangle' | 'flame' | 'alert-circle';
 
 export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) => {
   // ──────────────────────────────────────────────────────────────────────────
-  // Default Parameters (Preset by user's configuration)
+  // Default Parameters (Solidified to user's specified configuration)
   // ──────────────────────────────────────────────────────────────────────────
-  const [title, setTitle] = useState<string>('WARNING');
-  const [titleFontSize, setTitleFontSize] = useState<number>(28);
-  const [titleLetterSpacing, setTitleLetterSpacing] = useState<number>(4);
+  const [title, setTitle] = useState<string>('ALERT');
+  const [titleFontSize, setTitleFontSize] = useState<number>(32);
+  const [titleLetterSpacing, setTitleLetterSpacing] = useState<number>(10);
   const [titleFontWeight, setTitleFontWeight] = useState<number>(800);
-  const [titleMarginBottom, setTitleMarginBottom] = useState<number>(10);
+  const [titleMarginBottom, setTitleMarginBottom] = useState<number>(2);
+  const [titleColorMode, setTitleColorMode] = useState<'content' | 'muted' | 'primary' | 'tone'>('content');
+  const [titleColor, setTitleColor] = useState<string>('');
 
   const [content, setContent] = useState<string>(
-    'This action will reset all vehicle dynamics and recalibrate physical sub-ticks to 120Hz.\nAll uncommitted telemetry changes will be permanently discarded.'
+    'Failed to establish signaling server through WebSocket.'
   );
-  const [contentMarginBottom, setContentMarginBottom] = useState<number>(10);
+  const [contentMarginBottom, setContentMarginBottom] = useState<number>(16);
 
-  const [tone, setTone] = useState<DialogueTone>('warning');
+  const [tone, setTone] = useState<DialogueTone>('error');
   const [iconKey, setIconKey] = useState<IconKey>('auto');
 
   // Separated Paddings & Shadows
   const [paddingY, setPaddingY] = useState<number>(16);
-  const [paddingX, setPaddingX] = useState<number>(20);
-  const [innerGlowBlur, setInnerGlowBlur] = useState<number>(40);
-  const [outerShadowBlur, setOuterShadowBlur] = useState<number>(50);
-  const [minHeight, setMinHeight] = useState<number>(160);
+  const [paddingX, setPaddingX] = useState<number>(32);
+  const [innerGlowBlur, setInnerGlowBlur] = useState<number>(36);
+  const [outerShadowBlur, setOuterShadowBlur] = useState<number>(20);
+  const [minHeight, setMinHeight] = useState<number>(165);
   const [maxWidth, setMaxWidth] = useState<number>(560);
 
   // Dynamic Buttons
@@ -187,6 +189,7 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     titleLetterSpacing,
     titleFontWeight,
     titleMarginBottom,
+    titleColorMode,
     content,
     contentMarginBottom,
     tone,
@@ -214,6 +217,7 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   titleLetterSpacing={${titleLetterSpacing}}
   titleFontWeight={${titleFontWeight}}
   titleMarginBottom={${titleMarginBottom}}
+  titleColorMode="${titleColorMode}"
   content="${content.replace(/\n/g, '\\n')}"
   contentMarginBottom={${contentMarginBottom}}
   tone="${tone}"
@@ -445,6 +449,85 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                     {w}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Title Color Mode (标题颜色与正文同色抽色) */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold flex items-center justify-between">
+                <span>Title Color (标题色调 · 和正文抽色)</span>
+                <span className={`text-[10px] font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                  {titleColorMode === 'content' ? '和正文同色' : titleColorMode}
+                </span>
+              </label>
+              <div className="grid grid-cols-2 gap-1.5 font-mono text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => { setTitleColorMode('content'); setTitleColor(''); }}
+                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
+                    titleColorMode === 'content'
+                      ? isLight
+                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
+                      : isLight
+                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
+                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-neutral-500 shrink-0" />
+                  <span className="truncate">Content (同正文色)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setTitleColorMode('muted'); setTitleColor(''); }}
+                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
+                    titleColorMode === 'muted'
+                      ? isLight
+                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
+                      : isLight
+                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
+                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-neutral-400 shrink-0" />
+                  <span className="truncate">Muted (次级暗灰)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setTitleColorMode('primary'); setTitleColor(''); }}
+                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
+                    titleColorMode === 'primary'
+                      ? isLight
+                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
+                      : isLight
+                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
+                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-neutral-900 dark:bg-neutral-100 shrink-0" />
+                  <span className="truncate">Contrast (纯黑白)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setTitleColorMode('tone'); setTitleColor(''); }}
+                  className={`py-1.5 px-2 rounded-lg border text-left flex items-center gap-1.5 transition-all cursor-pointer ${
+                    titleColorMode === 'tone'
+                      ? isLight
+                        ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                        : 'bg-white text-neutral-900 border-white font-bold shadow-xs'
+                      : isLight
+                      ? 'bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-600'
+                      : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400'
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                  <span className="truncate">Tone (跟随调性)</span>
+                </button>
               </div>
             </div>
 
@@ -770,6 +853,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 titleLetterSpacing={titleLetterSpacing}
                 titleFontWeight={titleFontWeight}
                 titleMarginBottom={titleMarginBottom}
+                titleColorMode={titleColorMode}
+                titleColor={titleColor}
                 content={content}
                 contentMarginBottom={contentMarginBottom}
                 icon={renderSelectedIcon()}
@@ -811,6 +896,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 titleLetterSpacing={titleLetterSpacing}
                 titleFontWeight={titleFontWeight}
                 titleMarginBottom={titleMarginBottom}
+                titleColorMode={titleColorMode}
+                titleColor={titleColor}
                 content={content}
                 contentMarginBottom={contentMarginBottom}
                 icon={renderSelectedIcon()}
@@ -887,6 +974,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         titleLetterSpacing={titleLetterSpacing}
         titleFontWeight={titleFontWeight}
         titleMarginBottom={titleMarginBottom}
+        titleColorMode={titleColorMode}
+        titleColor={titleColor}
         content={content}
         contentMarginBottom={contentMarginBottom}
         icon={renderSelectedIcon()}
