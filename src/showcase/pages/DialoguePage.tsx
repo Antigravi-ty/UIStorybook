@@ -26,6 +26,7 @@ import {
 } from '../../primitives/Dialogue';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
+import { SliderControl } from '../../primitives/SliderControl';
 import { CodeBlock } from '../CodeBlock';
 
 type IconKey = 'auto' | 'info' | 'alert-triangle' | 'flame' | 'alert-circle';
@@ -36,8 +37,6 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   // ──────────────────────────────────────────────────────────────────────────
   const titleFontSize = 32;
   const titleLetterSpacing = 10;
-  const titleMarginBottom = 2;
-  const contentMarginBottom = 16;
   const paddingY = 16;
   const paddingX = 32;
   const innerGlowBlur = 36;
@@ -49,9 +48,14 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   // Active Configurable State
   // ──────────────────────────────────────────────────────────────────────────
   const [title, setTitle] = useState<string>('ALERT');
-  // Weight options: 400 (细), 600 (默认中), 800 (粗 · 当前默认)
-  const [titleFontWeight, setTitleFontWeight] = useState<number>(800);
-  const [titleColorMode, setTitleColorMode] = useState<'muted' | 'content' | 'primary' | 'tone'>('muted');
+  // Weight options: 400 (细 · 当前默认), 600 (默认中), 800 (粗)
+  const [titleFontWeight, setTitleFontWeight] = useState<number>(400);
+  const [titleColorMode, setTitleColorMode] = useState<'muted' | 'content' | 'primary' | 'tone'>('content');
+
+  // Spacing parameters brought back for fine tuning
+  const [titleMarginTop, setTitleMarginTop] = useState<number>(0);
+  const [titleMarginBottom, setTitleMarginBottom] = useState<number>(2);
+  const [contentMarginBottom, setContentMarginBottom] = useState<number>(16);
 
   const [content, setContent] = useState<string>(
     'Failed to establish signaling server through WebSocket.'
@@ -170,6 +174,7 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     titleFontSize,
     titleLetterSpacing,
     titleFontWeight,
+    titleMarginTop,
     titleMarginBottom,
     titleColorMode,
     content,
@@ -196,8 +201,11 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
 <Dialogue
   title="${title}"
   titleFontWeight={${titleFontWeight}}
+  titleMarginTop={${titleMarginTop}}
+  titleMarginBottom={${titleMarginBottom}}
   titleColorMode="${titleColorMode}"
   content="${content.replace(/\n/g, '\\n')}"
+  contentMarginBottom={${contentMarginBottom}}
   tone="${tone}"
   buttons={[
 ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outline'}' }`).join(',\n')}
@@ -377,7 +385,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               <label className="text-xs font-semibold flex items-center justify-between">
                 <span>Title Font Weight (粗细对比)</span>
                 <span className="text-[10px] font-mono text-neutral-400">
-                  {titleFontWeight === 400 ? '400 (细)' : titleFontWeight === 600 ? '600 (默认中)' : '800 (粗 · 当前)'}
+                  {titleFontWeight === 400 ? '400 (细 · 当前默认)' : titleFontWeight === 600 ? '600 (中)' : '800 (粗)'}
                 </span>
               </label>
               <div className="grid grid-cols-3 gap-1.5 font-mono text-[11px]">
@@ -439,7 +447,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               <label className="text-xs font-semibold flex items-center justify-between">
                 <span>Title Color (标题色调抽取)</span>
                 <span className={`text-[10px] font-mono ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                  {titleColorMode === 'muted' ? 'Muted (暗灰)' : titleColorMode}
+                  {titleColorMode === 'content' ? 'Content (正文色)' : titleColorMode}
                 </span>
               </label>
               <div className="grid grid-cols-2 gap-1.5 font-mono text-[11px]">
@@ -457,7 +465,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                   }`}
                 >
                   <span className="h-2 w-2 rounded-full bg-neutral-400 shrink-0" />
-                  <span className="truncate">Muted (暗灰 · 固化)</span>
+                  <span className="truncate">Muted (暗灰)</span>
                 </button>
 
                 <button
@@ -511,6 +519,42 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                   <span className="truncate">Tone (跟随调性)</span>
                 </button>
               </div>
+            </div>
+
+            {/* Title Margins (标题上下两端间距调节) */}
+            <div className="flex flex-col gap-2.5 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/60">
+              <SliderControl
+                label="Title Margin Top (标题上间距 / 顶边距)"
+                value={titleMarginTop}
+                min={0}
+                max={40}
+                step={1}
+                unit="px"
+                isLight={isLight}
+                onChange={setTitleMarginTop}
+              />
+
+              <SliderControl
+                label="Title Margin Bottom (标题下间距 / 与内容间距)"
+                value={titleMarginBottom}
+                min={0}
+                max={40}
+                step={1}
+                unit="px"
+                isLight={isLight}
+                onChange={setTitleMarginBottom}
+              />
+
+              <SliderControl
+                label="Content Margin Bottom (内容下间距 / 与按钮间距)"
+                value={contentMarginBottom}
+                min={0}
+                max={40}
+                step={1}
+                unit="px"
+                isLight={isLight}
+                onChange={setContentMarginBottom}
+              />
             </div>
 
             {/* Content Textarea */}
@@ -797,6 +841,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 titleFontSize={titleFontSize}
                 titleLetterSpacing={titleLetterSpacing}
                 titleFontWeight={titleFontWeight}
+                titleMarginTop={titleMarginTop}
                 titleMarginBottom={titleMarginBottom}
                 titleColorMode={titleColorMode}
                 content={content}
@@ -839,6 +884,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 titleFontSize={titleFontSize}
                 titleLetterSpacing={titleLetterSpacing}
                 titleFontWeight={titleFontWeight}
+                titleMarginTop={titleMarginTop}
                 titleMarginBottom={titleMarginBottom}
                 titleColorMode={titleColorMode}
                 content={content}
@@ -916,6 +962,7 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         titleFontSize={titleFontSize}
         titleLetterSpacing={titleLetterSpacing}
         titleFontWeight={titleFontWeight}
+        titleMarginTop={titleMarginTop}
         titleMarginBottom={titleMarginBottom}
         titleColorMode={titleColorMode}
         content={content}

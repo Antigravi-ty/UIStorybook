@@ -26,8 +26,10 @@ export interface DialogueProps {
   titleFontSize?: number;
   /** Title letter spacing in px or string (default: 4) */
   titleLetterSpacing?: number | string;
-  /** Title font weight (800+, default: 800) */
+  /** Title font weight (default: 400) */
   titleFontWeight?: number | string;
+  /** Title top margin in px (default: 0) */
+  titleMarginTop?: number;
   /** Title bottom margin in px (default: 2) */
   titleMarginBottom?: number;
   /** Title color mode: 'content' (matches body text), 'muted', 'primary', 'tone' (default: 'content') */
@@ -188,9 +190,10 @@ export const Dialogue: React.FC<DialogueProps> = ({
   title = 'ALERT',
   titleFontSize = 32,
   titleLetterSpacing = 10,
-  titleFontWeight = 800,
+  titleFontWeight = 400,
+  titleMarginTop = 0,
   titleMarginBottom = 2,
-  titleColorMode = 'muted',
+  titleColorMode = 'content',
   titleColor,
   content = 'Failed to establish signaling server through WebSocket.',
   contentMarginBottom = 16,
@@ -218,6 +221,7 @@ export const Dialogue: React.FC<DialogueProps> = ({
 
   const effectivePaddingY = paddingY ?? dialoguePadding ?? 16;
   const effectivePaddingX = paddingX ?? (dialoguePadding ? Math.round(dialoguePadding * 1.25) : 32);
+  const effectiveTitleMarginTop = titleMarginTop ?? 0;
   const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 2;
   const effectiveContentMarginBottom = contentMarginBottom ?? sectionGap ?? 16;
 
@@ -374,13 +378,16 @@ export const Dialogue: React.FC<DialogueProps> = ({
       {/* ───────────────────────────────────────────────────────────── */}
       <div 
         className="w-full shrink-0 flex items-center justify-center text-center px-2"
-        style={{ marginBottom: `${effectiveTitleMarginBottom}px` }}
+        style={{ 
+          marginTop: `${effectiveTitleMarginTop}px`,
+          marginBottom: `${effectiveTitleMarginBottom}px` 
+        }}
       >
         <h2
           style={{
             fontSize: `${titleFontSize}px`,
             letterSpacing: letterSpacingStyle,
-            fontWeight: Number(titleFontWeight) || 800,
+            fontWeight: Number(titleFontWeight) || 400,
             color: titleColor || undefined,
           }}
           className={`text-center tracking-tight truncate leading-tight transition-colors ${getTitleColorClass()}`}
