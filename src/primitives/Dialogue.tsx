@@ -48,24 +48,30 @@ export interface DialogueProps {
   buttons?: DialogueButtonConfig[];
   /** Light / Dark theme */
   isLight?: boolean;
+  /** Dialogue container top padding (上内衬) in px */
+  paddingTop?: number;
+  /** Dialogue container bottom padding (下内衬) in px */
+  paddingBottom?: number;
   /** Dialogue container vertical padding (上下内衬) in px (default: 16) */
   paddingY?: number;
-  /** Dialogue container horizontal padding (左右内衬) in px (default: 20) */
+  /** Dialogue container horizontal padding (左右内衬) in px (default: 32) */
   paddingX?: number;
   /** Legacy unified dialogue padding in px */
   dialoguePadding?: number;
   /** Legacy unified section gap in px */
   sectionGap?: number;
-  /** Inner glow blur radius in px (default: 40, 0 to disable) */
+  /** Inner glow blur radius in px (default: 36, 0 to disable) */
   innerGlowBlur?: number;
-  /** Omnidirectional outer shadow blur in px (default: 50, 0 to disable) */
+  /** Omnidirectional outer shadow blur in px (default: 20, 0 to disable) */
   outerShadowBlur?: number;
-  /** Minimum container height (default: 160) */
+  /** Minimum container height (default: 165) */
   minHeight?: number | string;
   /** Maximum container width (default: 560) */
   maxWidth?: number | string;
   /** Optional custom class name */
   className?: string;
+  /** Whether to show top-right close icon (default: false, user must pick a button action) */
+  showCloseButton?: boolean;
   /** Optional close handler */
   onClose?: () => void;
 }
@@ -205,6 +211,8 @@ export const Dialogue: React.FC<DialogueProps> = ({
     { label: 'Danger', variant: 'danger' },
   ],
   isLight = false,
+  paddingTop,
+  paddingBottom,
   paddingY = 16,
   paddingX = 32,
   dialoguePadding,
@@ -214,12 +222,14 @@ export const Dialogue: React.FC<DialogueProps> = ({
   minHeight = 165,
   maxWidth = 560,
   className = '',
+  showCloseButton = false,
   onClose,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [equalButtonWidth, setEqualButtonWidth] = useState<number | null>(null);
 
-  const effectivePaddingY = paddingY ?? dialoguePadding ?? 16;
+  const effectivePaddingTop = paddingTop ?? paddingY ?? dialoguePadding ?? 16;
+  const effectivePaddingBottom = paddingBottom ?? paddingY ?? dialoguePadding ?? 16;
   const effectivePaddingX = paddingX ?? (dialoguePadding ? Math.round(dialoguePadding * 1.25) : 32);
   const effectiveTitleMarginTop = titleMarginTop ?? 0;
   const effectiveTitleMarginBottom = titleMarginBottom ?? sectionGap ?? 2;
@@ -344,8 +354,8 @@ export const Dialogue: React.FC<DialogueProps> = ({
       style={{
         minHeight: minHeightStyle,
         maxWidth: maxWidthStyle,
-        paddingTop: `${effectivePaddingY}px`,
-        paddingBottom: `${effectivePaddingY}px`,
+        paddingTop: `${effectivePaddingTop}px`,
+        paddingBottom: `${effectivePaddingBottom}px`,
         paddingLeft: `${effectivePaddingX}px`,
         paddingRight: `${effectivePaddingX}px`,
         boxShadow: combinedShadow,
@@ -357,8 +367,8 @@ export const Dialogue: React.FC<DialogueProps> = ({
           : `bg-neutral-900 text-neutral-100 ${toneConfig.cardBorderClass}`
       } ${className}`}
     >
-      {/* Optional Top Right Close Icon */}
-      {onClose && (
+      {/* Optional Top Right Close Icon (default: hidden, forced selection required) */}
+      {showCloseButton && onClose && (
         <button
           type="button"
           onClick={onClose}
@@ -443,19 +453,23 @@ export interface DialogueModalProps extends DialogueProps {
   open: boolean;
   /** Callback to close modal */
   onClose: () => void;
-  /** Whether clicking overlay closes modal */
+  /** Whether clicking overlay closes modal (default: false, forces action button selection) */
   closeOnClickOutside?: boolean;
+  /** Whether pressing Esc closes modal (default: false, forces action button selection) */
+  closeOnEsc?: boolean;
 }
 
 export const DialogueModal: React.FC<DialogueModalProps> = ({
   open,
   onClose,
-  closeOnClickOutside = true,
+  closeOnClickOutside = false,
+  closeOnEsc = false,
   isLight = false,
+  showCloseButton = false,
   ...dialogueProps
 }) => {
   useEffect(() => {
-    if (!open) return;
+    if (!open || !closeOnEsc) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -465,7 +479,7 @@ export const DialogueModal: React.FC<DialogueModalProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
+  }, [open, onClose, closeOnEsc]);
 
   if (!open) return null;
 
@@ -487,7 +501,8 @@ export const DialogueModal: React.FC<DialogueModalProps> = ({
         <Dialogue
           {...dialogueProps}
           isLight={isLight}
-          onClose={onClose}
+          showCloseButton={showCloseButton}
+          onClose={showCloseButton ? onClose : undefined}
         />
       </div>
     </div>

@@ -52,7 +52,9 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   const [titleFontWeight, setTitleFontWeight] = useState<number>(400);
   const [titleColorMode, setTitleColorMode] = useState<'muted' | 'content' | 'primary' | 'tone'>('content');
 
-  // Spacing parameters brought back for fine tuning
+  // Spacing & padding parameters brought back for fine tuning
+  const [paddingTop, setPaddingTop] = useState<number>(16);
+  const [paddingBottom, setPaddingBottom] = useState<number>(16);
   const [titleMarginTop, setTitleMarginTop] = useState<number>(0);
   const [titleMarginBottom, setTitleMarginBottom] = useState<number>(2);
   const [contentMarginBottom, setContentMarginBottom] = useState<number>(16);
@@ -180,7 +182,9 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     content,
     contentMarginBottom,
     tone,
-    paddingY,
+    paddingTop,
+    paddingBottom,
+    paddingY: paddingTop === paddingBottom ? paddingTop : undefined,
     paddingX,
     innerGlowBlur,
     outerShadowBlur,
@@ -207,6 +211,9 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
   content="${content.replace(/\n/g, '\\n')}"
   contentMarginBottom={${contentMarginBottom}}
   tone="${tone}"
+  paddingTop={${paddingTop}}
+  paddingBottom={${paddingBottom}}
+  paddingX={${paddingX}}
   buttons={[
 ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outline'}' }`).join(',\n')}
   ]}
@@ -521,12 +528,34 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
               </div>
             </div>
 
-            {/* Title Margins (标题上下两端间距调节) */}
+            {/* Window Padding & Margins (窗口内边距与标题/内容间距调节) */}
             <div className="flex flex-col gap-2.5 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/60">
               <SliderControl
-                label="Title Margin Top (标题上间距 / 顶边距)"
-                value={titleMarginTop}
+                label="Padding Top (窗口上内边距)"
+                value={paddingTop}
                 min={0}
+                max={48}
+                step={1}
+                unit="px"
+                isLight={isLight}
+                onChange={setPaddingTop}
+              />
+
+              <SliderControl
+                label="Padding Bottom (窗口下内边距)"
+                value={paddingBottom}
+                min={0}
+                max={48}
+                step={1}
+                unit="px"
+                isLight={isLight}
+                onChange={setPaddingBottom}
+              />
+
+              <SliderControl
+                label="Title Margin Top (标题上间距 / 顶边距，可为负)"
+                value={titleMarginTop}
+                min={-16}
                 max={40}
                 step={1}
                 unit="px"
@@ -850,7 +879,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 tone={tone}
                 buttons={buttons}
                 isLight={true}
-                paddingY={paddingY}
+                paddingTop={paddingTop}
+                paddingBottom={paddingBottom}
                 paddingX={paddingX}
                 innerGlowBlur={innerGlowBlur}
                 outerShadowBlur={outerShadowBlur}
@@ -893,7 +923,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
                 tone={tone}
                 buttons={buttons}
                 isLight={false}
-                paddingY={paddingY}
+                paddingTop={paddingTop}
+                paddingBottom={paddingBottom}
                 paddingX={paddingX}
                 innerGlowBlur={innerGlowBlur}
                 outerShadowBlur={outerShadowBlur}
@@ -970,7 +1001,8 @@ ${buttons.map((b) => `    { label: '${b.label}', variant: '${b.variant ?? 'outli
         icon={renderSelectedIcon()}
         tone={tone}
         isLight={isLight}
-        paddingY={paddingY}
+        paddingTop={paddingTop}
+        paddingBottom={paddingBottom}
         paddingX={paddingX}
         innerGlowBlur={innerGlowBlur}
         outerShadowBlur={outerShadowBlur}
