@@ -101,7 +101,7 @@ export const MatchHudContainer: React.FC<MatchHudContainerProps> = ({
       {/* 0. DYNAMIC SUPERSONIC SPEED LINES RIPPLE EFFECT (Encapsulated Fullscreen VFX) */}
       {showSupersonicVFX && isSupersonicActive && (
         <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden opacity-60">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(168,85,247,0.3)_100%)] animate-pulse" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(168,85,247,0.3)_100%)]" />
         </div>
       )}
 

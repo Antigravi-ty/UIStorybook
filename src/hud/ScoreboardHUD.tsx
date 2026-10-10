@@ -1,7 +1,6 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { MatchScoreState, HudThemeStyle } from './types';
-import { Clock, Flame, ShieldAlert } from 'lucide-react';
+import { Flame, ShieldAlert } from 'lucide-react';
 
 export interface ScoreboardHUDProps extends MatchScoreState {
   themeStyle?: HudThemeStyle;
@@ -39,13 +38,13 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
   return (
     <div
       data-ui-element="hud-scoreboard"
-      className={`flex flex-col items-center select-none pointer-events-auto transition-transform duration-200 ${className}`}
+      className={`flex flex-col items-center select-none pointer-events-auto ${className}`}
     >
       {/* Game Mode Pill */}
       {gameMode && (
         <div className="mb-1">
           <span
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border shadow-xs backdrop-blur-md transition-colors ${
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border shadow-xs backdrop-blur-md ${
               isLight
                 ? 'bg-white/85 text-neutral-700 border-neutral-300/80 shadow-xs'
                 : 'bg-neutral-900/70 text-neutral-300 border-neutral-700/60'
@@ -58,7 +57,7 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
 
       {/* Main Scoreboard Banner */}
       <div
-        className={`flex items-center overflow-hidden rounded-2xl border transition-all duration-200 ${
+        className={`flex items-center overflow-hidden rounded-2xl border ${
           isLight
             ? themeStyle === 'tactile'
               ? 'bg-white border-neutral-300 shadow-xl scale-105'
@@ -79,30 +78,22 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
               {blueTeamName}
             </span>
           </div>
-          <AnimatePresence mode="popLayout">
-            <motion.span
-              key={`blue-${blueScore}`}
-              initial={{ scale: 1.4, opacity: 0.6 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-              className="text-2xl font-black font-mono tracking-tight tabular-nums"
-            >
-              {blueScore}
-            </motion.span>
-          </AnimatePresence>
+          <span className="text-2xl font-black font-mono tracking-tight tabular-nums">
+            {blueScore}
+          </span>
         </div>
 
         {/* Center Timer Capsule */}
         <div
-          className={`flex flex-col items-center justify-center px-4 py-1.5 min-w-[100px] transition-colors ${
+          className={`flex flex-col items-center justify-center px-4 py-1.5 min-w-[100px] ${
             isOvertime
               ? isLight
                 ? 'bg-amber-100/90 text-amber-900 font-bold'
                 : 'bg-amber-950/60 text-amber-300'
               : isLowTime
               ? isLight
-                ? 'bg-red-100/90 text-red-900 animate-pulse font-bold'
-                : 'bg-red-950/70 text-red-300 animate-pulse'
+                ? 'bg-red-100/90 text-red-900 font-bold'
+                : 'bg-red-950/70 text-red-300'
               : isLight
               ? 'bg-neutral-100/90 text-neutral-900 font-medium'
               : 'text-neutral-100'
@@ -111,12 +102,12 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
           <div className="flex items-center gap-1.5 font-mono text-lg font-bold tracking-wider tabular-nums">
             {isOvertime ? (
               <>
-                <Flame className="h-3.5 w-3.5 text-amber-500 animate-bounce" />
+                <Flame className="h-3.5 w-3.5 text-amber-500" />
                 <span className={isLight ? 'text-amber-700' : 'text-amber-400'}>+{formatTime(timeRemainingSec)}</span>
               </>
             ) : (
               <>
-                {isLowTime && <ShieldAlert className="h-3.5 w-3.5 text-red-500 animate-ping" />}
+                {isLowTime && <ShieldAlert className="h-3.5 w-3.5 text-red-500" />}
                 <span>{formatTime(timeRemainingSec)}</span>
               </>
             )}
@@ -129,17 +120,9 @@ export const ScoreboardHUD: React.FC<ScoreboardHUDProps> = ({
 
         {/* Orange Team Score Block */}
         <div className={`relative flex items-center justify-between gap-3 px-4 py-2 text-white min-w-[96px] border-l ${orangeTeamColor}`}>
-          <AnimatePresence mode="popLayout">
-            <motion.span
-              key={`orange-${orangeScore}`}
-              initial={{ scale: 1.4, opacity: 0.6 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-              className="text-2xl font-black font-mono tracking-tight tabular-nums"
-            >
-              {orangeScore}
-            </motion.span>
-          </AnimatePresence>
+          <span className="text-2xl font-black font-mono tracking-tight tabular-nums">
+            {orangeScore}
+          </span>
           <div className="flex flex-col items-end">
             <span className="text-[10px] font-bold tracking-wider uppercase opacity-90">
               {orangeTeamName}

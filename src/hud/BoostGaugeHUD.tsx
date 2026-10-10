@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { BoostState, HudThemeStyle } from './types';
 import { Flame, Infinity as InfinityIcon } from 'lucide-react';
 
@@ -41,13 +40,13 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
   return (
     <div
       data-ui-element="hud-boost-gauge"
-      className={`relative select-none pointer-events-auto transition-transform duration-150 ${
+      className={`relative select-none pointer-events-auto ${
         isFiring ? 'scale-105' : 'scale-100'
       } ${className}`}
     >
       {variant === 'circular' ? (
         <div
-          className={`relative flex flex-col items-center justify-center p-3 rounded-full border transition-all duration-200 ${
+          className={`relative flex flex-col items-center justify-center p-3 rounded-full border ${
             isLight
               ? themeStyle === 'tactile'
                 ? 'bg-white border-neutral-300 shadow-2xl'
@@ -62,17 +61,15 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
           }`}
           style={{ width: '148px', height: '148px' }}
         >
-          {/* Firing Plasma Glow */}
+          {/* Firing Plasma Glow (Static, instantaneous feedback) */}
           {isFiring && (
-            <motion.div
-              animate={{ opacity: [0.3, 0.7, 0.4], scale: [0.95, 1.05, 1] }}
-              transition={{ repeat: Infinity, duration: 0.15 }}
-              className="absolute inset-0 rounded-full blur-xl pointer-events-none"
+            <div
+              className="absolute inset-0 rounded-full blur-xl pointer-events-none opacity-50"
               style={{ backgroundColor: color }}
             />
           )}
 
-          {/* SVG Circular Progress Track */}
+          {/* SVG Circular Progress Track (Real-time instantaneous offset) */}
           <svg className="w-full h-full transform -rotate-[225deg]" viewBox="0 0 136 136">
             {/* Background Track */}
             <circle
@@ -98,7 +95,6 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
               strokeDasharray={`${arcTotal} ${circumference}`}
               strokeDashoffset={progressOffset}
               strokeLinecap="round"
-              className="transition-[stroke-dashoffset] duration-75"
               style={{
                 filter: isFiring ? `drop-shadow(0 0 8px ${color})` : undefined,
               }}
@@ -109,12 +105,7 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="flex items-center gap-1">
               {isFiring && (
-                <motion.div
-                  animate={{ scale: [1, 1.25, 1] }}
-                  transition={{ repeat: Infinity, duration: 0.2 }}
-                >
-                  <Flame className="h-4 w-4" style={{ color }} />
-                </motion.div>
+                <Flame className="h-4 w-4" style={{ color }} />
               )}
               {isInfinite ? (
                 <InfinityIcon className={`h-10 w-10 ${isLight ? 'text-sky-600' : 'text-sky-400'} stroke-[3]`} />
@@ -139,7 +130,7 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
               {[25, 50, 75, 100].map((tick) => (
                 <div
                   key={tick}
-                  className={`h-1 w-2 rounded-full transition-colors ${
+                  className={`h-1 w-2 rounded-full ${
                     clampedAmount >= tick
                       ? isLight ? 'bg-neutral-800' : 'bg-white'
                       : isLight ? 'bg-neutral-300' : 'bg-neutral-700'
@@ -152,7 +143,7 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
       ) : (
         /* Linear Variant */
         <div
-          className={`flex flex-col gap-1.5 p-3 rounded-2xl border min-w-[200px] transition-colors ${
+          className={`flex flex-col gap-1.5 p-3 rounded-2xl border min-w-[200px] ${
             isLight
               ? themeStyle === 'tactile'
                 ? 'bg-white border-neutral-300 shadow-xl'
@@ -176,7 +167,7 @@ export const BoostGaugeHUD: React.FC<BoostGaugeHUDProps> = ({
             isLight ? 'bg-neutral-200' : 'bg-neutral-800'
           }`}>
             <div
-              className="h-full rounded-full transition-all duration-75"
+              className="h-full rounded-full"
               style={{
                 width: isInfinite ? '100%' : `${clampedAmount}%`,
                 backgroundColor: color,

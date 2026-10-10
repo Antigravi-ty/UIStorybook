@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { FlipTimerState, HudThemeStyle } from './types';
 import { RefreshCw, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -28,8 +27,6 @@ export const FlipTimerHUD: React.FC<FlipTimerHUDProps> = ({
   const isExpired = status === 'expired';
   const isGrounded = status === 'grounded';
 
-  const allWheelsContact = wheelContacts.every(Boolean);
-
   // Status colors
   const getColor = () => {
     if (isResetReady) return isLight ? '#d97706' : '#fbbf24'; // amber
@@ -47,10 +44,10 @@ export const FlipTimerHUD: React.FC<FlipTimerHUDProps> = ({
   return (
     <div
       data-ui-element="hud-flip-timer"
-      className={`relative select-none pointer-events-auto flex flex-col items-center gap-1.5 transition-all duration-200 ${className}`}
+      className={`relative select-none pointer-events-auto flex flex-col items-center gap-1.5 ${className}`}
     >
       <div
-        className={`flex items-center gap-3 px-3.5 py-1.5 rounded-2xl border transition-all duration-200 ${
+        className={`flex items-center gap-3 px-3.5 py-1.5 rounded-2xl border ${
           isLight
             ? isResetReady
               ? 'bg-amber-50/95 border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)]'
@@ -64,19 +61,14 @@ export const FlipTimerHUD: React.FC<FlipTimerHUDProps> = ({
             : 'bg-neutral-900/75 border-neutral-800 shadow-md backdrop-blur-sm'
         }`}
       >
-        {/* Status Icon */}
+        {/* Status Icon (Real-time static display) */}
         <div className="flex items-center justify-center">
           {isResetReady ? (
-            <motion.div
-              animate={{ rotate: [0, 180, 360], scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
-            >
-              <Sparkles className="h-4 w-4 text-amber-500 fill-amber-500" />
-            </motion.div>
+            <Sparkles className="h-4 w-4 text-amber-500 fill-amber-500" />
           ) : isCountingDown ? (
             <RefreshCw
-              className="h-3.5 w-3.5 animate-spin"
-              style={{ color: statusColor, animationDuration: '1.5s' }}
+              className="h-3.5 w-3.5"
+              style={{ color: statusColor }}
             />
           ) : isGrounded ? (
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
@@ -109,10 +101,10 @@ export const FlipTimerHUD: React.FC<FlipTimerHUDProps> = ({
             </span>
           </div>
 
-          {/* Mini progress bar */}
+          {/* Mini progress bar (Real-time instantaneous render) */}
           <div className={`w-full h-1.5 rounded-full overflow-hidden mt-1 ${isLight ? 'bg-neutral-200' : 'bg-neutral-800'}`}>
             <div
-              className="h-full rounded-full transition-all duration-75"
+              className="h-full rounded-full"
               style={{
                 width: isResetReady ? '100%' : isGrounded ? '100%' : `${percent}%`,
                 backgroundColor: statusColor,
@@ -129,13 +121,13 @@ export const FlipTimerHUD: React.FC<FlipTimerHUDProps> = ({
         >
           <div className="flex items-center gap-1">
             <div
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              className={`h-1.5 w-1.5 rounded-full ${
                 wheelContacts[0] ? 'bg-amber-400 shadow-[0_0_4px_#fbbf24]' : isLight ? 'bg-neutral-300' : 'bg-neutral-700'
               }`}
               title="Front Left"
             />
             <div
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              className={`h-1.5 w-1.5 rounded-full ${
                 wheelContacts[1] ? 'bg-amber-400 shadow-[0_0_4px_#fbbf24]' : isLight ? 'bg-neutral-300' : 'bg-neutral-700'
               }`}
               title="Front Right"
@@ -143,13 +135,13 @@ export const FlipTimerHUD: React.FC<FlipTimerHUDProps> = ({
           </div>
           <div className="flex items-center gap-1">
             <div
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              className={`h-1.5 w-1.5 rounded-full ${
                 wheelContacts[2] ? 'bg-amber-400 shadow-[0_0_4px_#fbbf24]' : isLight ? 'bg-neutral-300' : 'bg-neutral-700'
               }`}
               title="Rear Left"
             />
             <div
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              className={`h-1.5 w-1.5 rounded-full ${
                 wheelContacts[3] ? 'bg-amber-400 shadow-[0_0_4px_#fbbf24]' : isLight ? 'bg-neutral-300' : 'bg-neutral-700'
               }`}
               title="Rear Right"

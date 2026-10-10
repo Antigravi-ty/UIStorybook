@@ -1,7 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { BallCamState, HudThemeStyle } from './types';
-import { Crosshair, Navigation, Car, Eye } from 'lucide-react';
+import { Crosshair, Navigation, Car } from 'lucide-react';
 import { KeycapBadge } from '../primitives/KeycapBadge';
 
 export interface BallCamIndicatorHUDProps extends BallCamState {
@@ -34,7 +33,7 @@ export const BallCamIndicatorHUD: React.FC<BallCamIndicatorHUDProps> = ({
       <button
         type="button"
         onClick={onToggle}
-        className={`group flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-95 ${
+        className={`group flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border cursor-pointer ${
           isBallCam
             ? isLight
               ? 'bg-white/90 border-amber-500 text-neutral-900 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
@@ -45,9 +44,9 @@ export const BallCamIndicatorHUD: React.FC<BallCamIndicatorHUDProps> = ({
         } ${themeStyle === 'glass' ? 'backdrop-blur-md' : ''}`}
         title="点击或按空格键切换球相机 (Toggle Ball Cam)"
       >
-        {/* Animated Icon Indicator */}
+        {/* Static Icon Indicator (Instant real-time state) */}
         <div
-          className={`h-7 w-7 rounded-xl flex items-center justify-center transition-colors ${
+          className={`h-7 w-7 rounded-xl flex items-center justify-center ${
             isBallCam
               ? 'bg-amber-500 text-black font-bold'
               : isLight
@@ -56,12 +55,7 @@ export const BallCamIndicatorHUD: React.FC<BallCamIndicatorHUDProps> = ({
           }`}
         >
           {isBallCam ? (
-            <motion.div
-              animate={{ rotate: [0, 90, 180, 270, 360] }}
-              transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
-            >
-              <Crosshair className="h-4 w-4 stroke-[2.5]" />
-            </motion.div>
+            <Crosshair className="h-4 w-4 stroke-[2.5]" />
           ) : (
             <Car className="h-4 w-4" />
           )}
@@ -75,7 +69,7 @@ export const BallCamIndicatorHUD: React.FC<BallCamIndicatorHUDProps> = ({
             </span>
             <div
               className={`h-1.5 w-1.5 rounded-full ${
-                isBallCam ? 'bg-amber-400 animate-pulse' : isLight ? 'bg-neutral-400' : 'bg-neutral-500'
+                isBallCam ? 'bg-amber-400' : isLight ? 'bg-neutral-400' : 'bg-neutral-500'
               }`}
             />
           </div>
@@ -96,26 +90,20 @@ export const BallCamIndicatorHUD: React.FC<BallCamIndicatorHUDProps> = ({
         )}
       </button>
 
-      {/* Off-screen Ball Locator Arrow (Nintendo-style directional compass pill when in Car Cam) */}
+      {/* Off-screen Ball Locator Arrow (Directional compass pill when in Car Cam, rendered instantaneously) */}
       {!isBallCam && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
+        <div
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold shadow-md backdrop-blur-sm ${
             isLight
               ? 'bg-amber-50 border-amber-300 text-amber-900'
               : 'bg-amber-500/15 border-amber-500/40 text-amber-300'
           }`}
         >
-          <motion.div
-            style={{ transform: `rotate(${ballAngleDeg}deg)` }}
-            transition={{ type: 'spring', damping: 15 }}
-          >
+          <div style={{ transform: `rotate(${ballAngleDeg}deg)` }}>
             <Navigation className="h-4 w-4 fill-amber-500 text-amber-500" />
-          </motion.div>
+          </div>
           <span className="text-[11px] tabular-nums">{distanceToBallMeters.toFixed(1)}m</span>
-        </motion.div>
+        </div>
       )}
     </div>
   );

@@ -35,7 +35,7 @@ export const NetworkDiagnosticsHUD: React.FC<NetworkDiagnosticsHUDProps> = ({
   return (
     <div
       data-ui-element="hud-network-diagnostics"
-      className={`select-none pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-mono transition-colors ${bgBorderClass} ${className}`}
+      className={`select-none pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-mono ${bgBorderClass} ${className}`}
     >
       {/* FPS & Subtick indicator */}
       <div className="flex items-center gap-1">

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { SpeedState, HudThemeStyle } from './types';
 import { Zap, Gauge } from 'lucide-react';
 
@@ -69,10 +68,7 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
 
         <div className="flex items-center gap-2">
           {isCurrentlySupersonic && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: [1, 1.08, 1], opacity: 1 }}
-              transition={{ repeat: Infinity, duration: 0.6 }}
+            <div
               className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-black tracking-widest uppercase shadow-xs ${
                 isLight
                   ? 'bg-purple-100 border-purple-400 text-purple-900 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
@@ -81,7 +77,7 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
             >
               <Zap className={`h-3 w-3 ${isLight ? 'text-purple-700 fill-purple-700' : 'text-purple-300 fill-purple-300'}`} />
               <span>SUPERSONIC</span>
-            </motion.div>
+            </div>
           )}
 
           <div
@@ -91,11 +87,11 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
                 onUnitChange(nextUnit);
               }
             }}
-            className="flex items-baseline gap-1 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-baseline gap-1 cursor-pointer hover:opacity-80"
             title="点击切换速度单位 (uu/s, km/h, mph)"
           >
             <span
-              className="text-base font-black tracking-tight tabular-nums transition-colors drop-shadow-xs"
+              className="text-base font-black tracking-tight tabular-nums drop-shadow-xs"
               style={{
                 color: isCurrentlySupersonic
                   ? isLight ? '#7e22ce' : '#d8b4fe'
@@ -111,7 +107,7 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
 
       {/* Progress Track with Notch at 85% (2200 uu/s) */}
       <div
-        className={`relative w-full h-2.5 rounded-full overflow-hidden border transition-all duration-200 ${
+        className={`relative w-full h-2.5 rounded-full overflow-hidden border ${
           isLight
             ? isCurrentlySupersonic
               ? 'bg-purple-50 border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
@@ -128,9 +124,9 @@ export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
           title="Supersonic Threshold (2200 uu/s)"
         />
 
-        {/* Filling progress */}
+        {/* Filling progress (Real-time instantaneous render) */}
         <div
-          className="h-full rounded-full transition-all duration-75"
+          className="h-full rounded-full"
           style={{
             width: `${percent}%`,
             backgroundColor: barColor,
