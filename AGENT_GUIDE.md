@@ -363,4 +363,42 @@ import { Layer1MainMenuRecipe, Layer2SettingsRecipe, Layer3AudioDetailRecipe } f
 - **组件路径**：`<DualProgressBar>` 与 `<LoadingScreen>` (`src/loading/`)
 - **唯一预览基准**：`<LoadingScreenPreviewPage>` (`src/showcase/pages/LoadingScreenPreviewPage.tsx`)，注册于主导航栏。
 
+---
+
+## 10. 万物皆可嵌套 (Universal Composable Nesting) 与 RLCleanWASM 模块化调优原语
+
+### 10.1 万物皆可嵌套设计哲学 (Composable Architecture)
+- **`<Button composable>`**：
+  - 当传入 `composable={true}`（或内部嵌套了复杂块级子组件）时，`Button` 自动解除单行 `truncate` 截断并切换为具备完整键盘可访问性的 `role="button"` 容器。
+  - 允许将一个完整的交互子页面（包含 `SliderControl`、`DualGrabberSlider`、`CubicBezierCurveEditor` 甚至实时遥测图表）嵌入进单个大 `<Button composable>` 内部，内部子控件指针拖拽与按键事件自动隔离，绝不误触外层按钮。
+- **`<DropdownMenu>` (`src/primitives/DropdownMenu.tsx`)**：
+  - 零耦合复合下拉框：既支持传入标准 `options` 列表，也支持直接传入任意 `children`（如嵌套 `PrecisionDigitPicker` + 双向 `SliderControl` + `TelemetrySparklineChart`）。
+
+### 10.2 双向零点滑块、双游标死区滑块与精度选择器
+- **`<SliderControl variation="centered">` (`src/primitives/SliderControl.tsx`)**：
+  - 支持任意基准点 `origin`（默认为 `0`，亦可设为 `100%` 等单位增益点）向左（负向/低于基准）或向右（正向/高于基准）双向填充。
+  - 支持正负异色 (`negativeColorScheme`)、双击/点击零点标记快速归零、内联数字直输 (`editable`) 以及上下方向键按当前精度步进 (`usePrecisionContext`)。
+- **`<DualGrabberSlider>` (`src/primitives/DualGrabberSlider.tsx`)**：
+  - 标准化自 `RLCleanWASM` 的 `SettingTwoGrabberSliderRow`，提供 `centered-deadband`（左游标锁定 `[min..origin]`，右游标锁定 `[origin..max]`，中心死区斜线阴影标识）与 `free-range` 两种模式。
+- **`<PrecisionDigitPicker>` & `TunerPrecisionContext` (`src/primitives/PrecisionDigitPicker.tsx`)**：
+  - 标准化自 `RLCleanWASM` 的 `1 . 0 0 0 0 0` 小数位步进选择器（`±1.0` 至 `±0.00001`），通过轻量级 Context 为任意包裹的滑块或输入框提供步进粒度，不污染全局状态。
+- **调优器与车库模块化原语 (`src/primitives/TunerControls.tsx`)**：
+  - `<UVTransformControl>`：支持 1:1 比例锁定 (Linked) 与独立 (Unlinked) UV 缩放及中心对称偏移。
+  - `<ColorSwatchInput>`：原生取色器 + `#RRGGBB` 十六进制直输 + 一键重置。
+  - `<PriorityQueueList>`：车库队伍涂装冲突回退优先级队列（Primary -> Secondary -> Tertiary）。
+  - `<EventFilterMatrix>`：`0x01`..`0x08` 十六进制物理/音频事件流分类矩阵过滤器。
+
+---
+
+## 11. 高清晰度、高性能遥测与曲线图表规范 (Clarity #1 -> Performance #2 -> Aesthetics #3)
+
+针对 `RLCleanWASM` 原有图表存在的三大痛点（`preserveAspectRatio="none"` 导致线条与圆点拉伸变形、120Hz `requestAnimationFrame(setNow)` 引发 React 整树重绘、多实例 SVG `<linearGradient id>` 冲突），`src/charts/` 确立了严格的开发规范：
+
+| 图表组件 | 核心职责与针对性改进 | 文件路径 |
+|---|---|---|
+| `<TelemetrySparklineChart>` | 1:1 物理像素 DPR `<canvas>` 120Hz 帧耗时与预算监测；提供清晰 Y 轴刻度、16.67ms 超预算红峰告警、十字准星逐帧回溯、Freeze 冻结快照与 P50/P95/P99 分位统计 | `src/charts/TelemetrySparklineChart.tsx` |
+| `<EventImpulseScatterChart>` | 1:1 DPR `<canvas>` 物理碰撞冲量散点+脉冲杆图；彻底根除 `preserveAspectRatio="none"` 椭圆畸变与 120Hz React State 刷帧；支持最近邻点准星锁定与音频门限线 | `src/charts/EventImpulseScatterChart.tsx` |
+| `<CubicBezierCurveEditor>` | 采用 `useId()` 隔离 SVG 渐变 ID（杜绝多实例碰撞），支持直接在画布内拖拽 `P1`/`P2` 控制点与悬停相位探测 (`t -> y(t)`) | `src/charts/CubicBezierCurveEditor.tsx` |
+| `<ParametricTrajectoryChart>` | 解析导数求极值 (`dy/du = 0`) 精确标注 Peak Lift (`+uu`) 与 Peak Time (`ms`)，支持沿时间轴横向滑动探测实时位移与归一化导数速度 | `src/charts/ParametricTrajectoryChart.tsx` |
+
 

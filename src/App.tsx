@@ -19,6 +19,8 @@ import { AnimationPage } from './showcase/pages/AnimationPage';
 import { RecipesPage } from './showcase/pages/RecipesPage';
 import { LivePreviewSimulationPage } from './showcase/pages/LivePreviewSimulationPage';
 import { FloatingWindowsSimulationPage } from './showcase/pages/FloatingWindowsSimulationPage';
+import { ChartsAndCurvesPage } from './showcase/pages/ChartsAndCurvesPage';
+import { ComposableNestingPage } from './showcase/pages/ComposableNestingPage';
 import { ViewportControls } from './showcase/ViewportControls';
 import { SafeAreaHud, useViewportStore, viewportStore } from './viewport';
 import { DialogueStackContainer } from './primitives/Dialogue';
@@ -143,6 +145,8 @@ export const App: React.FC = () => {
               {activeTab === 'overview' && <OverviewPage isLight={isLight} />}
               {activeTab === 'badges' && <BadgesPage isLight={isLight} />}
               {activeTab === 'tabs' && <TabsPage isLight={isLight} />}
+              {activeTab === 'composable-tuner' && <ComposableNestingPage isLight={isLight} />}
+              {activeTab === 'charts-curves' && <ChartsAndCurvesPage isLight={isLight} />}
               {activeTab === 'hud-elements' && <HudElementsPage isLight={isLight} />}
               {activeTab === 'stacks' && <StacksPage isLight={isLight} />}
               {activeTab === 'cards' && <CardsPage isLight={isLight} />}

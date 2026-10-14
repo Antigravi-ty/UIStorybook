@@ -20,7 +20,9 @@ import {
   Crosshair,
   MessageSquare,
   BellDot,
-  ShieldCheck
+  ShieldCheck,
+  LineChart,
+  Boxes
 } from 'lucide-react';
 import { useAccentStore } from '../tokens';
 import { AccentColor } from '../tokens/colors';
@@ -29,6 +31,8 @@ export type ShowcaseTab =
   | 'overview' 
   | 'badges' 
   | 'tabs' 
+  | 'charts-curves'
+  | 'composable-tuner'
   | 'hud-elements'
   | 'stacks' 
   | 'cards' 
@@ -64,7 +68,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems: { id: ShowcaseTab; label: string; icon: React.ReactNode; category: string }[] = [
     { id: 'overview', label: '设计理念与架构思路', icon: <BookOpen className="h-4 w-4" />, category: 'Core Architecture' },
     { id: 'badges', label: 'Badge & Keycap 徽章与键位', icon: <Tag className="h-4 w-4" />, category: 'Atomic Primitives' },
-    { id: 'tabs', label: 'Tabs & Controls 控件', icon: <Sliders className="h-4 w-4" />, category: 'Atomic Primitives' },
+    { id: 'tabs', label: 'Tabs & Sliders 双向/双游标滑块', icon: <Sliders className="h-4 w-4" />, category: 'Atomic Primitives' },
+    { id: 'composable-tuner', label: '万物嵌套与调优器原语', icon: <Boxes className="h-4 w-4 text-amber-500" />, category: 'Atomic Primitives' },
+    { id: 'charts-curves', label: 'Charts & Curves 高清遥测图表', icon: <LineChart className="h-4 w-4 text-emerald-500" />, category: 'High-Clarity Charts' },
     { id: 'hud-elements', label: 'HUD Elements 独立仪表', icon: <Crosshair className="h-4 w-4 text-red-500" />, category: 'Atomic Primitives' },
     { id: 'stacks', label: 'Stack 栅格布局 (H/V/Grid)', icon: <Layers className="h-4 w-4" />, category: 'Layout Primitives' },
     { id: 'cards', label: 'Card 卡片与选择器', icon: <Square className="h-4 w-4" />, category: 'Layout Primitives' },
