@@ -18,6 +18,21 @@ UIStorybook 是针对 [RLCleanWASM](https://github.com/Antigravi-ty/RLCleanWASM)
 
 ---
 
+## 🏛️ 精准 8 层金字塔架构 (L0–L7 Unidirectional Pyramid)
+
+全仓库与 UI 侧边栏严格遵循 **「单向依赖，指哪儿打哪儿」**（`L0 ← L1 ← L2 ← L3 ← L4 ← L5 ← L6 ← L7`），杜绝跨层循环引用与“牵一发动全身”：
+
+- **L0. Foundations (`@/tokens`)**：纯静态常量与 Token（`colors`, `radius`, `spacing`, `easing`, `themeStore`），零业务 JSX，零上层依赖。
+- **L1. Primitives (`@/primitives`)**：最小粒度原子表现组件（`Badge`, `KeycapBadge`, `Button`, `ToggleSwitch`, `SegmentedSwitch`, `SliderControl`, `DualGrabberSlider`, `PrecisionDigitPicker`, `UnderlineTabs`），同层彼此零耦合。
+- **L2. Layout & Shells (`@/layout`)**：纯空间结构与物理衬距容器（`VStack`, `HStack`, `GridStack`, `Card`, `Panel 3-Stage`, `MenuContainer`）。
+- **L3. Compound Controls (`@/compounds`)**：自洽复合交互控件（`DropdownMenu`, `Dialogue`, `QuickNotificationDrawer`, `TunerControls`, `MenuItem`）。
+- **L4. Motion & Transitions (`@/motion`)**：容器形变与转场时序引擎（`MorphContainer`, `FluidMorphTransition`, `SequencedStepTransition`, `MorphingShell`, `MenuStack`）。
+- **L5. Game Specials (`@/specials`)**：四大完全正交隔离的专业子域 —— **5A Match HUD** (`@/hud`)、**5B High-Clarity Charts** (`@/charts`)、**5C Viewport & Safe Area** (`@/viewport`)、**5D Loading Screen** (`@/loading`)。
+- **L6. Patterns & Recipes (`@/recipes`)**：100% 纯表现层可复用菜单树（Layer 1-2-3 Recipes）、`LivePreviewDock` 侧边收纳与 `FloatingWindowManager` 多窗编排。
+- **L7. Sandboxes & Demos (`src/showcase/pages/*`)**：高阶排列组合全链路仿真沙盒（`7A Menu Layer 沙盒`、`7B Match HUD 赛场全景沙盒`、`7C Notification × Dialogue 并发回归测试矩阵`）。
+
+---
+
 ## 📐 视口算法、Safe Area 与 分层架构 (对标 RLCleanWASM)
 
 - **顶栏与侧边栏常驻固定**：

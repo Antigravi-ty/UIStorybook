@@ -1,9 +1,13 @@
 import React from 'react';
-import { UI_SPACING } from '../tokens/spacing';
+import {
+  UI_SPACING,
+  StackGap,
+  StackAlign,
+  StackJustify,
+  normalizeStackGap,
+} from '../tokens/spacing';
 
-export type StackGap = 'none' | 'sm' | 'md' | 'lg';
-export type StackAlign = 'start' | 'center' | 'end' | 'stretch';
-export type StackJustify = 'start' | 'center' | 'end' | 'between';
+export type { StackGap, StackAlign, StackJustify };
 
 export interface VStackProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -15,11 +19,7 @@ export interface VStackProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-const normalizeGap = (gap?: StackGap | 'xs' | 'xl'): StackGap => {
-  if (gap === 'xs') return 'sm';
-  if (gap === 'xl') return 'lg';
-  return gap ?? 'md';
-};
+const normalizeGap = normalizeStackGap;
 
 const alignMap: Record<StackAlign, string> = {
   start: 'items-start',

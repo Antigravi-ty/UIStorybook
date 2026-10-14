@@ -1,6 +1,11 @@
 import React from 'react';
-import { StackGap, StackAlign, StackJustify } from './VStack';
-import { UI_SPACING } from '../tokens/spacing';
+import {
+  UI_SPACING,
+  StackGap,
+  StackAlign,
+  StackJustify,
+  normalizeStackGap,
+} from '../tokens/spacing';
 
 export interface HStackProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -13,11 +18,7 @@ export interface HStackProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-const normalizeGap = (gap?: StackGap | 'xs' | 'xl'): StackGap => {
-  if (gap === 'xs') return 'sm';
-  if (gap === 'xl') return 'lg';
-  return gap ?? 'md';
-};
+const normalizeGap = normalizeStackGap;
 
 const alignMap: Record<StackAlign | 'baseline', string> = {
   start: 'items-start',

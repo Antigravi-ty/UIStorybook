@@ -19,6 +19,20 @@
 - 如果将 UI 打包成编译后的 NPM 包，Agent 在排查布局、覆盖样式、绑定微观 DOM 事件或处理可访问性焦点时将彻底失明。
 - 采用 **Recipe Registry（参考代码谱）** 模式，AI Agent 既能拥有 100% 的参考标准，又能在特定业务场景下获得 100% 的灵活性。
 
+### 1.3 精准 8 层金字塔体系（严守“单向依赖，指哪儿打哪儿”：L0 → L7）
+全仓库与侧边栏导航严格收敛为遵循单向依赖流（`L0 ← L1 ← L2 ← L3 ← L4 ← L5 ← L6 ← L7`）、每个模块定位唯一确定的八层金字塔分类（L0~L6 定义标准与配方，L7 负责高阶排列组合沙盒与集成演练）：
+
+| 层级 | 名称 | 定位与准入规则（“非此即彼，绝无歧义”） | 标准导出入口 | 对应模块与页面 |
+|---|---|---|---|---|
+| **L0. Foundation** | Foundations (基石与变量) | 纯静态常量与 Token，无任何业务 JSX，无任何上层（L1~L7）依赖。 | `@/tokens` | `colors`, `radius`, `easing`, `spacing`, `themeStore`, `morphContext` (`FoundationsPage`, `OverviewPage`) |
+| **L1. Primitives** | Primitives (原子基础原语) | 最小粒度表现组件。不含业务上下文，纯 Props 驱动，同层互不耦合。 | `@/primitives` | `Badge`, `KeycapBadge`, `Button (含 composable)`, `ToggleSwitch`, `SegmentedSwitch`, `SliderControl`, `DualGrabberSlider`, `PrecisionDigitPicker`, `UnderlineTabs` (`BadgesPage`, `TabsPage`) |
+| **L2. Layout** | Layout & Shells (布局与骨架) | 纯结构容器，负责空间排布与物理衬距，不含复杂交互。 | `@/layout` | `HStack`, `VStack`, `GridStack`, `Card`, `SelectableCard`, `Panel (3-Stage Compound)`, `MenuContainer` (`StacksPage`, `CardsPage`, `PanelsPage`) |
+| **L3. Compounds** | Compound Controls (复合交互控件) | 由多个原语与布局拼装而成的自洽通用交互控件，无特定游戏业务绑定。 | `@/compounds` | `DropdownMenu`, `Dialogue`, `QuickNotificationDrawer`, `TunerControls (UVTransform/ColorSwatch/PriorityQueue/EventFilterMatrix)`, `MenuItem` (`ComposableNestingPage`, `DialoguePage`, `QuickNotificationPage`) |
+| **L4. Motion** | Motion & Transitions (动效引擎) | 专注容器几何形变、转场时序机与模态焦点外壳。 | `@/motion` | `MorphContainer`, `FluidMorphTransition`, `SequencedStepTransition`, `MorphingShell`, `MenuStack` (`AnimationPage`, `NavigationPage`) |
+| **L5. Specials** | Game Specials (游戏与遥测专属) | 强领域语义的专业可视化/遥测单元。四大子域 100% 正交隔离、纯 Props 驱动。 | `@/specials` | **5A Match HUD** (`HudElementsPage`), **5B High-Clarity Charts** (`ChartsAndCurvesPage`), **5C Viewport & Safe Area** (`ViewportSafeAreaPage`), **5D Loading Screen** (`LoadingScreenPreviewPage`) |
+| **L6. Patterns** | Patterns & Recipes (场景模板与配方) | 完整的可复用交互链路、纯展示菜单面板 Recipe 与系统级浮窗/通知编排器。 | `@/recipes` | **6A Layer 1-2-3 菜单谱** (`RecipesPage`), **6B 赛后战报谱** (`MenusPage`), **6C Live Preview 收纳** (`LivePreviewSimulationPage`), **6D Floating Window 编排** (`FloatingWindowsSimulationPage`) |
+| **L7. Sandboxes** | Sandboxes & Demos (综合演练沙盒) | 顶层跨模块排列组合仿真与自动化集成压力测试场，严禁下层反向引用。 | `src/showcase/pages/*` | **7A Menu Layer 全链路沙盒** (`MenuLayerPreviewPage`), **7B Match HUD 赛场全景沙盒** (`MatchHudPreviewPage`), **7C Notification × Dialogue 并发集成测试** (`NotificationIntegrationPage`) |
+
 ---
 
 ## 2. 屏幕视口算法与 Safe Area 标准 (对标 RLCleanWASM)

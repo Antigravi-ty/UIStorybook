@@ -1,7 +1,7 @@
 import React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
-import { SliderColorScheme } from './SliderControl';
 
+export type DualGrabberColorScheme = 'neutral' | 'amber' | 'orange' | 'emerald' | 'sky' | 'rose';
 export type DualGrabberMode = 'centered-deadband' | 'free-range';
 
 export interface DualGrabberSliderProps {
@@ -26,7 +26,7 @@ export interface DualGrabberSliderProps {
    * - 'free-range': Standard two-thumb interval `[low, high]` anywhere within `[min, max]`.
    */
   mode?: DualGrabberMode;
-  colorScheme?: SliderColorScheme;
+  colorScheme?: DualGrabberColorScheme;
   showTicks?: boolean;
   /**
    * Optional domain badge text next to title (e.g. `[-α .. +α]`).

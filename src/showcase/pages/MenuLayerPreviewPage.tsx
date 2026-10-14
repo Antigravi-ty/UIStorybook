@@ -1038,6 +1038,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                       onTabChange={(tab) => setSettingsTab(tab)}
                       backgroundRenderPaused={bgRenderPaused}
                       onToggleBackgroundRender={setBgRenderPaused}
+                      onSpawnDiagnosticWindow={(win) => floatingStore.spawnWindow(win)}
                       onNavigateAudioDetail={() => {
                         setLastParentRoute('settings');
                         handleSelectRoute('audio-eq');
@@ -1059,6 +1060,10 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                         handleSelectRoute('trajectory');
                       }}
                       onAddPresetWindow={handleAddPresetWindow}
+                      activeWindows={windows}
+                      minimizedWindowCount={minimizedCount}
+                      totalWindowCount={totalCount}
+                      onClosePresetWindow={closeWindow}
                     />
                   )}
 

@@ -62,5 +62,16 @@ export const UI_SPACING = {
   }
 } as const;
 
+export type StackGap = 'none' | 'sm' | 'md' | 'lg';
+export type StackAlign = 'start' | 'center' | 'end' | 'stretch';
+export type StackJustify = 'start' | 'center' | 'end' | 'between';
+
+export const normalizeStackGap = (gap?: StackGap | 'xs' | 'xl'): StackGap => {
+  if (gap === 'xs') return 'sm';
+  if (gap === 'xl') return 'lg';
+  return gap ?? 'md';
+};
+
 export { UI_RADIUS } from './radius';
 export { UI_EASING } from './easing';
+

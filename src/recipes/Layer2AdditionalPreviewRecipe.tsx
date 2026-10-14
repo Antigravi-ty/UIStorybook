@@ -21,13 +21,20 @@ import { KeycapBadge } from '../primitives/KeycapBadge';
 import { VStack } from '../layout/VStack';
 import { Card } from '../layout/Card';
 import { PRESET_WINDOWS, type PresetConfig } from '../tokens/floatingPresets';
-import { useFloatingStore } from '../tokens/floatingStore';
 
 export interface Layer2AdditionalPreviewRecipeProps {
   isLight?: boolean;
   onBack?: () => void;
   onNavigateLivePreview?: () => void;
   onAddPresetWindow?: (preset: PresetConfig, event: React.MouseEvent<HTMLButtonElement>) => void;
+  /** Optional controlled list of active floating windows */
+  activeWindows?: { id: string }[];
+  /** Optional controlled count of minimized windows in stack tray */
+  minimizedWindowCount?: number;
+  /** Optional controlled count of total floating windows */
+  totalWindowCount?: number;
+  /** Optional callback to close/remove an existing singleton preset window */
+  onClosePresetWindow?: (windowId: string) => void;
   initialTab?: 'live-preview' | 'floating-windows';
   activeTab?: 'live-preview' | 'floating-windows';
   onTabChange?: (tab: 'live-preview' | 'floating-windows') => void;
@@ -55,6 +62,10 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
   onBack,
   onNavigateLivePreview,
   onAddPresetWindow,
+  activeWindows,
+  minimizedWindowCount,
+  totalWindowCount,
+  onClosePresetWindow,
   initialTab = 'live-preview',
   activeTab: controlledTab,
   onTabChange,
@@ -63,8 +74,19 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
   const currentTab = controlledTab ?? internalTab;
 
   const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
+  const [localWindowIds, setLocalWindowIds] = useState<string[]>([]);
 
-  const { windows, closeWindow, minimizedCount, totalCount } = useFloatingStore();
+  const windows = activeWindows ?? localWindowIds.map((id) => ({ id }));
+  const totalCount = totalWindowCount ?? windows.length;
+  const minimizedCount = minimizedWindowCount ?? windows.length;
+
+  const closeWindow = (id: string) => {
+    if (onClosePresetWindow) {
+      onClosePresetWindow(id);
+    } else {
+      setLocalWindowIds((prev) => prev.filter((item) => item !== id));
+    }
+  };
 
   const handleTabChange = (t: string) => {
     const valid = t as 'live-preview' | 'floating-windows';
@@ -319,7 +341,13 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
                       return (
                         <button
                           type="button"
-                          onClick={(e) => onAddPresetWindow?.(preset, e)}
+                          onClick={(e) => {
+                            if (onAddPresetWindow) {
+                              onAddPresetWindow(preset, e);
+                            } else {
+                              setLocalWindowIds((prev) => [...prev, preset.id]);
+                            }
+                          }}
                           title={`Spawn "${preset.title}" into top-right Stack`}
                           className={`h-7 w-7 rounded-lg border flex items-center justify-center cursor-pointer transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 shrink-0 ${
                             isLight

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Play, Gamepad2, Wrench, Settings, Layers, ArrowUpRight, PauseCircle, PlayCircle } from 'lucide-react';
 import { PanelContainer, PanelContent } from '../layout/Panel';
-import { MenuContainer, MenuItem, MenuDivider } from '../navigation';
+import { MenuContainer, MenuDivider } from '../navigation/MenuContainer';
+import { MenuItem } from '../navigation/MenuItem';
 import { Badge } from '../primitives/Badge';
 import { KeycapBadge } from '../primitives/KeycapBadge';
-import { UI_RADIUS } from '../tokens';
+import { UI_RADIUS } from '../tokens/radius';
 
 export interface Layer1MainMenuRecipeProps {
   isLight?: boolean;

@@ -4,7 +4,17 @@ import type {
   QuickNotificationType,
   QuickNotificationButtonConfig,
 } from '../primitives/QuickNotification';
-import { dialogue } from '../primitives/Dialogue';
+
+export type SchemaErrorPresenter = (message: string) => void;
+let customSchemaErrorPresenter: SchemaErrorPresenter | null = null;
+
+/**
+ * Optional hook to register a custom error UI presenter (e.g. Dialogue modal)
+ * without coupling the pure notification scheduler to any specific UI widget.
+ */
+export const registerSchemaErrorPresenter = (presenter: SchemaErrorPresenter | null) => {
+  customSchemaErrorPresenter = presenter;
+};
 
 export interface QuickNotificationItem {
   id: string;
@@ -45,7 +55,7 @@ export interface QuickNotificationStoreState {
 /**
  * Triggers a fatal parameter schema error:
  * 1. Outputs structured bold red console error
- * 2. Spawns a top-level error dialogue with ghost icon
+ * 2. Notifies any registered error presenter or dispatches decoupled 'uistorybook:fatal-schema-error' DOM event
  * 3. Throws a fatal JavaScript Error
  */
 export const triggerFatalSchemaError = (message: string): never => {
@@ -56,32 +66,15 @@ export const triggerFatalSchemaError = (message: string): never => {
   );
 
   try {
-    dialogue.show({
-      title: 'FATAL ERROR',
-      tone: 'error',
-      icon: 'ghost',
-      content: (
-        <div className="flex flex-col gap-2 font-mono text-xs w-full text-left">
-          <p className="font-bold text-red-600 dark:text-red-400">
-            Fatal parameter schema violation occurred in the Notification System:
-          </p>
-          <div className="p-2.5 rounded-lg bg-red-50 text-red-900 border border-red-200 dark:bg-red-950/40 dark:border-red-800/80 dark:text-red-200 whitespace-pre-wrap select-all leading-relaxed">
-            {message}
-          </div>
-          <p className="opacity-80 text-[11px] mt-1 text-neutral-500 dark:text-neutral-400">
-            Silent fallbacks are strictly prohibited. Fix the parameter keys or provide required values in source code.
-          </p>
-        </div>
-      ),
-      buttons: [
-        {
-          label: 'Acknowledge',
-          variant: 'danger',
-        },
-      ],
-    });
+    if (customSchemaErrorPresenter) {
+      customSchemaErrorPresenter(message);
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('uistorybook:fatal-schema-error', { detail: { message } })
+      );
+    }
   } catch {
-    // Fallback if dialogue container is not yet initialized
+    // Fallback if presenter/listener is not initialized
   }
 
   throw new Error(errorBanner);

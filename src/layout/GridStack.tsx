@@ -1,6 +1,5 @@
 import React from 'react';
-import { StackGap } from './VStack';
-import { UI_SPACING } from '../tokens/spacing';
+import { UI_SPACING, StackGap, normalizeStackGap } from '../tokens/spacing';
 
 export interface GridStackProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -9,11 +8,7 @@ export interface GridStackProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-const normalizeGap = (gap?: StackGap | 'xs' | 'xl'): StackGap => {
-  if (gap === 'xs') return 'sm';
-  if (gap === 'xl') return 'lg';
-  return gap ?? 'md';
-};
+const normalizeGap = normalizeStackGap;
 
 const colsMap = {
   1: 'grid-cols-1',

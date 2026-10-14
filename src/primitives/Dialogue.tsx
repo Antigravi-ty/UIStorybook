@@ -677,6 +677,40 @@ export const useDialogueStack = () => {
 export const DialogueStackContainer: React.FC<{ isLight?: boolean }> = ({ isLight }) => {
   const { stack, dismiss } = useDialogueStack();
 
+  useEffect(() => {
+    const handleSchemaError = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message?: string }>;
+      const message = customEvent.detail?.message || 'Unknown schema violation';
+      dialogue.show({
+        title: 'FATAL ERROR',
+        tone: 'error',
+        icon: 'ghost',
+        content: (
+          <div className="flex flex-col gap-2 font-mono text-xs w-full text-left">
+            <p className="font-bold text-red-600 dark:text-red-400">
+              Fatal parameter schema violation occurred in the Notification System:
+            </p>
+            <div className="p-2.5 rounded-lg bg-red-50 text-red-900 border border-red-200 dark:bg-red-950/40 dark:border-red-800/80 dark:text-red-200 whitespace-pre-wrap select-all leading-relaxed">
+              {message}
+            </div>
+            <p className="opacity-80 text-[11px] mt-1 text-neutral-500 dark:text-neutral-400">
+              Silent fallbacks are strictly prohibited. Fix the parameter keys or provide required values in source code.
+            </p>
+          </div>
+        ),
+        buttons: [
+          {
+            label: 'Acknowledge',
+            variant: 'danger',
+          },
+        ],
+      });
+    };
+
+    window.addEventListener('uistorybook:fatal-schema-error', handleSchemaError);
+    return () => window.removeEventListener('uistorybook:fatal-schema-error', handleSchemaError);
+  }, []);
+
   if (stack.length === 0) return null;
 
   return (

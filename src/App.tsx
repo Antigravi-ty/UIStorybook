@@ -142,12 +142,16 @@ export const App: React.FC = () => {
                 width: contentScale !== 1 ? `${100 / contentScale}%` : '100%',
               }}
             >
-              {activeTab === 'overview' && <OverviewPage isLight={isLight} />}
+              {activeTab === 'overview' && (
+                <OverviewPage isLight={isLight} onSelectTab={setActiveTab} />
+              )}
+              {activeTab === 'foundations' && <FoundationsPage isLight={isLight} />}
               {activeTab === 'badges' && <BadgesPage isLight={isLight} />}
               {activeTab === 'tabs' && <TabsPage isLight={isLight} />}
               {activeTab === 'composable-tuner' && <ComposableNestingPage isLight={isLight} />}
               {activeTab === 'charts-curves' && <ChartsAndCurvesPage isLight={isLight} />}
               {activeTab === 'hud-elements' && <HudElementsPage isLight={isLight} />}
+              {activeTab === 'viewport-safe-area' && <ViewportSafeAreaPage isLight={isLight} />}
               {activeTab === 'stacks' && <StacksPage isLight={isLight} />}
               {activeTab === 'cards' && <CardsPage isLight={isLight} />}
               {activeTab === 'panels' && <PanelsPage isLight={isLight} />}
