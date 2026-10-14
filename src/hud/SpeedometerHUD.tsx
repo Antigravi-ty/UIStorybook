@@ -1,0 +1,147 @@
+import React from 'react';
+import { SpeedState, HudThemeStyle } from './types';
+import { Zap, Gauge } from 'lucide-react';
+
+export interface SpeedometerHUDProps extends SpeedState {
+  themeStyle?: HudThemeStyle;
+  isLight?: boolean;
+  className?: string;
+  onUnitChange?: (unit: 'uu/s' | 'km/h' | 'mph') => void;
+}
+
+export const SpeedometerHUD: React.FC<SpeedometerHUDProps> = ({
+  speed = 0,
+  maxSpeed = 2300,
+  unit = 'uu/s',
+  isSupersonic = false,
+  themeStyle = 'glass',
+  isLight = false,
+  className = '',
+  onUnitChange,
+}) => {
+  const clampedSpeed = Math.max(0, Math.min(maxSpeed, Math.round(speed)));
+  const supersonicThreshold = 2200;
+  const isCurrentlySupersonic = isSupersonic || clampedSpeed >= supersonicThreshold;
+
+  // Calculate non-linear percentage per RLCleanWASM mechanics:
+  let percent = 0;
+  if (clampedSpeed <= 1410) {
+    percent = (clampedSpeed / 1410) * 40;
+  } else if (clampedSpeed < supersonicThreshold) {
+    percent = 40 + ((clampedSpeed - 1410) / (supersonicThreshold - 1410)) * 45;
+  } else {
+    percent = 85 + ((clampedSpeed - supersonicThreshold) / (maxSpeed - supersonicThreshold)) * 15;
+  }
+  percent = Math.min(100, Math.max(0, percent));
+
+  // Converted value for display
+  const getDisplaySpeed = () => {
+    if (unit === 'km/h') {
+      return Math.round(clampedSpeed * 0.036);
+    }
+    if (unit === 'mph') {
+      return Math.round(clampedSpeed * 0.02237);
+    }
+    return clampedSpeed;
+  };
+
+  // Color gradient
+  const getBarColor = () => {
+    if (isCurrentlySupersonic) return isLight ? '#9333ea' : '#c084fc'; // purple
+    if (clampedSpeed > 1410) return isLight ? '#059669' : '#34d399'; // emerald
+    return isLight ? '#d97706' : '#fbbf24'; // amber
+  };
+
+  const barColor = getBarColor();
+
+  return (
+    <div
+      data-ui-element="hud-speedometer"
+      className={`relative select-none pointer-events-auto flex flex-col items-center gap-1.5 min-w-[280px] max-w-[420px] w-full ${className}`}
+    >
+      {/* Top telemetry pill: Digital readout + Supersonic badge */}
+      <div className="flex items-center justify-between w-full px-2 text-xs font-mono font-bold">
+        <div className="flex items-center gap-1.5">
+          <Gauge className={`h-3.5 w-3.5 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`} />
+          <span className={`text-[10px] tracking-wider uppercase ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>VELOCITY</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isCurrentlySupersonic && (
+            <div
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-black tracking-widest uppercase shadow-xs ${
+                isLight
+                  ? 'bg-purple-100 border-purple-400 text-purple-900 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                  : 'bg-purple-500/20 border-purple-400/60 text-purple-300 shadow-[0_0_12px_rgba(192,132,252,0.5)]'
+              }`}
+            >
+              <Zap className={`h-3 w-3 ${isLight ? 'text-purple-700 fill-purple-700' : 'text-purple-300 fill-purple-300'}`} />
+              <span>SUPERSONIC</span>
+            </div>
+          )}
+
+          <div
+            onClick={() => {
+              if (onUnitChange) {
+                const nextUnit = unit === 'uu/s' ? 'km/h' : unit === 'km/h' ? 'mph' : 'uu/s';
+                onUnitChange(nextUnit);
+              }
+            }}
+            className="flex items-baseline gap-1 cursor-pointer hover:opacity-80"
+            title="点击切换速度单位 (uu/s, km/h, mph)"
+          >
+            <span
+              className="text-base font-black tracking-tight tabular-nums drop-shadow-xs"
+              style={{
+                color: isCurrentlySupersonic
+                  ? isLight ? '#7e22ce' : '#d8b4fe'
+                  : isLight ? '#0f172a' : '#ffffff',
+              }}
+            >
+              {getDisplaySpeed()}
+            </span>
+            <span className={`text-[10px] uppercase ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>{unit}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Track with Notch at 85% (2200 uu/s) */}
+      <div
+        className={`relative w-full h-2.5 rounded-full overflow-hidden border ${
+          isLight
+            ? isCurrentlySupersonic
+              ? 'bg-purple-50 border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+              : 'bg-neutral-200/90 border-neutral-300 shadow-inner'
+            : isCurrentlySupersonic
+            ? 'bg-neutral-900 border-purple-500/70 shadow-[0_0_15px_rgba(168,85,247,0.4)]'
+            : 'bg-neutral-900/90 border-neutral-700/80 shadow-inner'
+        }`}
+      >
+        {/* Supersonic Threshold Notch at 85% */}
+        <div
+          className={`absolute top-0 bottom-0 w-0.5 z-10 ${isLight ? 'bg-neutral-500' : 'bg-neutral-400/70'}`}
+          style={{ left: '85%' }}
+          title="Supersonic Threshold (2200 uu/s)"
+        />
+
+        {/* Filling progress (Real-time instantaneous render) */}
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${percent}%`,
+            backgroundColor: barColor,
+            boxShadow: isCurrentlySupersonic ? '0 0 16px #c084fc' : undefined,
+          }}
+        />
+      </div>
+
+      {/* Speedometer milestones */}
+      <div className={`flex justify-between w-full px-1 text-[9px] font-mono font-semibold ${isLight ? 'text-neutral-600' : 'text-neutral-500'}`}>
+        <span>0</span>
+        <span>1410 (CRUISE)</span>
+        <span className={isLight ? 'text-purple-700' : 'text-purple-400/90'}>2200 (SUPERSONIC)</span>
+        <span>2300 MAX</span>
+      </div>
+    </div>
+  );
+};

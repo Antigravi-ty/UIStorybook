@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *, [data-theme=dark], [data-theme=dark] *));
+
+:root {
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --ease-apple: cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+body {
+  font-family: var(--font-apple);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.45);
+}
+
+
+/* Base resets & fallbacks for SimpleUI standard primitives */
+[data-ui-element="menu-shell"],
+[data-morph-container="true"] {
+  box-sizing: border-box;
+}
+
+[data-ui-element="panel-header"],
+[data-panel-section="header"] {
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="panel-content"],
+[data-panel-section="content"] {
+  padding: 1.25rem 1.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="panel-footer"],
+[data-panel-section="footer"] {
+  padding: 1rem 1.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="menu-container"],
+[data-menu-container="true"] {
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+[data-ui-element="menu-item"],
+[data-menu-item="true"] {
+  padding: 0.75rem 1rem;
+  min-height: 52px;
+  box-sizing: border-box;
+}
