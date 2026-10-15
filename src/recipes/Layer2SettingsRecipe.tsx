@@ -91,6 +91,7 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   onTabChange,
   backgroundRenderPaused = false,
   onToggleBackgroundRender,
+  onSpawnDiagnosticWindow,
 }) => {
   const [internalTab, setInternalTab] = useState<SettingsTabId>(initialTab as SettingsTabId);
   const currentTab = (controlledTab as SettingsTabId) ?? internalTab;

@@ -8,6 +8,7 @@ import type {
 import {
   type QuickNotificationItem,
   type QuickNotificationPushOptions,
+  type QuickNotificationOngoingPushOptions,
   type OngoingConflictPolicy,
   type QuickNotificationStoreState,
   validateNotificationOptions,
@@ -18,21 +19,22 @@ import {
 export type {
   QuickNotificationItem,
   QuickNotificationPushOptions,
+  QuickNotificationOngoingPushOptions,
   OngoingConflictPolicy,
   QuickNotificationStoreState,
 };
 
 export interface QuickNotificationActions {
   // Ongoing Tasks (Lazy Loading, Preloading, Background Sync)
-  pushOngoingNotification: (config: QuickNotificationPushOptions) => string;
-  pushBackgroundNotification: (config: QuickNotificationPushOptions) => string;
+  pushOngoingNotification: (config: QuickNotificationOngoingPushOptions) => string;
+  pushBackgroundNotification: (config: QuickNotificationOngoingPushOptions) => string;
   updateOngoingNotification: (
-    idOrUpdates: string | Partial<QuickNotificationPushOptions>,
-    updates?: Partial<QuickNotificationPushOptions>
+    idOrUpdates: string | Partial<QuickNotificationOngoingPushOptions>,
+    updates?: Partial<QuickNotificationOngoingPushOptions>
   ) => void;
   updateBackgroundNotification: (
-    idOrUpdates: string | Partial<QuickNotificationPushOptions>,
-    updates?: Partial<QuickNotificationPushOptions>
+    idOrUpdates: string | Partial<QuickNotificationOngoingPushOptions>,
+    updates?: Partial<QuickNotificationOngoingPushOptions>
   ) => void;
   dismissOngoingNotification: (id?: string) => void;
   dismissBackgroundNotification: (id?: string) => void;
@@ -152,8 +154,8 @@ export const useQuickNotificationStore = create<QuickNotificationStore>((set, ge
     }));
   },
 
-  pushOngoingNotification: (config: QuickNotificationPushOptions) => {
-    validateNotificationOptions(config);
+  pushOngoingNotification: (config: QuickNotificationOngoingPushOptions) => {
+    validateNotificationOptions({ ...config, type: config.type || 'ongoing', duration: 0 });
 
     const taskId = config.id || `ongoing-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const currentTasks = get().ongoingTasks;
@@ -452,17 +454,17 @@ export const useQuickNotificationStore = create<QuickNotificationStore>((set, ge
 export const quickNotificationStore = Object.assign(useQuickNotificationStore, {
   pushNotification: (config: QuickNotificationPushOptions) =>
     useQuickNotificationStore.getState().pushNotification(config),
-  pushOngoingNotification: (config: QuickNotificationPushOptions) =>
+  pushOngoingNotification: (config: QuickNotificationOngoingPushOptions) =>
     useQuickNotificationStore.getState().pushOngoingNotification(config),
-  pushBackgroundNotification: (config: QuickNotificationPushOptions) =>
+  pushBackgroundNotification: (config: QuickNotificationOngoingPushOptions) =>
     useQuickNotificationStore.getState().pushBackgroundNotification(config),
   updateOngoingNotification: (
-    idOrUpdates: string | Partial<QuickNotificationPushOptions>,
-    updates?: Partial<QuickNotificationPushOptions>
+    idOrUpdates: string | Partial<QuickNotificationOngoingPushOptions>,
+    updates?: Partial<QuickNotificationOngoingPushOptions>
   ) => useQuickNotificationStore.getState().updateOngoingNotification(idOrUpdates, updates),
   updateBackgroundNotification: (
-    idOrUpdates: string | Partial<QuickNotificationPushOptions>,
-    updates?: Partial<QuickNotificationPushOptions>
+    idOrUpdates: string | Partial<QuickNotificationOngoingPushOptions>,
+    updates?: Partial<QuickNotificationOngoingPushOptions>
   ) => useQuickNotificationStore.getState().updateBackgroundNotification(idOrUpdates, updates),
   dismissOngoingNotification: (id?: string) =>
     useQuickNotificationStore.getState().dismissOngoingNotification(id),
@@ -508,13 +510,13 @@ export const quickNotificationStore = Object.assign(useQuickNotificationStore, {
 export const pushQuickNotification = (config: QuickNotificationPushOptions) =>
   useQuickNotificationStore.getState().pushNotification(config);
 
-export const pushOngoingNotification = (config: QuickNotificationPushOptions) =>
+export const pushOngoingNotification = (config: QuickNotificationOngoingPushOptions) =>
   useQuickNotificationStore.getState().pushOngoingNotification(config);
 export const pushBackgroundNotification = pushOngoingNotification;
 
 export const updateOngoingNotification = (
-  idOrUpdates: string | Partial<QuickNotificationPushOptions>,
-  updates?: Partial<QuickNotificationPushOptions>
+  idOrUpdates: string | Partial<QuickNotificationOngoingPushOptions>,
+  updates?: Partial<QuickNotificationOngoingPushOptions>
 ) => useQuickNotificationStore.getState().updateOngoingNotification(idOrUpdates, updates);
 export const updateBackgroundNotification = updateOngoingNotification;
 

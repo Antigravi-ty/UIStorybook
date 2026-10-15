@@ -14,6 +14,7 @@ export interface ViewportState {
   renderScale: number; // 50 to 200 (%)
   safeAreaMargin: number; // -5 to +10 (%)
   showSafeAreaHud: boolean;
+  showSafeAreaGuides: boolean;
   portraitDismissed: boolean;
   metrics: ViewportMetrics;
 }
@@ -116,10 +117,12 @@ const applyCssVariables = (metrics: ViewportMetrics, scalePct: number, marginPct
   root.style.setProperty('--ui-font-scale', String(metrics.scaleFactor));
 };
 
+const initialHud = getInitialHud();
 let state: ViewportState = {
   renderScale: getInitialScale(),
   safeAreaMargin: getInitialMargin(),
-  showSafeAreaHud: getInitialHud(),
+  showSafeAreaHud: initialHud,
+  showSafeAreaGuides: initialHud,
   portraitDismissed: false,
   metrics: calculateMetrics(getInitialMargin(), getInitialScale()),
 };
@@ -157,8 +160,14 @@ export const viewportStore = {
     notify();
   },
   setShowSafeAreaHud: (show: boolean) => {
-    state = { ...state, showSafeAreaHud: show };
+    state = { ...state, showSafeAreaHud: show, showSafeAreaGuides: show };
     safeStorage.set('ui-storybook-safe-area-hud', show);
+    notify();
+  },
+  toggleSafeAreaGuides: () => {
+    const next = !state.showSafeAreaHud;
+    state = { ...state, showSafeAreaHud: next, showSafeAreaGuides: next };
+    safeStorage.set('ui-storybook-safe-area-hud', next);
     notify();
   },
   dismissPortraitGate: () => {

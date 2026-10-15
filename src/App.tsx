@@ -21,6 +21,8 @@ import { LivePreviewSimulationPage } from './showcase/pages/LivePreviewSimulatio
 import { FloatingWindowsSimulationPage } from './showcase/pages/FloatingWindowsSimulationPage';
 import { ChartsAndCurvesPage } from './showcase/pages/ChartsAndCurvesPage';
 import { ComposableNestingPage } from './showcase/pages/ComposableNestingPage';
+import { FoundationsPage } from './showcase/pages/FoundationsPage';
+import { ViewportSafeAreaPage } from './showcase/pages/ViewportSafeAreaPage';
 import { ViewportControls } from './showcase/ViewportControls';
 import { SafeAreaHud, useViewportStore, viewportStore } from './viewport';
 import { DialogueStackContainer } from './primitives/Dialogue';

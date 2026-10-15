@@ -141,7 +141,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   const [ballSimSpeed, setBallSimSpeed] = useState(128);
 
   // Floating Window 状态获取：用于光标显隐判断与批量折叠
-  const { isStackDismissed, minimizedCount } = useFloatingStore();
+  const { windows, isStackDismissed, minimizedCount, totalCount, closeWindow } = useFloatingStore();
   const hasStackIcon = !(isStackDismissed && minimizedCount === 0);
   // 光标隐藏条件：仅当处于对局 Layer 0 状态且右上角无 Stack Icon 时隐藏光标
   const isCursorHidden = currentRoute === 'layer-0' && !hasStackIcon;

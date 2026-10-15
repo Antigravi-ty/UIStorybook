@@ -34,9 +34,22 @@ export interface QuickNotificationItem {
   isSpinningIcon?: boolean;
 }
 
-export type QuickNotificationPushOptions = Omit<QuickNotificationItem, 'id' | 'timestamp'> & {
+export type QuickNotificationPushOptions = Omit<
+  QuickNotificationItem,
+  'id' | 'timestamp' | 'icon' | 'tone'
+> & {
   id?: string;
   timestamp?: number;
+  icon?: string | React.ReactNode;
+  tone?: QuickNotificationGlowLevel;
+};
+
+export type QuickNotificationOngoingPushOptions = Omit<
+  QuickNotificationPushOptions,
+  'type' | 'duration'
+> & {
+  type?: QuickNotificationType;
+  duration?: number;
 };
 
 export type OngoingConflictPolicy = 'latest' | 'first' | 'queue';
