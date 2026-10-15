@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, X, Activity, Cpu, Target, Sliders, Maximize2 } from 'lucide-react';
+import { Minus } from 'lucide-react';
 import { useFloatingStore, FloatingWindowItem } from '../tokens/floatingStore';
-import { UI_EASING } from '../tokens/easing';
-import { Badge } from '../primitives/Badge';
+import { getFloatingWindowIcon } from './FloatingWindowIcon';
 
 export interface FloatingWindowManagerProps {
   isLight?: boolean;
@@ -240,11 +239,7 @@ const FloatingWindowInstance: React.FC<FloatingWindowInstanceProps> = ({
   };
 
   // Pick suitable telemetry icon
-  const getHeaderIcon = () => {
-    if (item.id.includes('hitbox')) return <Target className="h-4 w-4 text-emerald-500 shrink-0" />;
-    if (item.id.includes('kernel') || item.id.includes('simd')) return <Cpu className="h-4 w-4 text-sky-500 shrink-0" />;
-    return <Activity className="h-4 w-4 text-neutral-800 dark:text-neutral-200 shrink-0" />;
-  };
+  const getHeaderIcon = () => getFloatingWindowIcon(item.category, item.id);
 
   const isResizingToStack = minimizePhase === 'resizing_to_stack';
   const isContentHidden = minimizePhase !== 'idle';

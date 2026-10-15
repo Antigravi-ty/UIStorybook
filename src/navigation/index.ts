@@ -4,6 +4,8 @@ export * from './MenuStack';
 export * from './MorphingShell';
 export * from './transitions';
 export * from './LivePreviewDock';
+export * from './FloatingWindowIcon';
+export * from './FloatingStackGhostPortals';
 export * from './FloatingStackIcon';
 export * from './FloatingWindowManager';
 export * from './QuickNotificationSystem';
