@@ -12,3 +12,5 @@ export * from './ToggleSwitch';
 export * from './UnderConstructionPlaceholder';
 export * from './Dialogue';
 export * from './QuickNotification';
+export * from './InlineErrorNotice';
+

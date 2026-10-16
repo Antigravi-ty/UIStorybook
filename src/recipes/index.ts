@@ -7,4 +7,6 @@ export * from './Layer2AdditionalPreviewRecipe';
 export * from './Layer2MatchStatsRecipe';
 export * from './Layer3AudioDetailRecipe';
 export * from './Layer3BallTrajectoryRecipe';
+export * from './Layer3OnlineWarmupRecipe';
 export * from './KeybindingRecipe';
+

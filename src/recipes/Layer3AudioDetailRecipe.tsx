@@ -4,22 +4,34 @@ import { SliderControl } from '../primitives/SliderControl';
 import { ToggleSwitch } from '../primitives/ToggleSwitch';
 import { SegmentedSwitch } from '../primitives/SegmentedSwitch';
 import { Badge } from '../primitives/Badge';
+import { InlineErrorNotice } from '../primitives/InlineErrorNotice';
 import { Card } from '../layout/Card';
-import { Volume2, Sliders, Waves, Sparkles, Info } from 'lucide-react';
+import { useMenuLayoutStore } from '../tokens';
+import { Sliders, Info } from 'lucide-react';
 
 export interface Layer3AudioDetailRecipeProps {
   isLight?: boolean;
   onBack?: () => void;
+  /** Optional explicit inline error visibility override (defaults to L0 menuLayoutStore.simulateLayer3Error) */
+  hasError?: boolean;
+  onCheckNotification?: () => void;
 }
 
 /**
  * [Recipe] Layer 3 Audio Equalizer & Detailed Acoustics
- * Layer 3 Sub-Menu: 3-Band Parametric Equalizer & DSP Acoustics Console (Width: 480px).
+ * Layer 3 Sub-Menu: 3-Band Parametric Equalizer & DSP Acoustics Console (Width: 480px, Height: 540px).
+ * Supports Apple HIG adaptive vertical spacing when a single-line InlineErrorNotice appears,
+ * keeping the outer container 100% fixed without leaving blank bottom space in normal mode.
  */
 export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = ({
   isLight = false,
   onBack,
+  hasError: propHasError,
+  onCheckNotification,
 }) => {
+  const { layer3Width, layer3Height, simulateLayer3Error } = useMenuLayoutStore();
+  const showError = propHasError ?? simulateLayer3Error;
+
   const [spatialAudio, setSpatialAudio] = useState(true);
   const [compressionMode, setCompressionMode] = useState('dynamic');
   const [lows, setLows] = useState(65);
@@ -29,7 +41,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
   const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
 
   return (
-    <PanelContainer isLight={isLight} className="w-full max-w-[480px]">
+    <PanelContainer isLight={isLight} width={layer3Width} height={layer3Height} className="w-full">
       <PanelHeader
         title="ACOUSTICS & EQUALIZER"
         subtitle="Layer 3 Sub-Menu • 32-bit DSP Engine"
@@ -42,7 +54,22 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
         isLight={isLight}
       />
 
-      <PanelContent scrollable={true} className="flex flex-col gap-4">
+      {/* Apple HIG Adaptive Density:
+          - Normal state (!showError): generous py-5 gap-4, zero blank hole at bottom.
+          - Error state (showError): compresses to py-3 gap-2.5 to absorb the 32px single-line InlineErrorNotice without resizing container or forcing scrollbar, with scrollable={true} as safety fallback.
+      */}
+      <PanelContent
+        scrollable={true}
+        className={`flex flex-col px-6 transition-all duration-150 ${
+          showError ? 'py-3 gap-2.5' : 'py-5 gap-4'
+        }`}
+      >
+        <InlineErrorNotice
+          visible={showError}
+          isLight={isLight}
+          onCheckNotification={onCheckNotification}
+        />
+
         {/* Dynamic Range Switcher */}
         <div
           className="flex flex-col gap-1.5"
@@ -65,10 +92,18 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
         </div>
 
         {/* 3-Band Equalizer Sliders */}
-        <Card isLight={isLight} variant="outlined" className="p-4 flex flex-col gap-3">
-          <div className="flex items-center gap-2 mb-1">
+        <Card
+          isLight={isLight}
+          variant="outlined"
+          className={`flex flex-col transition-all duration-150 ${
+            showError ? 'p-3 gap-2' : 'p-4 gap-3'
+          }`}
+        >
+          <div className="flex items-center gap-2 mb-0.5">
             <Sliders className="h-4 w-4 text-amber-500" />
-            <span className="text-xs font-bold tracking-tight text-neutral-300">3-Band Acoustic EQ</span>
+            <span className={`text-xs font-bold tracking-tight ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
+              3-Band Acoustic EQ
+            </span>
           </div>
 
           <div
@@ -121,7 +156,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
         <Card
           isLight={isLight}
           variant="flat"
-          className="p-3"
+          className={showError ? 'p-2.5' : 'p-3'}
           onMouseEnter={() => setHoveredDesc('Simulates HRTF 3D binaural spatialization for pin-point audio localization.')}
           onMouseLeave={() => setHoveredDesc(null)}
         >

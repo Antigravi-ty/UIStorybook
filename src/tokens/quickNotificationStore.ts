@@ -75,6 +75,7 @@ export interface QuickNotificationActions {
   // Unread stack tray
   toggleStack: () => void;
   setStackOpen: (open: boolean) => void;
+  expandNotificationCenter: () => void;
   resolveFromStack: (id: string) => void;
   dismissFromStack: (id: string) => void;
 
@@ -426,6 +427,14 @@ export const useQuickNotificationStore = create<QuickNotificationStore>((set, ge
     set(() => ({ isStackOpen: open }));
   },
 
+  expandNotificationCenter: () => {
+    const current = get();
+    const totalTrayItems = current.unreadStack.length + current.preemptedPersistentStack.length;
+    if (totalTrayItems > 0 && !current.isStackOpen) {
+      set(() => ({ isStackOpen: true }));
+    }
+  },
+
   resolveFromStack: (id: string) => {
     get().resolveNotification(id);
   },
@@ -499,6 +508,7 @@ export const quickNotificationStore = Object.assign(useQuickNotificationStore, {
   ignoreActive: () => useQuickNotificationStore.getState().ignoreActive(),
   toggleStack: () => useQuickNotificationStore.getState().toggleStack(),
   setStackOpen: (open: boolean) => useQuickNotificationStore.getState().setStackOpen(open),
+  expandNotificationCenter: () => useQuickNotificationStore.getState().expandNotificationCenter(),
   resolveFromStack: (id: string) => useQuickNotificationStore.getState().resolveFromStack(id),
   dismissFromStack: (id: string) => useQuickNotificationStore.getState().dismissFromStack(id),
   clearAll: () => useQuickNotificationStore.getState().clearAll(),
@@ -543,6 +553,9 @@ export const dismissQuickNotification = (id: string) =>
 
 export const resolveQuickNotification = (id: string) =>
   useQuickNotificationStore.getState().resolveNotification(id);
+
+export const expandQuickNotificationCenter = () =>
+  useQuickNotificationStore.getState().expandNotificationCenter();
 
 export const clearAllQuickNotifications = () =>
   useQuickNotificationStore.getState().clearAll();

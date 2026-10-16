@@ -19,6 +19,8 @@ export interface MorphContainerProps {
   currentKey?: string;
   /** 目标容器宽度（数字表示 px，或 CSS 字符串） */
   width?: number | string;
+  /** 目标容器固定高度（数字表示 px，或 CSS 字符串） */
+  height?: number | string;
   /** 过渡模式：'fluid-morph' (连续流体) 或 'sequenced-step' (三段分步) */
   mode?: ContainerTransitionMode;
   children: React.ReactNode;
@@ -64,6 +66,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
     {
       currentKey = 'default',
       width,
+      height,
       mode = 'fluid-morph',
       children,
       isLight = false,
@@ -99,7 +102,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
       UI_EASING.transitions.sequencedStep.resize.duration;
     const activeStepEase = stepConfig?.ease ?? UI_EASING.apple;
 
-    // 格式化宽度值
+    // 格式化尺寸值
     const resolveWidth = (val: number | string | undefined): string | undefined => {
       if (val === undefined) return undefined;
       return typeof val === 'number' ? `${val}px` : val;
@@ -109,18 +112,21 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
     const [displayedContent, setDisplayedContent] = useState<React.ReactNode>(children);
     const [displayedKey, setDisplayedKey] = useState<string>(currentKey);
     const [containerWidth, setContainerWidth] = useState<number | string | undefined>(width);
+    const [containerHeight, setContainerHeight] = useState<number | string | undefined>(height);
     const [phase, setPhase] = useState<TransitionPhase>('idle');
 
     // 追踪最新目标引用，防止闭包失效
     const targetKeyRef = useRef(currentKey);
     const targetContentRef = useRef(children);
     const targetWidthRef = useRef(width);
+    const targetHeightRef = useRef(height);
     const timersRef = useRef<NodeJS.Timeout[]>([]);
     const isFirstMountRef = useRef(true);
 
     targetKeyRef.current = currentKey;
     targetContentRef.current = children;
     targetWidthRef.current = width;
+    targetHeightRef.current = height;
 
     const clearAllTimers = () => {
       timersRef.current.forEach((t) => clearTimeout(t));
@@ -145,6 +151,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
         setDisplayedContent(children);
         setDisplayedKey(currentKey);
         setContainerWidth(width);
+        setContainerHeight(height);
         setPhase('idle');
         return;
       }
@@ -154,6 +161,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
         setDisplayedContent(children);
         setDisplayedKey(currentKey);
         setContainerWidth(width);
+        setContainerHeight(height);
         setPhase('idle');
         return;
       }
@@ -161,8 +169,9 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
       // mode === 'sequenced-step'
       const hasKeyChanged = currentKey !== displayedKey;
       const hasWidthChanged = width !== containerWidth;
+      const hasHeightChanged = height !== containerHeight;
 
-      if (hasKeyChanged || hasWidthChanged) {
+      if (hasKeyChanged || hasWidthChanged || hasHeightChanged) {
         clearAllTimers();
 
         // 阶段 1: 旧内容透明度从 100% 平滑淡出至 0% (Apple Ease)
@@ -173,6 +182,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
           setDisplayedKey(targetKeyRef.current);
           setDisplayedContent(targetContentRef.current);
           setContainerWidth(targetWidthRef.current);
+          setContainerHeight(targetHeightRef.current);
           setPhase('resize');
 
           const resizeTimer = setTimeout(() => {
@@ -194,6 +204,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
     }, [
       currentKey,
       width,
+      height,
       mode,
       activeFadeOutDuration,
       activeResizeDuration,
@@ -230,6 +241,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
     // ──────────────────────────────────────────────────────────────────────────
     if (mode === 'fluid-morph') {
       const renderWidth = resolveWidth(width);
+      const renderHeight = resolveWidth(height);
       return (
         <MorphContainerContext.Provider value={true}>
           <motion.div
@@ -240,6 +252,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
               opacity: 1,
               scale: 1,
               width: renderWidth,
+              ...(renderHeight ? { height: renderHeight } : {}),
             }}
             exit={initialModal ? { opacity: 0, scale: 0.96 } : undefined}
             transition={{
@@ -248,6 +261,10 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
                 ease: activeFluidEase,
               },
               width: {
+                duration: activeFluidDuration,
+                ease: activeFluidEase,
+              },
+              height: {
                 duration: activeFluidDuration,
                 ease: activeFluidEase,
               },
@@ -289,6 +306,7 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
     // 容器背景、边框及阴影全程常驻稳定（透明度绝不降低），仅 content 区域进行时序淡入淡出
     // ──────────────────────────────────────────────────────────────────────────
     const renderWidth = resolveWidth(containerWidth);
+    const renderHeight = resolveWidth(containerHeight);
     const contentOpacity = phase === 'fadeOut' || phase === 'resize' ? 0 : 1;
 
     const easeCss = `cubic-bezier(${activeStepEase.join(',')})`;
@@ -303,10 +321,15 @@ export const MorphContainer = forwardRef<HTMLDivElement, MorphContainerProps>(
             opacity: 1,
             scale: 1,
             width: renderWidth,
+            ...(renderHeight ? { height: renderHeight } : {}),
           }}
           exit={initialModal ? { opacity: 0, scale: 0.96 } : undefined}
           transition={{
             width: {
+              duration: activeResizeDuration,
+              ease: activeStepEase,
+            },
+            height: {
               duration: activeResizeDuration,
               ease: activeStepEase,
             },

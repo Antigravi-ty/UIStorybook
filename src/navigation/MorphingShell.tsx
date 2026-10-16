@@ -7,6 +7,7 @@ export interface MorphingShellProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   width?: number; // target width in px
+  height?: number; // target height in px
   currentKey?: string;
   children: React.ReactNode;
   isLight?: boolean;
@@ -37,6 +38,7 @@ export const MorphingShell: React.FC<MorphingShellProps> = ({
   open,
   onOpenChange,
   width = 460,
+  height,
   currentKey,
   children,
   isLight = false,
@@ -118,6 +120,7 @@ export const MorphingShell: React.FC<MorphingShellProps> = ({
               data-morph-container="true"
               currentKey={currentKey || (isLayer1 ? 'layer1' : 'layer2')}
               width={width}
+              height={height}
               mode={transitionMode}
               onPhaseChange={onPhaseChange}
               fluidDuration={fluidDuration}

@@ -1,11 +1,9 @@
 import React from 'react';
-import { Play, Gamepad2, Wrench, Settings, Layers, ArrowUpRight, PauseCircle, PlayCircle } from 'lucide-react';
+import { Play, Gamepad2, Wrench, Settings, Layers, ArrowUpRight } from 'lucide-react';
 import { PanelContainer, PanelContent } from '../layout/Panel';
 import { MenuContainer, MenuDivider } from '../navigation/MenuContainer';
 import { MenuItem } from '../navigation/MenuItem';
-import { Badge } from '../primitives/Badge';
-import { KeycapBadge } from '../primitives/KeycapBadge';
-import { UI_RADIUS } from '../tokens/radius';
+import { useMenuLayoutStore } from '../tokens';
 
 export interface Layer1MainMenuRecipeProps {
   isLight?: boolean;
@@ -14,24 +12,17 @@ export interface Layer1MainMenuRecipeProps {
   onNavigateGarage?: () => void;
   onNavigateSettings?: (targetTab?: string) => void;
   onNavigatePreviews?: () => void;
+  /** Optional override for whether to show the Additional Previews button (defaults to L0 menuLayoutStore) */
+  showAdditionalPreviews?: boolean;
   /** Background render pause indicator status */
   backgroundRenderPaused?: boolean;
   className?: string;
 }
 
 /**
- * [Recipe] Layer 1 Main Menu (Root / Width: 420px)
+ * [Recipe] Layer 1 Main Menu (Root / Width: 420px, Height: 520px)
  * Designed for instant in-game ESC menu overlay.
- * Structure:
- * - Top: Centered big bold "MENU", clean and minimal.
- * - Center:
- *     1. Resume Match (Primary highlight)
- *     2. Play (Secondary)
- *     3. Garage (Secondary)
- *     4. Settings (Secondary)
- * - Bottom (Footer):
- *     - Left: Background render pause indicator badge
- *     - Right: "Click to change settings ↗" directly navigating into Settings Video tab.
+ * Connected to L0 `useMenuLayoutStore` so spacing & container parameters tuned in L6 immediately apply in L7.
  */
 export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
   isLight = false,
@@ -40,13 +31,25 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
   onNavigateGarage,
   onNavigateSettings,
   onNavigatePreviews,
+  showAdditionalPreviews: propShowPreviews,
   backgroundRenderPaused = true,
   className = '',
 }) => {
+  const {
+    layer1Width,
+    layer1Height,
+    panelContentPaddingY,
+    showAdditionalPreviews: storeShowPreviews,
+  } = useMenuLayoutStore();
+
+  const shouldShowPreviews = propShowPreviews ?? storeShowPreviews;
+
   return (
     <PanelContainer
       isLight={isLight}
-      className={`w-full max-w-[420px] ${
+      width={layer1Width}
+      height={layer1Height}
+      className={`w-full ${
         isLight
           ? 'shadow-[0_0_0_1px_rgba(0,0,0,0.12),0_0_24px_rgba(0,0,0,0.16),0_0_48px_rgba(0,0,0,0.10)]'
           : 'shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_0_25px_rgba(0,0,0,0.85),0_0_35px_rgba(255,255,255,0.08)]'
@@ -56,7 +59,7 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
       <div
         data-ui-element="panel-header"
         data-panel-section="header"
-        className={`px-6 pt-5 pb-4 border-b select-none text-center transition-colors ${
+        className={`px-6 pt-5 pb-4 border-b select-none text-center shrink-0 transition-colors ${
           isLight
             ? 'border-neutral-200/90 bg-neutral-50/70 text-neutral-900'
             : 'border-neutral-800/80 bg-neutral-900/60 text-white'
@@ -67,8 +70,15 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
         </h1>
       </div>
 
-      {/* 2. CENTER CONTENT: Resume, Play, Garage, Settings */}
-      <PanelContent scrollable={false} className="px-6 py-5">
+      {/* 2. CENTER CONTENT: Resume, Play, Garage, Settings, Additional Previews */}
+      <PanelContent
+        scrollable={true}
+        style={{
+          paddingTop: `${panelContentPaddingY}px`,
+          paddingBottom: `${panelContentPaddingY}px`,
+        }}
+        className="px-6"
+      >
         <MenuContainer ariaLabel="Main Game Menu">
           {/* Resume */}
           <MenuItem
@@ -115,7 +125,7 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
           />
 
           {/* Additional Previews */}
-          {onNavigatePreviews && (
+          {shouldShowPreviews && (
             <MenuItem
               icon={<Layers className="h-5 w-5" />}
               title="Additional Previews"
@@ -128,14 +138,14 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
         </MenuContainer>
       </PanelContent>
 
-      {/* 3. BOTTOM FOOTER: Render Pause Indicator + Settings Shortcut Link */}
+      {/* 3. BOTTOM FOOTER: Render Pause Indicator + Settings Shortcut Link (shrink-0 z-10 prevents overlap) */}
       <div
         data-ui-element="panel-footer"
         data-panel-section="footer"
-        className={`px-6 py-4 border-t text-xs select-none flex items-center justify-between transition-colors ${
+        className={`px-6 py-4 border-t text-xs select-none shrink-0 mt-auto relative z-10 flex items-center justify-between transition-colors ${
           isLight
-            ? 'border-neutral-200/90 text-neutral-600 bg-neutral-50/90'
-            : 'border-neutral-800/80 text-neutral-400 bg-neutral-900/90'
+            ? 'border-neutral-200/90 text-neutral-600 bg-neutral-50/95'
+            : 'border-neutral-800/80 text-neutral-400 bg-neutral-900/95'
         }`}
       >
         {/* Left: Background render pause indicator */}

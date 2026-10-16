@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { UI_SPACING, UI_RADIUS } from '../tokens';
+import { UI_SPACING, UI_RADIUS, useMenuLayoutStore } from '../tokens';
 import { KeycapBadge } from '../primitives/KeycapBadge';
 
 export interface MenuItemProps {
@@ -19,6 +19,7 @@ export interface MenuItemProps {
   isLight?: boolean;
   onClick?: () => void;
   autoFocus?: boolean;
+  paddingYPx?: number;
   className?: string;
 }
 
@@ -46,9 +47,12 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   isLight = false,
   onClick,
   autoFocus = false,
+  paddingYPx,
   className = '',
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const storePaddingY = useMenuLayoutStore((s) => s.menuItemPaddingY);
+  const resolvedPaddingY = paddingYPx ?? storePaddingY;
 
   useEffect(() => {
     if (autoFocus && buttonRef.current) {
@@ -85,7 +89,11 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       onClick={onClick}
       data-ui-element="menu-item"
       data-menu-item="true"
-      className={`group relative flex items-center justify-between w-full min-h-[52px] ${UI_SPACING.menu.item} ${UI_RADIUS.lg} border font-medium text-sm transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 active:scale-[0.985] cursor-pointer select-none disabled:opacity-40 disabled:pointer-events-none ${getVariantStyles()} ${className}`}
+      style={{
+        paddingTop: `${resolvedPaddingY}px`,
+        paddingBottom: `${resolvedPaddingY}px`,
+      }}
+      className={`group relative flex items-center justify-between w-full min-h-[48px] shrink-0 ${UI_SPACING.menu.item} ${UI_RADIUS.lg} border font-medium text-sm transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 active:scale-[0.985] cursor-pointer select-none disabled:opacity-40 disabled:pointer-events-none ${getVariantStyles()} ${className}`}
     >
       {/* Left grouping */}
       <div className={`flex items-center ${UI_SPACING.menu.iconGap} min-w-0`}>

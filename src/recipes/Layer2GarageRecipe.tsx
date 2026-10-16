@@ -9,6 +9,7 @@ import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layou
 import { UnderlineTabs, TabItem } from '../primitives/UnderlineTabs';
 import { Badge } from '../primitives/Badge';
 import { UnderConstructionPlaceholder } from '../primitives/UnderConstructionPlaceholder';
+import { useMenuLayoutStore } from '../tokens';
 import { GarageCarTab } from './garage/GarageCarTab';
 import { GarageColorTab } from './garage/GarageColorTab';
 import { GarageAnthemTab } from './garage/GarageAnthemTab';
@@ -25,7 +26,7 @@ export interface Layer2GarageRecipeProps {
 }
 
 /**
- * [Recipe] Layer 2 Garage Loadout Menu (Width: 680px)
+ * [Recipe] Layer 2 Garage Loadout Menu (Width: 680px, Height: 540px)
  * Modular nested architecture maintaining low coupling:
  * 1. Car (`GarageCarTab`): 8 cards with name & hitbox badge (4x2 grid, no scroll)
  * 2. Colour (`GarageColorTab`): Blue & Orange team fallback preference order (6 presets)
@@ -37,6 +38,7 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
   onBack,
   initialTab = 'car',
 }) => {
+  const { layer2Width, layer2Height } = useMenuLayoutStore();
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Car State
@@ -57,7 +59,7 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
   ];
 
   return (
-    <PanelContainer isLight={isLight} className="w-full max-w-[680px]">
+    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
       <PanelHeader
         title="GARAGE LOADOUT"
         subtitle="Customization loadout, team colour preference & player identity"
@@ -71,7 +73,7 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
       />
 
       {/* Underline Tabs */}
-      <div className="px-6 pt-2">
+      <div className="px-6 pt-2 shrink-0">
         <UnderlineTabs
           items={tabs}
           activeId={activeTab}

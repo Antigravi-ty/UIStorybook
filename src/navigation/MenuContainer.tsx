@@ -1,10 +1,14 @@
 import React, { useRef } from 'react';
-import { UI_SPACING } from '../tokens';
+import { UI_SPACING, useMenuLayoutStore } from '../tokens';
 
 export interface MenuContainerProps {
   children: React.ReactNode;
   className?: string;
   ariaLabel?: string;
+  /** Optional explicit gap override in px */
+  gapPx?: number;
+  /** Optional explicit container padding override in px */
+  paddingPx?: number;
 }
 
 /**
@@ -12,14 +16,20 @@ export interface MenuContainerProps {
  * Roving keyboard focus manager for SimpleUI menus:
  * - ArrowDown / ArrowUp traverses interactive items
  * - Home / End keys jump to first / last items
- * - Tokenized gap (gap-2.5) with clean zero container padding
+ * - Tokenized gap & padding connected to L0 menuLayoutStore
  */
 export const MenuContainer: React.FC<MenuContainerProps> = ({
   children,
   className = '',
   ariaLabel = 'Navigation Menu',
+  gapPx,
+  paddingPx,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { menuItemGap, menuContainerPadding } = useMenuLayoutStore();
+
+  const resolvedGap = gapPx ?? menuItemGap;
+  const resolvedPadding = paddingPx ?? menuContainerPadding;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
@@ -55,6 +65,10 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({
       onKeyDown={handleKeyDown}
       data-ui-element="menu-container"
       data-menu-container="true"
+      style={{
+        gap: `${resolvedGap}px`,
+        padding: `${resolvedPadding}px`,
+      }}
       className={`flex flex-col ${UI_SPACING.menu.gap} ${UI_SPACING.menu.container} w-full transition-colors ${className}`}
     >
       {children}
@@ -62,13 +76,21 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({
   );
 };
 
-export const MenuDivider: React.FC<{ isLight?: boolean; className?: string }> = ({
-  isLight = false,
-  className = '',
-}) => {
+export const MenuDivider: React.FC<{
+  isLight?: boolean;
+  className?: string;
+  marginYPx?: number;
+}> = ({ isLight = false, className = '', marginYPx }) => {
+  const dividerMarginY = useMenuLayoutStore((s) => s.dividerMarginY);
+  const resolvedMarginY = marginYPx ?? dividerMarginY;
+
   return (
     <hr
-      className={`border-none h-px my-1.5 w-full ${
+      style={{
+        marginTop: `${resolvedMarginY}px`,
+        marginBottom: `${resolvedMarginY}px`,
+      }}
+      className={`border-none h-px w-full shrink-0 ${
         isLight ? 'bg-neutral-200' : 'bg-neutral-800'
       } ${className}`}
     />

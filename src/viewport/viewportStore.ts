@@ -90,9 +90,8 @@ const calculateMetrics = (marginPct: number, scalePct: number): ViewportMetrics 
   // 3. Portrait gate: width < height (cannot be taller than wide)
   const isPortrait = Wsafe < Hsafe;
 
-  // SimpleUI standard: baseScale = Wrender / 1280
-  const baseScale = Wrender / 1280;
-  const scaleFactor = Number((baseScale * (scalePct / 100)).toFixed(3));
+  // UI Zoom is 100% user-controlled (no automatic resolution-based scaling)
+  const scaleFactor = Number((scalePct / 100).toFixed(3));
 
   return {
     scaleFactor,

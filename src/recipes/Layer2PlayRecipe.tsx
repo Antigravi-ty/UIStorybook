@@ -3,7 +3,7 @@ import { User, Bot, Users, Shuffle, Target, Sparkles, BookOpen } from 'lucide-re
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { GridStack } from '../layout/GridStack';
 import { Badge } from '../primitives/Badge';
-import { UI_RADIUS } from '../tokens';
+import { UI_RADIUS, useMenuLayoutStore } from '../tokens';
 
 export interface Layer2PlayRecipeProps {
   isLight?: boolean;
@@ -75,7 +75,7 @@ const PLAY_MODES: PlayModeDef[] = [
 
 /**
  * [Recipe] Layer 2 Play / Mode Selection Menu
- * 2x3 Grid with Lucide Icons and clean placeholders (Width: 680px).
+ * 2x3 Grid with Lucide Icons and clean placeholders (Width: 680px, Height: 540px).
  * Row 1: Single Player with Bot | Multiplayer Match | Multiplayer Custom Match
  * Row 2: Free Play Training | Training Packs | Multiplayer Training
  */
@@ -84,8 +84,10 @@ export const Layer2PlayRecipe: React.FC<Layer2PlayRecipeProps> = ({
   onBack,
   onSelectMode,
 }) => {
+  const { layer2Width, layer2Height } = useMenuLayoutStore();
+
   return (
-    <PanelContainer isLight={isLight} className="w-full max-w-[680px]">
+    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
       <PanelHeader
         title="PLAY"
         subtitle="Select game mode, custom match or training discipline"

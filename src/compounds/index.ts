@@ -7,4 +7,6 @@ export * from '../primitives/DropdownMenu';
 export * from '../primitives/Dialogue';
 export * from '../primitives/QuickNotification';
 export * from '../primitives/TunerControls';
+export * from '../primitives/InlineErrorNotice';
 export * from '../navigation/MenuItem';
+

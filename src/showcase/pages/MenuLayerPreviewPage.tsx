@@ -17,13 +17,17 @@ import {
   Sparkles,
   ChevronLeft,
   Sliders,
-  Keyboard
+  Keyboard,
+  Server,
+  AlertCircle,
 } from 'lucide-react';
 import { ContainerTransitionMode } from '../../navigation/transitions';
 import { Badge } from '../../primitives/Badge';
 import { KeycapBadge } from '../../primitives/KeycapBadge';
 import { UnderlineTabs, TabItem } from '../../primitives/UnderlineTabs';
 import { MorphContainerContext } from '../../tokens/morphContext';
+import { useMenuLayoutStore } from '../../tokens';
+import { useQuickNotificationStore } from '../../tokens/quickNotificationStore';
 import { 
   Layer1MainMenuRecipe,
   Layer2PlayRecipe,
@@ -32,9 +36,12 @@ import {
   Layer2AdditionalPreviewRecipe,
   Layer3AudioDetailRecipe,
   Layer3BallTrajectoryRecipe,
+  Layer3OnlineWarmupRecipe,
+  dispatchOnlineRoomErrorNotification,
 } from '../../recipes';
 import { FloatingStackIcon } from '../../navigation/FloatingStackIcon';
 import { FloatingWindowManager } from '../../navigation/FloatingWindowManager';
+import { QuickNotificationSystem } from '../../navigation/QuickNotificationSystem';
 import { floatingStore, useFloatingStore } from '../../tokens/floatingStore';
 import { PRESET_WINDOWS, type PresetConfig } from '../../tokens/floatingPresets';
 import { UI_EASING } from '../../tokens/easing';
@@ -47,7 +54,8 @@ export type ActiveMenuRoute =
   | 'settings' 
   | 'additional-preview' 
   | 'audio-eq' 
-  | 'trajectory';
+  | 'trajectory'
+  | 'online-warmup';
 
 export interface MenuLayerPreviewPageProps {
   isLight?: boolean;
@@ -74,6 +82,7 @@ export const MENU_ROUTE_CONFIG: Record<ActiveMenuRoute, LayerRouteConfig> = {
   'additional-preview': { id: 'additional-preview', label: 'Additional Preview', layer: 2, width: 680, parentRoute: 'main-menu' },
   'audio-eq': { id: 'audio-eq', label: 'Acoustics & EQ', layer: 3, width: 480, parentRoute: 'settings' },
   'trajectory': { id: 'trajectory', label: 'Ball Trajectory Predictor', layer: 3, width: 480, parentRoute: 'additional-preview' },
+  'online-warmup': { id: 'online-warmup', label: 'Online Warmup & Match', layer: 3, width: 480, parentRoute: 'play' },
 };
 
 export const SETTINGS_QUICK_TABS: TabItem[] = [
@@ -197,16 +206,40 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // 各层级菜单标准宽度映射 (对标规范)
+  const {
+    layer1Width,
+    layer1Height,
+    layer2Width,
+    layer2Height,
+    layer3Width,
+    layer3Height,
+    simulateLayer3Error,
+    setToken,
+  } = useMenuLayoutStore();
+
+  // 各层级菜单标准宽度与高度映射 (直接读取 L0 menuLayoutStore，确保与 L6 调优器 100% 同步)
   const routeWidthMap: Record<ActiveMenuRoute, number> = {
     'layer-0': 0,
-    'main-menu': 420,
-    'play': 680,
-    'garage': 680,
-    'settings': 680,
-    'additional-preview': 680,
-    'audio-eq': 480,
-    'trajectory': 480,
+    'main-menu': layer1Width,
+    'play': layer2Width,
+    'garage': layer2Width,
+    'settings': layer2Width,
+    'additional-preview': layer2Width,
+    'audio-eq': layer3Width,
+    'trajectory': layer3Width,
+    'online-warmup': layer3Width,
+  };
+
+  const routeHeightMap: Record<ActiveMenuRoute, number> = {
+    'layer-0': 0,
+    'main-menu': layer1Height,
+    'play': layer2Height,
+    'garage': layer2Height,
+    'settings': layer2Height,
+    'additional-preview': layer2Height,
+    'audio-eq': layer3Height,
+    'trajectory': layer3Height,
+    'online-warmup': layer3Height,
   };
 
   // 路由切换统一入口（支持 SequencedStep 分步与 FluidMorph 连续流体）
@@ -306,6 +339,8 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           handleSelectRoute('main-menu');
         } else if (currentRoute === 'audio-eq') {
           handleSelectRoute('settings');
+        } else if (currentRoute === 'online-warmup') {
+          handleSelectRoute('play');
         } else if (currentRoute === 'trajectory') {
           if (liveAnimPhase === 'collapsed') {
             handleTriggerExpand();
@@ -336,9 +371,8 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
 
   const dockW = 88;
   const dockH = 38;
-  const expandedW = routeWidthMap[currentRoute] || 480;
-  // 针对根菜单拉长高度至 510px（容纳新增的 Additional Previews 选项卡与内衬，避免内容挤压），二级与三级统一 540px
-  const expandedH = currentRoute === 'main-menu' ? 510 : 540;
+  const expandedW = routeWidthMap[currentRoute] || layer3Width;
+  const expandedH = routeHeightMap[currentRoute] || layer3Height;
 
   const xExpanded = Math.max(16, Math.round((stageSize.width - expandedW) / 2));
   const yExpanded = Math.max(16, Math.round((stageSize.height - expandedH) / 2));
@@ -652,6 +686,38 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* Layer 3 联机房间与单行内联报错 */}
+            {(() => {
+              const available = isLayer3RouteAvailable('online-warmup', currentRoute);
+              const isActive = currentRoute === 'online-warmup';
+
+              return (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLastParentRoute('play');
+                    handleSelectRoute('online-warmup');
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-sky-500 text-white border-sky-500 font-semibold shadow-2xs'
+                      : available
+                      ? isLight
+                        ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-800 shadow-2xs'
+                        : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200 shadow-2xs'
+                      : isLight
+                      ? 'bg-neutral-50/70 hover:bg-neutral-100 border-neutral-200 text-neutral-600'
+                      : 'bg-neutral-800/60 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                  }`}
+                  title="点击进入 Online Warmup & Match (支持单行内联报错与通知展开)"
+                >
+                  <Server className="h-3.5 w-3.5" />
+                  <span>Online Warmup (联机大厅 · 内联报错)</span>
+                  <span className="font-mono text-[10px] opacity-75">{layer3Width}px</span>
+                </button>
+              );
+            })()}
+
             {/* Layer 3 音频高级均衡器 */}
             {(() => {
               const available = isLayer3RouteAvailable('audio-eq', currentRoute);
@@ -680,13 +746,13 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                   }`}
                   title={
                     available
-                      ? '点击直接进入 Acoustics & EQ (480px)'
+                      ? `点击直接进入 Acoustics & EQ (${layer3Width}px)`
                       : '此三级面板隶属于 Game Settings，当前菜单不可用'
                   }
                 >
                   <Volume2 className="h-3.5 w-3.5" />
                   <span>Acoustics & EQ (音频高级均衡器)</span>
-                  <span className="font-mono text-[10px] opacity-75">480px</span>
+                  <span className="font-mono text-[10px] opacity-75">{layer3Width}px</span>
                   {!available && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 font-mono">
                       需在 Settings 唤起
@@ -734,7 +800,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 >
                   <Eye className="h-3.5 w-3.5" />
                   <span>Ball Trajectory (弹道预测器 · Live Preview)</span>
-                  <span className="font-mono text-[10px] opacity-75">480px</span>
+                  <span className="font-mono text-[10px] opacity-75">{layer3Width}px</span>
                   {!available && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 font-mono">
                       需在 Settings 或 Previews 唤起
@@ -744,24 +810,36 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
               );
             })()}
 
-            {/* 动态逻辑关联状态提示 */}
-            <span className={`text-[11px] font-mono ml-1.5 ${
-              currentRoute === 'additional-preview' || currentRoute === 'settings' || currentRoute === 'audio-eq' || currentRoute === 'trajectory'
-                ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                : isLight
-                ? 'text-neutral-500'
-                : 'text-neutral-400'
-            }`}>
-              {currentRoute === 'additional-preview'
-                ? '(✓ 已选中 Additional Preview: 三级实时预览面板已就绪)'
-                : currentRoute === 'settings'
-                ? '(✓ 已选中 Game Settings: 三级音频与弹道面板已就绪)'
-                : currentRoute === 'audio-eq'
-                ? '(当前处于 Layer 3 独立音频声场面板)'
-                : currentRoute === 'trajectory'
-                ? `(当前处于 Layer 3 弹道预测器面板，支持 Tab 快捷键收起/展开 Live Preview，返回到 ${lastParentRoute})`
-                : '(请先进入 Game Settings 或 Additional Preview 唤起关联三级面板)'}
-            </span>
+            {/* 三级菜单单行内联报错模拟开关 */}
+            <button
+              type="button"
+              onClick={() => {
+                const next = !simulateLayer3Error;
+                setToken('simulateLayer3Error', next);
+                if (next) {
+                  dispatchOnlineRoomErrorNotification();
+                  const st = useQuickNotificationStore.getState();
+                  if (st.activeNotification) {
+                    st.collapseActive();
+                  }
+                  st.setStackOpen(false);
+                  showToast('已触发三级菜单单行报错 (点击 Check notification ↗ 可展开右上角通知)');
+                } else {
+                  showToast('已清除三级菜单单行报错');
+                }
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+                simulateLayer3Error
+                  ? 'bg-rose-500 text-white border-rose-500 font-semibold shadow-2xs'
+                  : isLight
+                  ? 'bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700'
+                  : 'bg-rose-950/40 hover:bg-rose-900/50 border-rose-800/70 text-rose-300'
+              }`}
+              title="切换三级菜单单行内联报错 (Something went wrong. Check notification ↗)"
+            >
+              <AlertCircle className="h-3.5 w-3.5" />
+              <span>{simulateLayer3Error ? '内联报错: 开启中' : '模拟三级内联报错'}</span>
+            </button>
           </div>
         </div>
 
@@ -775,16 +853,17 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             <span className="text-neutral-400">当前活跃窗口:</span>
             <span className="font-bold text-amber-500">
               {currentRoute === 'layer-0' && 'Layer 0: Active Match Gameplay (0px · 零级无菜单状态)'}
-              {currentRoute === 'main-menu' && 'Layer 1: MENU (420px)'}
-              {currentRoute === 'play' && 'Layer 2: Play Modes (680px)'}
-              {currentRoute === 'garage' && 'Layer 2: Garage Loadout (680px)'}
-              {currentRoute === 'settings' && 'Layer 2: Game Settings (680px)'}
-              {currentRoute === 'additional-preview' && 'Layer 2: Additional Preview (680px · 实时预览与悬浮窗)'}
-              {currentRoute === 'audio-eq' && 'Layer 3: Acoustics & EQ (480px)'}
+              {currentRoute === 'main-menu' && `Layer 1: MENU (${layer1Width}×${layer1Height}px)`}
+              {currentRoute === 'play' && `Layer 2: Play Modes (${layer2Width}×${layer2Height}px)`}
+              {currentRoute === 'garage' && `Layer 2: Garage Loadout (${layer2Width}×${layer2Height}px)`}
+              {currentRoute === 'settings' && `Layer 2: Game Settings (${layer2Width}×${layer2Height}px)`}
+              {currentRoute === 'additional-preview' && `Layer 2: Additional Preview (${layer2Width}×${layer2Height}px · 实时预览与悬浮窗)`}
+              {currentRoute === 'audio-eq' && `Layer 3: Acoustics & EQ (${layer3Width}×${layer3Height}px)`}
+              {currentRoute === 'online-warmup' && `Layer 3: Online Warmup & Match (${layer3Width}×${layer3Height}px)`}
               {currentRoute === 'trajectory' && (
                 isDockState
                   ? 'Layer 3: Live Preview Dock Pill (88×38px · 已折叠至侧边)'
-                  : 'Layer 3: Ball Trajectory Predictor (480px · Live Preview 展开)'
+                  : `Layer 3: Ball Trajectory Predictor (${layer3Width}×${layer3Height}px · Live Preview 展开)`
               )}
             </span>
           </div>
@@ -858,6 +937,13 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 : 'rgba(0, 0, 0, 0.55)',
             transition: `background-color ${backdropDuration}ms cubic-bezier(0.2, 0.8, 0.25, 1)`,
           }}
+        />
+
+        {/* 2.5 舞台右上角通知中心 (QuickNotificationSystem，响应三级菜单内联报错 Check notification ↗ 点击展开) */}
+        <QuickNotificationSystem
+          isLight={isLight}
+          absolute={true}
+          className={hasStackIcon ? '!right-16' : '!right-4'}
         />
 
         {/* 
@@ -1016,7 +1102,18 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                     <Layer2PlayRecipe
                       isLight={isLight}
                       onBack={() => handleSelectRoute('main-menu')}
-                      onSelectMode={(m) => showToast(`选择了玩法模式: ${m}`)}
+                      onSelectMode={(m) => {
+                        if (
+                          m === 'multiplayer-match' ||
+                          m === 'multiplayer-custom' ||
+                          m === 'multiplayer-training'
+                        ) {
+                          setLastParentRoute('play');
+                          handleSelectRoute('online-warmup');
+                        } else {
+                          showToast(`选择了玩法模式: ${m}`);
+                        }
+                      }}
                     />
                   )}
 
@@ -1072,6 +1169,14 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                     <Layer3AudioDetailRecipe
                       isLight={isLight}
                       onBack={() => handleSelectRoute('settings')}
+                    />
+                  )}
+
+                  {/* Layer 3: Online Warmup & Match Lobby */}
+                  {displayedRoute === 'online-warmup' && (
+                    <Layer3OnlineWarmupRecipe
+                      isLight={isLight}
+                      onBack={() => handleSelectRoute('play')}
                     />
                   )}
 

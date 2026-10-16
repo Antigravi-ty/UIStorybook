@@ -7,6 +7,7 @@ import { Badge } from '../primitives/Badge';
 import { KeycapBadge } from '../primitives/KeycapBadge';
 import { Card } from '../layout/Card';
 import { VStack } from '../layout/VStack';
+import { useMenuLayoutStore } from '../tokens';
 import { 
   Activity, 
   Eye, 
@@ -22,7 +23,7 @@ export interface Layer3BallTrajectoryRecipeProps {
 }
 
 /**
- * [Recipe] Layer 3 Ball Trajectory Predictor Configuration Panel (Width: 480px)
+ * [Recipe] Layer 3 Ball Trajectory Predictor Configuration Panel (Width: 480px, Height: 540px)
  * Supports Live Preview with Tab key collapse/expand.
  * Tuning parameters:
  * - Trajectory Draw Duration (0.5s - 5.0s)
@@ -37,6 +38,8 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
   onCollapsePreview,
   transparent = false,
 }) => {
+  const { layer3Width, layer3Height } = useMenuLayoutStore();
+
   // Trajectory Prediction Parameters
   const [trajectoryDuration, setTrajectoryDuration] = useState(2.5);
   const [renderColor, setRenderColor] = useState('amber');
@@ -49,7 +52,13 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
   const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
 
   return (
-    <PanelContainer isLight={isLight} transparent={transparent} className="w-full max-w-[480px]">
+    <PanelContainer
+      isLight={isLight}
+      transparent={transparent}
+      width={layer3Width}
+      height={layer3Height}
+      className="w-full"
+    >
       <PanelHeader
         title="BALL TRAJECTORY PREDICTOR"
         subtitle="Live Preview Ready • Tab to Collapse/Expand"

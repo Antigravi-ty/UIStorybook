@@ -3,6 +3,7 @@ import { Info } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { UnderlineTabs, TabItem } from '../primitives/UnderlineTabs';
 import { Badge } from '../primitives/Badge';
+import { useMenuLayoutStore } from '../tokens';
 import { type PresetConfig } from '../tokens/floatingPresets';
 import { LivePreviewTab } from './additional-preview/LivePreviewTab';
 import { FloatingWindowsTab } from './additional-preview/FloatingWindowsTab';
@@ -29,7 +30,7 @@ export interface Layer2AdditionalPreviewRecipeProps {
 }
 
 /**
- * [Recipe] Layer 2 Additional Preview Recipe (Width: 680px)
+ * [Recipe] Layer 2 Additional Preview Recipe (Width: 680px, Height: 540px)
  * Dedicated secondary menu for previewing experimental interfaces:
  * - Tab 1 (`LivePreviewTab`): Live Preview (Enter Layer 3 dedicated Live Preview container with Tab collapse/expand)
  * - Tab 2 (`FloatingWindowsTab`): Floating Window (4 varied length presets with unified '+' action button enqueuing to Stack)
@@ -47,6 +48,7 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
   activeTab: controlledTab,
   onTabChange,
 }) => {
+  const { layer2Width, layer2Height } = useMenuLayoutStore();
   const [internalTab, setInternalTab] = useState<'live-preview' | 'floating-windows'>(initialTab);
   const currentTab = controlledTab ?? internalTab;
 
@@ -93,7 +95,7 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
   ];
 
   return (
-    <PanelContainer isLight={isLight} className="w-full max-w-[680px]">
+    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
       <PanelHeader
         title="ADDITIONAL PREVIEWS"
         subtitle="Live Preview sandbox & floating telemetry overlays"

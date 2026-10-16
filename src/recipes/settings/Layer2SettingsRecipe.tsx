@@ -3,6 +3,7 @@ import { Info } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../../layout/Panel';
 import { UnderlineTabs, TabItem } from '../../primitives/UnderlineTabs';
 import { Badge } from '../../primitives/Badge';
+import { useMenuLayoutStore } from '../../tokens';
 import { type DiagnosticWindowPayload } from './components/FloatingWindowCard';
 import {
   GameplayTab,
@@ -47,7 +48,7 @@ export type SettingsTabId =
   | 'developer';
 
 /**
- * [Recipe] Layer 2 Settings Menu (Width: 680px)
+ * [Recipe] Layer 2 Settings Menu (Width: 680px, Height: 540px)
  * Complete Settings system featuring 9+1 UnderlineTabs:
  * - Gameplay (`GameplayTab`)
  * - Camera (`CameraTab`)
@@ -75,6 +76,7 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   onToggleBackgroundRender,
   onSpawnDiagnosticWindow,
 }) => {
+  const { layer2Width, layer2Height } = useMenuLayoutStore();
   const [internalTab, setInternalTab] = useState<SettingsTabId>(initialTab as SettingsTabId);
   const currentTab = (controlledTab as SettingsTabId) ?? internalTab;
 
@@ -149,7 +151,7 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
     : baseTabs;
 
   return (
-    <PanelContainer isLight={isLight} className="w-full max-w-[680px]">
+    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
       <PanelHeader
         title="SETTINGS"
         subtitle="Game preferences, controls, acoustics & engine diagnostics"

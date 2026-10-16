@@ -76,6 +76,7 @@ export interface PanelContentProps {
   children: React.ReactNode;
   className?: string;
   scrollable?: boolean;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -88,11 +89,13 @@ export const PanelContent: React.FC<PanelContentProps> = ({
   children,
   className = '',
   scrollable = true,
+  style,
 }) => {
   return (
     <div
       data-ui-element="panel-content"
       data-panel-section="content"
+      style={style}
       className={`flex flex-col flex-1 min-h-0 ${UI_SPACING.panel.body} w-full box-border ${
         scrollable ? 'overflow-y-auto' : ''
       } ${className}`}
@@ -124,7 +127,7 @@ export const PanelFooter: React.FC<PanelFooterProps> = ({
     <div
       data-ui-element="panel-footer"
       data-panel-section="footer"
-      className={`flex items-center justify-between ${UI_SPACING.panel.footer} border-t text-xs select-none shrink-0 mt-auto transition-colors duration-150 ${
+      className={`flex items-center justify-between ${UI_SPACING.panel.footer} border-t text-xs select-none shrink-0 mt-auto relative z-10 transition-colors duration-150 ${
         isLight
           ? 'border-neutral-200/90 text-neutral-600 bg-neutral-100/60'
           : 'border-neutral-800/80 text-neutral-400 bg-neutral-950/50'
@@ -147,19 +150,27 @@ export interface PanelContainerProps {
   isLight?: boolean;
   className?: string;
   transparent?: boolean;
+  /** Fixed outer container height (in px or CSS string) when rendered standalone outside MorphContainer */
+  height?: number | string;
+  /** Fixed outer container max-width (in px or CSS string) */
+  width?: number | string;
+  style?: React.CSSProperties;
 }
 
 /**
  * PanelContainer
  * Shell wrapping the 3-stage panel hierarchy (Header -> Content -> Footer).
  * 当处于 MorphContainer 内时作为纯内容承载器，外壳背景与边框由外层容器常驻负责；
- * 当作为独立面板静态展示时，渲染完整的独立容器底板背景与边框。
+ * 当作为独立面板静态展示时，渲染完整的独立容器底板背景与边框，并保持确定性固定高度。
  */
 export const PanelContainer: React.FC<PanelContainerProps> = ({
   children,
   isLight = false,
   className = '',
   transparent,
+  height,
+  width,
+  style,
 }) => {
   const inMorphContainer = useInMorphContainer();
   const isTransparent = transparent ?? inMorphContainer;
@@ -172,9 +183,28 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
         .trim()
     : className;
 
+  const resolvedHeight =
+    !inMorphContainer && height !== undefined
+      ? typeof height === 'number'
+        ? `${height}px`
+        : height
+      : undefined;
+
+  const resolvedMaxWidth =
+    width !== undefined
+      ? typeof width === 'number'
+        ? `${width}px`
+        : width
+      : undefined;
+
   return (
     <div
       data-panel="container"
+      style={{
+        ...(resolvedHeight ? { height: resolvedHeight } : {}),
+        ...(resolvedMaxWidth ? { maxWidth: resolvedMaxWidth } : {}),
+        ...style,
+      }}
       className={`flex flex-col h-full w-full overflow-hidden transition-colors ${
         isTransparent
           ? 'bg-transparent border-0 ring-0 shadow-none'
