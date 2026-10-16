@@ -26,7 +26,7 @@ import { Badge } from '../../primitives/Badge';
 import { KeycapBadge } from '../../primitives/KeycapBadge';
 import { UnderlineTabs, TabItem } from '../../primitives/UnderlineTabs';
 import { MorphContainerContext } from '../../tokens/morphContext';
-import { useMenuLayoutStore } from '../../tokens';
+import { useMenuLayoutStore, type MenuPanelId } from '../../tokens';
 import { useQuickNotificationStore } from '../../tokens/quickNotificationStore';
 import { 
   Layer1MainMenuRecipe,
@@ -57,6 +57,17 @@ export type ActiveMenuRoute =
   | 'trajectory'
   | 'online-warmup';
 
+export const ROUTE_TO_PANEL_ID: Record<Exclude<ActiveMenuRoute, 'layer-0'>, MenuPanelId> = {
+  'main-menu': 'layer1-main',
+  'play': 'layer2-play',
+  'garage': 'layer2-garage',
+  'settings': 'layer2-settings',
+  'additional-preview': 'layer2-previews',
+  'audio-eq': 'layer3-audio-detail',
+  'trajectory': 'layer3-ball-trajectory',
+  'online-warmup': 'layer3-online-warmup',
+};
+
 export interface MenuLayerPreviewPageProps {
   isLight?: boolean;
   onNavigateToReserved?: () => void;
@@ -76,10 +87,10 @@ export interface LayerRouteConfig {
 export const MENU_ROUTE_CONFIG: Record<ActiveMenuRoute, LayerRouteConfig> = {
   'layer-0': { id: 'layer-0', label: 'Active Match (Layer 0)', layer: 0, width: 0 },
   'main-menu': { id: 'main-menu', label: 'Main Menu', layer: 1, width: 420 },
-  'play': { id: 'play', label: 'Play Modes', layer: 2, width: 680, parentRoute: 'main-menu' },
-  'garage': { id: 'garage', label: 'Garage Loadout', layer: 2, width: 680, parentRoute: 'main-menu' },
+  'play': { id: 'play', label: 'Play Modes', layer: 2, width: 600, parentRoute: 'main-menu' },
+  'garage': { id: 'garage', label: 'Garage Loadout', layer: 2, width: 640, parentRoute: 'main-menu' },
   'settings': { id: 'settings', label: 'Game Settings', layer: 2, width: 680, parentRoute: 'main-menu' },
-  'additional-preview': { id: 'additional-preview', label: 'Additional Preview', layer: 2, width: 680, parentRoute: 'main-menu' },
+  'additional-preview': { id: 'additional-preview', label: 'Additional Preview', layer: 2, width: 600, parentRoute: 'main-menu' },
   'audio-eq': { id: 'audio-eq', label: 'Acoustics & EQ', layer: 3, width: 480, parentRoute: 'settings' },
   'trajectory': { id: 'trajectory', label: 'Ball Trajectory Predictor', layer: 3, width: 480, parentRoute: 'additional-preview' },
   'online-warmup': { id: 'online-warmup', label: 'Online Warmup & Match', layer: 3, width: 480, parentRoute: 'play' },
@@ -207,39 +218,97 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
   }, []);
 
   const {
-    layer1Width,
-    layer1Height,
-    layer2Width,
-    layer2Height,
-    layer3Width,
-    layer3Height,
+    panels,
+    dividerMarginY,
+    menuItemGap,
+    menuItemPaddingY,
+    menuContainerPadding,
+    panelContentPaddingY,
+    showAdditionalPreviews,
     simulateLayer3Error,
     setToken,
   } = useMenuLayoutStore();
 
-  // 各层级菜单标准宽度与高度映射 (直接读取 L0 menuLayoutStore，确保与 L6 调优器 100% 同步)
-  const routeWidthMap: Record<ActiveMenuRoute, number> = {
-    'layer-0': 0,
-    'main-menu': layer1Width,
-    'play': layer2Width,
-    'garage': layer2Width,
-    'settings': layer2Width,
-    'additional-preview': layer2Width,
-    'audio-eq': layer3Width,
-    'trajectory': layer3Width,
-    'online-warmup': layer3Width,
-  };
+  // 记录各路由面板在 Auto-Fit 模式下的真实自然高度 (Header + Tabs + PanelContent.scrollHeight + Footer)
+  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [intrinsicHeightByRoute, setIntrinsicHeightByRoute] = useState<Record<string, number>>({
+    'main-menu': showAdditionalPreviews ? 444 : 382,
+    'play': 410,
+    'additional-preview': 420,
+  });
 
-  const routeHeightMap: Record<ActiveMenuRoute, number> = {
-    'layer-0': 0,
-    'main-menu': layer1Height,
-    'play': layer2Height,
-    'garage': layer2Height,
-    'settings': layer2Height,
-    'additional-preview': layer2Height,
-    'audio-eq': layer3Height,
-    'trajectory': layer3Height,
-    'online-warmup': layer3Height,
+  useEffect(() => {
+    const wrapper = contentWrapperRef.current;
+    if (!wrapper || currentRoute === 'layer-0') return;
+    const panelEl = wrapper.querySelector<HTMLElement>('[data-panel="container"]');
+    if (!panelEl) return;
+
+    const measure = () => {
+      let sum = 2; // top + bottom border
+      Array.from(panelEl.children).forEach((child) => {
+        const el = child as HTMLElement;
+        if (el.getAttribute('data-panel-section') === 'content') {
+          sum += el.scrollHeight;
+        } else {
+          sum += el.offsetHeight;
+        }
+      });
+      if (sum > 40) {
+        setIntrinsicHeightByRoute((prev) =>
+          prev[displayedRoute] === sum ? prev : { ...prev, [displayedRoute]: sum }
+        );
+      }
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(panelEl);
+    Array.from(panelEl.children).forEach((child) => {
+      ro.observe(child);
+      if (
+        (child as HTMLElement).getAttribute('data-panel-section') === 'content' &&
+        child.firstElementChild
+      ) {
+        ro.observe(child.firstElementChild);
+      }
+    });
+
+    return () => ro.disconnect();
+  }, [
+    displayedRoute,
+    currentRoute,
+    panels,
+    dividerMarginY,
+    menuItemGap,
+    menuItemPaddingY,
+    menuContainerPadding,
+    panelContentPaddingY,
+    showAdditionalPreviews,
+    simulateLayer3Error,
+    stageSize.width,
+    stageSize.height,
+  ]);
+
+  const availStageW = Math.max(320, stageSize.width - 32);
+  const availStageH = Math.max(240, stageSize.height - 32);
+
+  const resolveRouteSize = (route: ActiveMenuRoute): { width: number; height: number; modeLabel: string } => {
+    if (route === 'layer-0') return { width: 0, height: 0, modeLabel: '0px' };
+    const panelId = ROUTE_TO_PANEL_ID[route];
+    const cfg = panels[panelId];
+    const w = Math.min(cfg.width, availStageW);
+    if (cfg.mode === 'fixed') {
+      const h = Math.min(cfg.targetHeight, availStageH);
+      return { width: w, height: h, modeLabel: `${w}×${h}px (Fixed)` };
+    }
+    // Auto-Fit clamping: clamp(minHeight, contentHeight, min(maxHeight, availStageH))
+    const maxAllowed = Math.min(cfg.maxHeight, availStageH);
+    const minAllowed = Math.min(cfg.minHeight, maxAllowed);
+    const fallbackIntrinsic =
+      route === 'main-menu' ? (showAdditionalPreviews ? 444 : 382) : cfg.targetHeight;
+    const naturalH = intrinsicHeightByRoute[route] ?? fallbackIntrinsic;
+    const h = Math.max(minAllowed, Math.min(naturalH, maxAllowed));
+    return { width: w, height: h, modeLabel: `${w}×${h}px (Auto-Fit)` };
   };
 
   // 路由切换统一入口（支持 SequencedStep 分步与 FluidMorph 连续流体）
@@ -371,8 +440,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
 
   const dockW = 88;
   const dockH = 38;
-  const expandedW = routeWidthMap[currentRoute] || layer3Width;
-  const expandedH = routeHeightMap[currentRoute] || layer3Height;
+  const activeRouteSize = resolveRouteSize(currentRoute);
+  const expandedW = activeRouteSize.width || 480;
+  const expandedH = activeRouteSize.height || 540;
 
   const xExpanded = Math.max(16, Math.round((stageSize.width - expandedW) / 2));
   const yExpanded = Math.max(16, Math.round((stageSize.height - expandedH) / 2));
@@ -569,7 +639,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
               }`}
             >
               <span>MENU (主暂停根菜单)</span>
-              <span className="font-mono text-[10px] opacity-75">420px</span>
+              <span className="font-mono text-[10px] opacity-75">
+                {panels['layer1-main'].width}px · {panels['layer1-main'].mode === 'auto' ? 'Auto' : 'Fixed'}
+              </span>
             </button>
           </div>
         </div>
@@ -597,7 +669,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             >
               <Gamepad2 className="h-3.5 w-3.5" />
               <span>Play (模式选择 / 6 种玩法网格)</span>
-              <span className="font-mono text-[10px] opacity-75">680px</span>
+              <span className="font-mono text-[10px] opacity-75">
+                {panels['layer2-play'].width}px · {panels['layer2-play'].mode === 'auto' ? 'Auto' : 'Fixed'}
+              </span>
             </button>
 
             <button
@@ -613,7 +687,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             >
               <Wrench className="h-3.5 w-3.5" />
               <span>Garage (车库 / Car, Colour, Anthem, Name)</span>
-              <span className="font-mono text-[10px] opacity-75">680px</span>
+              <span className="font-mono text-[10px] opacity-75">
+                {panels['layer2-garage'].width}px · {panels['layer2-garage'].mode === 'auto' ? 'Auto' : 'Fixed'}
+              </span>
             </button>
 
             <button
@@ -629,7 +705,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             >
               <Settings className="h-3.5 w-3.5" />
               <span>Settings (9+1 Tabs 综合设置)</span>
-              <span className="font-mono text-[10px] opacity-75">680px</span>
+              <span className="font-mono text-[10px] opacity-75">
+                {panels['layer2-settings'].width}px · {panels['layer2-settings'].mode === 'auto' ? 'Auto' : 'Fixed'}
+              </span>
             </button>
 
             {/* 新增: Additional Preview 二级菜单 */}
@@ -646,7 +724,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             >
               <Eye className="h-3.5 w-3.5" />
               <span>Additional Preview (实时预览与悬浮窗沙盒)</span>
-              <span className="font-mono text-[10px] opacity-75">680px</span>
+              <span className="font-mono text-[10px] opacity-75">
+                {panels['layer2-previews'].width}px · {panels['layer2-previews'].mode === 'auto' ? 'Auto' : 'Fixed'}
+              </span>
             </button>
           </div>
 
@@ -713,7 +793,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 >
                   <Server className="h-3.5 w-3.5" />
                   <span>Online Warmup (联机大厅 · 内联报错)</span>
-                  <span className="font-mono text-[10px] opacity-75">{layer3Width}px</span>
+                  <span className="font-mono text-[10px] opacity-75">
+                    {panels['layer3-online-warmup'].width}px
+                  </span>
                 </button>
               );
             })()}
@@ -746,13 +828,15 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                   }`}
                   title={
                     available
-                      ? `点击直接进入 Acoustics & EQ (${layer3Width}px)`
+                      ? `点击直接进入 Acoustics & EQ (${panels['layer3-audio-detail'].width}px)`
                       : '此三级面板隶属于 Game Settings，当前菜单不可用'
                   }
                 >
                   <Volume2 className="h-3.5 w-3.5" />
                   <span>Acoustics & EQ (音频高级均衡器)</span>
-                  <span className="font-mono text-[10px] opacity-75">{layer3Width}px</span>
+                  <span className="font-mono text-[10px] opacity-75">
+                    {panels['layer3-audio-detail'].width}px
+                  </span>
                   {!available && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 font-mono">
                       需在 Settings 唤起
@@ -800,7 +884,9 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                 >
                   <Eye className="h-3.5 w-3.5" />
                   <span>Ball Trajectory (弹道预测器 · Live Preview)</span>
-                  <span className="font-mono text-[10px] opacity-75">{layer3Width}px</span>
+                  <span className="font-mono text-[10px] opacity-75">
+                    {panels['layer3-ball-trajectory'].width}px
+                  </span>
                   {!available && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400 font-mono">
                       需在 Settings 或 Previews 唤起
@@ -853,17 +939,17 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
             <span className="text-neutral-400">当前活跃窗口:</span>
             <span className="font-bold text-amber-500">
               {currentRoute === 'layer-0' && 'Layer 0: Active Match Gameplay (0px · 零级无菜单状态)'}
-              {currentRoute === 'main-menu' && `Layer 1: MENU (${layer1Width}×${layer1Height}px)`}
-              {currentRoute === 'play' && `Layer 2: Play Modes (${layer2Width}×${layer2Height}px)`}
-              {currentRoute === 'garage' && `Layer 2: Garage Loadout (${layer2Width}×${layer2Height}px)`}
-              {currentRoute === 'settings' && `Layer 2: Game Settings (${layer2Width}×${layer2Height}px)`}
-              {currentRoute === 'additional-preview' && `Layer 2: Additional Preview (${layer2Width}×${layer2Height}px · 实时预览与悬浮窗)`}
-              {currentRoute === 'audio-eq' && `Layer 3: Acoustics & EQ (${layer3Width}×${layer3Height}px)`}
-              {currentRoute === 'online-warmup' && `Layer 3: Online Warmup & Match (${layer3Width}×${layer3Height}px)`}
+              {currentRoute === 'main-menu' && `Layer 1: MENU (${activeRouteSize.modeLabel})`}
+              {currentRoute === 'play' && `Layer 2: Play Modes (${activeRouteSize.modeLabel})`}
+              {currentRoute === 'garage' && `Layer 2: Garage Loadout (${activeRouteSize.modeLabel})`}
+              {currentRoute === 'settings' && `Layer 2: Game Settings (${activeRouteSize.modeLabel})`}
+              {currentRoute === 'additional-preview' && `Layer 2: Additional Preview (${activeRouteSize.modeLabel})`}
+              {currentRoute === 'audio-eq' && `Layer 3: Acoustics & EQ (${activeRouteSize.modeLabel})`}
+              {currentRoute === 'online-warmup' && `Layer 3: Online Warmup & Match (${activeRouteSize.modeLabel})`}
               {currentRoute === 'trajectory' && (
                 isDockState
                   ? 'Layer 3: Live Preview Dock Pill (88×38px · 已折叠至侧边)'
-                  : `Layer 3: Ball Trajectory Predictor (${layer3Width}×${layer3Height}px · Live Preview 展开)`
+                  : `Layer 3: Ball Trajectory Predictor (${activeRouteSize.modeLabel} · Live Preview 展开)`
               )}
             </span>
           </div>
@@ -1074,6 +1160,7 @@ export const MenuLayerPreviewPage: React.FC<MenuLayerPreviewPageProps> = ({
                   通过时序透明度完全与容器尺寸解耦，防止尺寸过渡期间内容抽动
                 */
                 <div
+                  ref={contentWrapperRef}
                   className={`w-full h-full flex flex-col transition-opacity ${
                     isContentVisible ? 'opacity-100 pointer-events-auto duration-150' : 'opacity-0 pointer-events-none duration-100'
                   }`}

@@ -84,10 +84,11 @@ export const Layer2PlayRecipe: React.FC<Layer2PlayRecipeProps> = ({
   onBack,
   onSelectMode,
 }) => {
-  const { layer2Width, layer2Height } = useMenuLayoutStore();
+  const { panels } = useMenuLayoutStore();
+  const sizing = panels['layer2-play'];
 
   return (
-    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
+    <PanelContainer isLight={isLight} sizing={sizing} className="w-full">
       <PanelHeader
         title="PLAY"
         subtitle="Select game mode, custom match or training discipline"

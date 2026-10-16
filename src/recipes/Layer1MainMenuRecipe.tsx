@@ -36,19 +36,18 @@ export const Layer1MainMenuRecipe: React.FC<Layer1MainMenuRecipeProps> = ({
   className = '',
 }) => {
   const {
-    layer1Width,
-    layer1Height,
+    panels,
     panelContentPaddingY,
     showAdditionalPreviews: storeShowPreviews,
   } = useMenuLayoutStore();
 
+  const sizing = panels['layer1-main'];
   const shouldShowPreviews = propShowPreviews ?? storeShowPreviews;
 
   return (
     <PanelContainer
       isLight={isLight}
-      width={layer1Width}
-      height={layer1Height}
+      sizing={sizing}
       className={`w-full ${
         isLight
           ? 'shadow-[0_0_0_1px_rgba(0,0,0,0.12),0_0_24px_rgba(0,0,0,0.16),0_0_48px_rgba(0,0,0,0.10)]'

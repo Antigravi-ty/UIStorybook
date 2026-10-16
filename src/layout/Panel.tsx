@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { UI_SPACING, UI_RADIUS, useInMorphContainer } from '../tokens';
+import {
+  UI_SPACING,
+  UI_RADIUS,
+  useInMorphContainer,
+  type PanelSizingConfig,
+  type PanelSizingMode,
+} from '../tokens';
 import { KeycapBadge } from '../primitives/KeycapBadge';
+
+const PanelSizingModeContext = createContext<PanelSizingMode>('fixed');
 
 export interface PanelHeaderProps {
   title: string;
@@ -82,8 +90,8 @@ export interface PanelContentProps {
 /**
  * 3-Stage Compound Panel Content Body
  * Standardized SimpleUI .ui-panel__content pattern (p-6 / 24px uniform padding)
- * Ensures components breathe comfortably without clipping borders or scrollbars.
- * flex-1 min-h-0 allows it to automatically absorb all remaining vertical space.
+ * - In 'fixed' sizing mode: `flex-1 min-h-0` fills the locked container height.
+ * - In 'auto' sizing mode: `flex-initial min-h-0` fits natural content height while shrinking to scroll when hitting maxHeight/availH.
  */
 export const PanelContent: React.FC<PanelContentProps> = ({
   children,
@@ -91,12 +99,15 @@ export const PanelContent: React.FC<PanelContentProps> = ({
   scrollable = true,
   style,
 }) => {
+  const sizingMode = useContext(PanelSizingModeContext);
+  const flexClass = sizingMode === 'auto' ? 'flex-initial min-h-0' : 'flex-1 min-h-0';
+
   return (
     <div
       data-ui-element="panel-content"
       data-panel-section="content"
       style={style}
-      className={`flex flex-col flex-1 min-h-0 ${UI_SPACING.panel.body} w-full box-border ${
+      className={`flex flex-col ${flexClass} ${UI_SPACING.panel.body} w-full box-border ${
         scrollable ? 'overflow-y-auto' : ''
       } ${className}`}
     >
@@ -150,9 +161,11 @@ export interface PanelContainerProps {
   isLight?: boolean;
   className?: string;
   transparent?: boolean;
-  /** Fixed outer container height (in px or CSS string) when rendered standalone outside MorphContainer */
+  /** Unified per-panel sizing contract ('auto' clamping vs 'fixed' height) */
+  sizing?: PanelSizingConfig;
+  /** Legacy / explicit outer container height (in px or CSS string) when rendered standalone outside MorphContainer */
   height?: number | string;
-  /** Fixed outer container max-width (in px or CSS string) */
+  /** Legacy / explicit outer container max-width (in px or CSS string) */
   width?: number | string;
   style?: React.CSSProperties;
 }
@@ -160,14 +173,14 @@ export interface PanelContainerProps {
 /**
  * PanelContainer
  * Shell wrapping the 3-stage panel hierarchy (Header -> Content -> Footer).
- * 当处于 MorphContainer 内时作为纯内容承载器，外壳背景与边框由外层容器常驻负责；
- * 当作为独立面板静态展示时，渲染完整的独立容器底板背景与边框，并保持确定性固定高度。
+ * Supports dual sizing modes ('auto' content-fit with min/max clamping vs 'fixed' targetHeight with viewport fallback).
  */
 export const PanelContainer: React.FC<PanelContainerProps> = ({
   children,
   isLight = false,
   className = '',
   transparent,
+  sizing,
   height,
   width,
   style,
@@ -175,7 +188,6 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
   const inMorphContainer = useInMorphContainer();
   const isTransparent = transparent ?? inMorphContainer;
 
-  // 当处于 MorphContainer 内部时，剥离内层阴影与边框，避免双层边框或内容淡出时将底板背景一同降透明度
   const effectiveClassName = isTransparent
     ? className
         .replace(/shadow-\[[^\]]+\]/g, '')
@@ -183,39 +195,59 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
         .trim()
     : className;
 
-  const resolvedHeight =
-    !inMorphContainer && height !== undefined
-      ? typeof height === 'number'
-        ? `${height}px`
-        : height
+  const effectiveWidth = sizing?.width ?? width;
+  const resolvedMaxWidth =
+    effectiveWidth !== undefined
+      ? typeof effectiveWidth === 'number'
+        ? `${effectiveWidth}px`
+        : effectiveWidth
       : undefined;
 
-  const resolvedMaxWidth =
-    width !== undefined
-      ? typeof width === 'number'
-        ? `${width}px`
-        : width
-      : undefined;
+  const sizingMode: PanelSizingMode = sizing?.mode ?? 'fixed';
+
+  // Compute standalone container height constraints when outside MorphContainer
+  const standaloneSizingStyle: React.CSSProperties = {};
+  if (!inMorphContainer) {
+    if (sizing) {
+      if (sizing.mode === 'auto') {
+        standaloneSizingStyle.height = 'auto';
+        standaloneSizingStyle.minHeight = `min(${sizing.minHeight}px, var(--avail-h, 100vh))`;
+        standaloneSizingStyle.maxHeight = `min(${sizing.maxHeight}px, var(--avail-h, 100vh))`;
+      } else {
+        standaloneSizingStyle.height = `min(${sizing.targetHeight}px, var(--avail-h, 100vh))`;
+        standaloneSizingStyle.maxHeight = `min(${sizing.targetHeight}px, var(--avail-h, 100vh))`;
+      }
+    } else if (height !== undefined) {
+      const hStr = typeof height === 'number' ? `${height}px` : height;
+      standaloneSizingStyle.height = `min(${hStr}, var(--avail-h, 100vh))`;
+      standaloneSizingStyle.maxHeight = `min(${hStr}, var(--avail-h, 100vh))`;
+    }
+  }
 
   return (
-    <div
-      data-panel="container"
-      style={{
-        ...(resolvedHeight ? { height: resolvedHeight } : {}),
-        ...(resolvedMaxWidth ? { maxWidth: resolvedMaxWidth } : {}),
-        ...style,
-      }}
-      className={`flex flex-col h-full w-full overflow-hidden transition-colors ${
-        isTransparent
-          ? 'bg-transparent border-0 ring-0 shadow-none'
-          : `${UI_RADIUS.xl} border shadow-2xl ${
-              isLight
-                ? 'bg-neutral-50/98 border-neutral-300/80 text-neutral-900 ring-1 ring-black/5'
-                : 'bg-neutral-900/98 border-neutral-700/60 text-neutral-100 ring-1 ring-white/10'
-            }`
-      } ${effectiveClassName}`}
-    >
-      {children}
-    </div>
+    <PanelSizingModeContext.Provider value={sizingMode}>
+      <div
+        data-panel="container"
+        data-sizing-mode={sizingMode}
+        style={{
+          ...standaloneSizingStyle,
+          ...(resolvedMaxWidth ? { maxWidth: resolvedMaxWidth } : {}),
+          ...style,
+        }}
+        className={`flex flex-col ${
+          inMorphContainer ? 'h-full' : sizing?.mode === 'auto' ? 'h-auto' : 'h-full'
+        } w-full overflow-hidden transition-colors ${
+          isTransparent
+            ? 'bg-transparent border-0 ring-0 shadow-none'
+            : `${UI_RADIUS.xl} border shadow-2xl ${
+                isLight
+                  ? 'bg-neutral-50/98 border-neutral-300/80 text-neutral-900 ring-1 ring-black/5'
+                  : 'bg-neutral-900/98 border-neutral-700/60 text-neutral-100 ring-1 ring-white/10'
+              }`
+        } ${effectiveClassName}`}
+      >
+        {children}
+      </div>
+    </PanelSizingModeContext.Provider>
   );
 };

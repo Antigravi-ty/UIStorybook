@@ -48,7 +48,8 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
   activeTab: controlledTab,
   onTabChange,
 }) => {
-  const { layer2Width, layer2Height } = useMenuLayoutStore();
+  const { panels } = useMenuLayoutStore();
+  const sizing = panels['layer2-previews'];
   const [internalTab, setInternalTab] = useState<'live-preview' | 'floating-windows'>(initialTab);
   const currentTab = controlledTab ?? internalTab;
 
@@ -95,7 +96,7 @@ export const Layer2AdditionalPreviewRecipe: React.FC<Layer2AdditionalPreviewReci
   ];
 
   return (
-    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
+    <PanelContainer isLight={isLight} sizing={sizing} className="w-full">
       <PanelHeader
         title="ADDITIONAL PREVIEWS"
         subtitle="Live Preview sandbox & floating telemetry overlays"

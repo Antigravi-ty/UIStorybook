@@ -29,7 +29,8 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
   hasError: propHasError,
   onCheckNotification,
 }) => {
-  const { layer3Width, layer3Height, simulateLayer3Error } = useMenuLayoutStore();
+  const { panels, simulateLayer3Error } = useMenuLayoutStore();
+  const sizing = panels['layer3-audio-detail'];
   const showError = propHasError ?? simulateLayer3Error;
 
   const [spatialAudio, setSpatialAudio] = useState(true);
@@ -41,7 +42,7 @@ export const Layer3AudioDetailRecipe: React.FC<Layer3AudioDetailRecipeProps> = (
   const [hoveredDesc, setHoveredDesc] = useState<string | null>(null);
 
   return (
-    <PanelContainer isLight={isLight} width={layer3Width} height={layer3Height} className="w-full">
+    <PanelContainer isLight={isLight} sizing={sizing} className="w-full">
       <PanelHeader
         title="ACOUSTICS & EQUALIZER"
         subtitle="Layer 3 Sub-Menu • 32-bit DSP Engine"

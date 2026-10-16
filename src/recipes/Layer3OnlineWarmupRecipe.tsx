@@ -80,7 +80,8 @@ export const Layer3OnlineWarmupRecipe: React.FC<Layer3OnlineWarmupRecipeProps> =
   hasError: propHasError,
   onCheckNotification,
 }) => {
-  const { layer3Width, layer3Height, simulateLayer3Error, setToken } = useMenuLayoutStore();
+  const { panels, simulateLayer3Error, setToken } = useMenuLayoutStore();
+  const sizing = panels['layer3-online-warmup'];
   const [localError, setLocalError] = useState(false);
   const showError = propHasError ?? (simulateLayer3Error || localError);
 
@@ -117,7 +118,7 @@ export const Layer3OnlineWarmupRecipe: React.FC<Layer3OnlineWarmupRecipeProps> =
   };
 
   return (
-    <PanelContainer isLight={isLight} width={layer3Width} height={layer3Height} className="w-full">
+    <PanelContainer isLight={isLight} sizing={sizing} className="w-full">
       <PanelHeader
         isLight={isLight}
         title={roomType === 'match' ? 'MULTIPLAYER MATCH' : 'ONLINE WARMUP'}

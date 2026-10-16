@@ -76,7 +76,8 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   onToggleBackgroundRender,
   onSpawnDiagnosticWindow,
 }) => {
-  const { layer2Width, layer2Height } = useMenuLayoutStore();
+  const { panels } = useMenuLayoutStore();
+  const sizing = panels['layer2-settings'];
   const [internalTab, setInternalTab] = useState<SettingsTabId>(initialTab as SettingsTabId);
   const currentTab = (controlledTab as SettingsTabId) ?? internalTab;
 
@@ -151,7 +152,7 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
     : baseTabs;
 
   return (
-    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
+    <PanelContainer isLight={isLight} sizing={sizing} className="w-full">
       <PanelHeader
         title="SETTINGS"
         subtitle="Game preferences, controls, acoustics & engine diagnostics"

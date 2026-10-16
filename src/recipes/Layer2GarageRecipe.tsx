@@ -38,7 +38,8 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
   onBack,
   initialTab = 'car',
 }) => {
-  const { layer2Width, layer2Height } = useMenuLayoutStore();
+  const { panels } = useMenuLayoutStore();
+  const sizing = panels['layer2-garage'];
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Car State
@@ -59,7 +60,7 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
   ];
 
   return (
-    <PanelContainer isLight={isLight} width={layer2Width} height={layer2Height} className="w-full">
+    <PanelContainer isLight={isLight} sizing={sizing} className="w-full">
       <PanelHeader
         title="GARAGE LOADOUT"
         subtitle="Customization loadout, team colour preference & player identity"

@@ -38,7 +38,8 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
   onCollapsePreview,
   transparent = false,
 }) => {
-  const { layer3Width, layer3Height } = useMenuLayoutStore();
+  const { panels } = useMenuLayoutStore();
+  const sizing = panels['layer3-ball-trajectory'];
 
   // Trajectory Prediction Parameters
   const [trajectoryDuration, setTrajectoryDuration] = useState(2.5);
@@ -55,8 +56,7 @@ export const Layer3BallTrajectoryRecipe: React.FC<Layer3BallTrajectoryRecipeProp
     <PanelContainer
       isLight={isLight}
       transparent={transparent}
-      width={layer3Width}
-      height={layer3Height}
+      sizing={sizing}
       className="w-full"
     >
       <PanelHeader
