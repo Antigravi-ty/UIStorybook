@@ -5,7 +5,7 @@ import {
   CenterUpperInfoVariant, WinnerTeamPreset, DEFAULT_RL_COUNTDOWN_GLOW, DEFAULT_CENTER_UPPER_TYPOGRAPHY,
   DEFAULT_CENTER_UPPER_TIMING,
 } from '../../hud/CenterUpperInfoHUD';
-import { ArenaLightingPreset } from '../../hud/ArenaBackdrop';
+import { ArenaLightingPreset } from '../ArenaBackdrop';
 import { Badge } from '../../primitives/Badge';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';

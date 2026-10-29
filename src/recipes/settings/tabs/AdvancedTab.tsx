@@ -9,15 +9,15 @@ import {
   Settings2,
   ChevronsLeftRightEllipsis,
 } from 'lucide-react';
-import { SettingSegmentedRow } from '../../../primitives/SettingSegmentedRow';
-import { SettingToggleRow } from '../../../primitives/SettingToggleRow';
-import { SettingDeveloperStatusRow } from '../../../primitives/SettingDeveloperStatusRow';
+import { SettingSegmentedRow } from '../../../compounds/SettingSegmentedRow';
+import { SettingToggleRow } from '../../../compounds/SettingToggleRow';
+import { SettingDeveloperStatusRow } from '../../../compounds/SettingDeveloperStatusRow';
 import { FloatingWindowCard, type DiagnosticWindowPayload } from '../components/FloatingWindowCard';
 import { DualGrabberSlider } from '../../../primitives/DualGrabberSlider';
 import {
   AudioDebugSection,
   type AudioDebugTelemetryProps,
-} from '../../../compounds/AudioDebugSection';
+} from '../components/AudioDebugSection';
 import {
   TelemetryConfigCard,
   DEFAULT_TELEMETRY_CONFIG_STATE,
@@ -36,7 +36,7 @@ import {
 } from '../settingsPacingStore';
 
 export type { ClockPacingMode } from '../settingsPacingStore';
-export type { AudioDebugTelemetryProps } from '../../../compounds/AudioDebugSection';
+export type { AudioDebugTelemetryProps } from '../components/AudioDebugSection';
 export type { TelemetryConfigState } from '../../../compounds/TelemetryConfigCard';
 export type TelemetryOverlayConfig = TelemetryConfigState;
 export type InputBufferTargetOption = number;

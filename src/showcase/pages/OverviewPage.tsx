@@ -36,13 +36,13 @@ const PYRAMID_SPEC: PyramidRow[] = [
     code: 'L0. Foundation',
     name: 'Foundations (基石与变量)',
     rule: '纯静态常量、类型契约与主题 Store，无任何业务 JSX，无任何上层（L1~L7）依赖。',
-    importPath: '@/tokens',
+    importPath: 'src/tokens/*',
     badgeColor: 'bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-400/40',
     modules: [
       {
         label: 'Tokens & Theme Store',
         tab: 'foundations',
-        items: 'colors, radius, spacing, easing, themeStore, morphContext',
+        items: 'colors, radius, spacing, easing, themeStore, morphContext, syncBridge',
       },
     ],
   },
@@ -50,7 +50,7 @@ const PYRAMID_SPEC: PyramidRow[] = [
     code: 'L1. Primitives',
     name: 'Primitives (原子基础原语)',
     rule: '最小粒度纯表现组件。不含业务上下文，纯 Props 驱动，彼此零横向强耦合，仅依赖 L0。',
-    importPath: '@/primitives',
+    importPath: 'src/primitives/*',
     badgeColor: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/40',
     modules: [
       {
@@ -69,7 +69,7 @@ const PYRAMID_SPEC: PyramidRow[] = [
     code: 'L2. Layout',
     name: 'Layout & Shells (布局与骨架)',
     rule: '纯结构空间容器，负责栅格排布、卡片封装与 3-Stage 光学衬距 (px-6 pt-5 pb-4)，不含复杂业务状态，仅依赖 L0~L1。',
-    importPath: '@/layout',
+    importPath: 'src/layout/*',
     badgeColor: 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border-indigo-500/40',
     modules: [
       {
@@ -85,7 +85,7 @@ const PYRAMID_SPEC: PyramidRow[] = [
       {
         label: '2B · PlayCard 模式卡片三风格',
         tab: 'play-cards',
-        items: 'PlayModeCard (Style 1 Icon+Badge+Title+Desc · Style 2 Icon+Title+Desc · Style 3 JetBrains Mono Regular + 30% Giant Watermark Icon)',
+        items: 'PlayModeCard, MainMenuRow (Style 1 Icon+Badge+Title+Desc · Style 2 Icon+Title+Desc · Style 3 JetBrains Mono + Giant Watermark)',
       },
       {
         label: 'Panel & MenuContainer',
@@ -98,13 +98,13 @@ const PYRAMID_SPEC: PyramidRow[] = [
     code: 'L3. Compounds',
     name: 'Compound Controls (复合交互控件)',
     rule: '由多个原语与布局拼装而成的自洽通用交互控件。具备内部微状态，但无特定游戏业务锁定，仅依赖 L0~L2。',
-    importPath: '@/compounds',
+    importPath: 'src/compounds/*',
     badgeColor: 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/40',
     modules: [
       {
         label: 'Dropdown & Tuner 复合控件',
         tab: 'composable-tuner',
-        items: 'DropdownMenu, UVTransformControl, ColorSwatchInput, PriorityQueueList, EventFilterMatrix, CollapsibleNumberedRailList, MenuItem',
+        items: 'DropdownMenu, TunerControls, UVTransformControl, ColorSwatchInput, PriorityQueueList, EventFilterMatrix, CollapsibleNumberedRailList, SettingActionRow, MenuItem',
       },
       {
         label: 'Dialogue 零遮罩弹窗',
@@ -119,10 +119,10 @@ const PYRAMID_SPEC: PyramidRow[] = [
     ],
   },
   {
-    code: 'L4. Motion',
-    name: 'Motion & Transitions (动效引擎)',
+    code: 'L4. Navigation',
+    name: 'Navigation & Transitions (导航与动效引擎)',
     rule: '专注容器几何形变、三段时序状态机与模态焦点壳体。任意面板皆可委托形变，仅依赖 L0~L3。',
-    importPath: '@/motion',
+    importPath: 'src/navigation/*',
     badgeColor: 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/40',
     modules: [
       {
@@ -133,7 +133,7 @@ const PYRAMID_SPEC: PyramidRow[] = [
       {
         label: 'MorphingShell & 侧边收纳壳体',
         tab: 'navigation',
-        items: 'MorphingShell (Radix Dialog + MorphContainer), EdgeInspectorDrawer (TAB 零遮罩侧边抽屉), MenuStack, BreadcrumbNav',
+        items: 'MorphingShell, MorphingStageShell, LivePreviewDock, EdgeInspectorDrawer (TAB 零遮罩侧边抽屉)',
       },
     ],
   },
@@ -141,13 +141,13 @@ const PYRAMID_SPEC: PyramidRow[] = [
     code: 'L5. Specials',
     name: 'Game Specials (游戏与遥测专属)',
     rule: '强领域语义的专业可视化/遥测单元。5A/5B/5C/5D/5E/5F 六大子域完全正交平行、互不依赖，全部保持纯 Props 驱动。',
-    importPath: '@/specials',
+    importPath: 'src/hud/* | src/charts/* | src/viewport/* | src/loading/*',
     badgeColor: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/40',
     modules: [
       {
         label: '5A · Match HUD 独立仪表',
         tab: 'hud-elements',
-        items: 'StepperScoreboardHUD, EdgePlayerHudStrip, BallCameraIndicator, VelocityProgressBar, CircularBoostGauge, CompactTelemetryBarHUD, FlipIndicatorPillHUD, ReplayControlBannerHUD, KickoffRhythmOverlayHUD',
+        items: 'StepperScoreboardHUD, EdgePlayerHudStrip, BallCameraIndicator, VelocityProgressBar, CircularBoostGauge, CompactTelemetryBarHUD, FlipIndicatorPillHUD, ReplayControlBannerHUD, KickoffRhythmOverlayHUD, StaticTrainingPackHUD',
       },
       {
         label: '5B · High-Clarity 遥测图表',
@@ -179,14 +179,14 @@ const PYRAMID_SPEC: PyramidRow[] = [
   {
     code: 'L6. Patterns',
     name: 'Patterns & Recipes (场景模板与参考配方)',
-    rule: '由 L0~L5 组装而成的完整可复用业务面板配方 (Recipes) 与窗口/通知编排系统 (Orchestrators)，即考即用。',
-    importPath: '@/recipes',
+    rule: '由 L0~L5 组装而成的完整可复用业务面板配方 (Recipes) 与窗口/通知编排系统 (Orchestrators)，即拷即用。',
+    importPath: 'src/recipes/* | src/panels/*',
     badgeColor: 'bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/40',
     modules: [
       {
         label: '6A · Layer 1-2-3 菜单代码谱',
         tab: 'recipes',
-        items: 'Layer1MainMenu, Layer2Play, Layer2Garage, Layer2Settings, Keybinding, Layer3AudioDetail (100% 纯展示解耦)',
+        items: 'Layer1MainMenuRecipe, Layer2PlayRecipe, Layer2GarageRecipe, Layer2SettingsRecipe, Layer3KeybindingsRecipe, Layer3AudioEqRecipe',
       },
       {
         label: '6B · Post-Match 赛后候选谱',
@@ -196,7 +196,7 @@ const PYRAMID_SPEC: PyramidRow[] = [
       {
         label: '6C · Live Preview 侧边收纳',
         tab: 'live-preview',
-        items: 'LivePreviewDock, Layer3BallTrajectoryRecipe, livePreviewStore',
+        items: 'LivePreviewDock, MorphingStageShell, Layer3BallTrajectoryRecipe, livePreviewStore',
       },
       {
         label: '6D · Floating Window 多窗编排',
@@ -359,10 +359,10 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ isLight = true, onSe
           >
             <div className="flex items-center gap-2 font-bold text-emerald-600 dark:text-emerald-400">
               <GitBranch className="h-4 w-4" />
-              <span>1. 根除 L0 Barrel 反向污染</span>
+              <span>1. 零 Barrel 转发与直接模块寻址</span>
             </div>
             <p className={`leading-relaxed ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
-              <code className="font-mono">src/tokens/index.ts</code> 严格只导出纯静态常量（<code className="font-mono">spacing, radius, easing, colors, themeStore, morphContext</code>），彻底剥离上层通知调度器与浮窗 Store，确保修改任意复合组件绝不触发底层 Token 重编译。
+              全仓消除冗余 <code className="font-mono">index.ts</code> Barrel 转发文件，所有导入直指具体物理文件（如 <code className="font-mono">src/tokens/spacing</code>、<code className="font-mono">src/compounds/Dialogue</code>），彻底杜绝隐式循环依赖与全量重编译。
             </p>
           </div>
 
@@ -396,15 +396,15 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ isLight = true, onSe
 
           <div
             className={`p-4 rounded-xl border flex flex-col gap-2 ${
-              isLight ? 'bg-emerald-50/50 border-emerald-200' : 'bg-emerald-950/20 border-emerald-800/60'
+              isLight ? 'bg-emerald-50/50 border-emerald-200' : 'bg-emerald-950/40 border-emerald-800/60'
             }`}
           >
             <div className="flex items-center gap-2 font-bold text-emerald-600 dark:text-emerald-400">
               <GitBranch className="h-4 w-4" />
-              <span>4. L6 Recipes 彻底剥离全局 Store 单例</span>
+              <span>4. L6 Recipes 与 L5 零反向类型耦合</span>
             </div>
             <p className={`leading-relaxed ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
-              <code className="font-mono">src/recipes/*</code> 下全部 10 个菜单面板通过可选回调 Props（如 <code className="font-mono">onSpawnDiagnosticWindow</code>）与外层通信，不再硬编码导入 <code className="font-mono">floatingStore</code>，确保每个 Recipe 均可零依赖独立移植。
+              <code className="font-mono">src/recipes/*</code> 下全部 26 个顶层菜单面板集中于根目录，并通过可选回调 Props 与外层通信，确保每个 Recipe 均可独立移植。
             </p>
           </div>
         </div>
@@ -476,34 +476,46 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ isLight = true, onSe
 
         <CodeBlock
           isLight={isLight}
-          title="示例：按层级精准导入，业务连接层无缝驱动纯表现层组件"
-          code={`// RLCleanWASM/src/ui-system/panels/SettingsPanel.tsx
-import React from 'react';
-import { useUIStore } from '../core/store';
-// L2 Layout: 仅导入 3-Stage 面板容器
-import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '@/layout';
-// L1 Primitives: 仅导入所需的原子滑块与标签
-import { UnderlineTabs, SliderControl } from '@/primitives';
+          title="示例：按物理层级精准导入，纯表现层组件通过 Props 驱动"
+          code={`// src/recipes/Layer3AudioEqRecipe.tsx
+import React, { useState } from 'react';
+// L2 Layout: 导入 3-Stage 面板容器
+import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
+// L1 Primitives: 导入所需的原子滑块与标签
+import { UnderlineTabs } from '../primitives/UnderlineTabs';
+import { SliderControl } from '../primitives/SliderControl';
 
-export const SettingsPanel = () => {
-  // 1. 宿主业务层：从 Zustand 提取状态与动作
-  const { theme, soundVolume, setSoundVolume, goBack } = useUIStore();
-  const isLight = theme === 'light';
+export const AudioSettingsPanel: React.FC<{ isLight?: boolean; onBack?: () => void }> = ({
+  isLight = false,
+  onBack,
+}) => {
+  const [soundVolume, setSoundVolume] = useState(80);
+  const [activeTab, setActiveTab] = useState('master');
 
-  // 2. 纯表现层组装：指哪儿打哪儿，不牵连任何无关模块
   return (
     <PanelContainer isLight={isLight}>
-      <PanelHeader title="SETTINGS" onBack={goBack} isLight={isLight} />
+      <PanelHeader title="AUDIO SETTINGS" onBack={onBack} isLight={isLight} />
+      <UnderlineTabs
+        tabs={[
+          { id: 'master', label: 'Master' },
+          { id: 'eq', label: 'Equalizer' },
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        isLight={isLight}
+      />
       <PanelContent>
         <SliderControl
           label="Sound Volume"
           value={soundVolume}
-          min={0} max={100} unit="%"
+          min={0}
+          max={100}
+          unit="%"
           onChange={setSoundVolume}
           isLight={isLight}
         />
       </PanelContent>
-      <PanelFooter hint="ESC to Back" isLight={isLight} />
+      <PanelFooter defaultDescription="Adjust master audio gain" isLight={isLight} />
     </PanelContainer>
   );
 };`}

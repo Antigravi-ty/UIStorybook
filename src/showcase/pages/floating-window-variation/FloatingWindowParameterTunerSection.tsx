@@ -4,7 +4,7 @@ import {
   useFloatingThreeStageStore, type FloatingHeaderLeftSlotMode, type FloatingHeaderTitleAlign, type FloatingHeaderRightActionMode,
   type FloatingHeaderRightIconStyle, type FloatingFooterRightSlotMode, type FloatingResizeHandleStyle, type FloatingCornerArcColorMode,
   type FloatingContentOverflowMode,
-} from '../../stores/floatingThreeStageStore';
+} from '../../../tokens/floatingThreeStageStore';
 import {
   resolvePanelHeaderBackBtnGeometry, type PanelHeaderBackBtnIdleTone, type PanelHeaderBackBtnRadiusMode, type PanelHeaderBackBtnStyle,
 } from '../../../tokens/menuLayoutStore';

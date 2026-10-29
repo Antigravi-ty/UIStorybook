@@ -13,7 +13,7 @@ import { CompactTelemetryBarHUD } from '../../../hud/CompactTelemetryBarHUD';
 import { FlipIndicatorPillHUD } from '../../../hud/FlipIndicatorPillHUD';
 import { TemporalReplayFooterHUD } from '../../../hud/TemporalReplayFooterHUD';
 import { DemolishHourglassTimerHUD } from '../../../hud/DemolishHourglassTimerHUD';
-import { ArenaBackdrop } from '../../../hud/ArenaBackdrop';
+import { ArenaBackdrop } from '../../ArenaBackdrop';
 import { JumpPlacementOption } from './HudChoreographyControlDeck';
 import {
   HudAnchorStage,

@@ -14,7 +14,7 @@ import { DualLayerBoostPieHUD } from '../../hud/DualLayerBoostPieHUD';
 import { STEP_12_TIER_PRESETS } from '../../hud/CircularBoostGauge';
 import { DigitSlotReelHUD } from '../../hud/DigitSlotReelHUD';
 import { KickoffCountdownFlashHUD } from '../../hud/KickoffCountdownFlashHUD';
-import { ArenaBackdrop } from '../../hud/ArenaBackdrop';
+import { ArenaBackdrop } from '../ArenaBackdrop';
 import { PageJumpDirectory, JumpDirectoryItem } from '../PageJumpDirectory';
 
 const T5A_DIRECTORY_ITEMS: JumpDirectoryItem[] = [

@@ -13,7 +13,7 @@ import {
   Bot,
 } from 'lucide-react';
 import { PanelContainer, PanelContent } from '../layout/Panel';
-import { MainMenuRow } from '../compounds/MainMenuRow';
+import { MainMenuRow } from '../layout/MainMenuRow';
 import { MenuContainer, MenuDivider } from '../layout/MenuContainer';
 import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens/menuLayoutStore';
 import type { PanelSizingConfig } from '../tokens/menuLayoutStore';

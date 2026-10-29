@@ -8,7 +8,7 @@ import { Badge } from '../../../primitives/Badge';
 import { SliderControl } from '../../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';
-import { ColorSwatchInput } from '../../../primitives/tuner/ColorSwatchInput';
+import { ColorSwatchInput } from '../../../compounds/tuner/ColorSwatchInput';
 import { CodeBlock } from '../../CodeBlock';
 import { RL_GLOW_SWATCHES } from './CenterUpperArchetypesAndBackdrop';
 

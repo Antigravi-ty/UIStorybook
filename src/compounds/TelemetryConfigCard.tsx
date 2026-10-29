@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MonitorPlay, RefreshCw, Ruler, Gauge, Router, ChevronDown } from 'lucide-react';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
+import { SettingSegmentedRow } from './SettingSegmentedRow';
 import { ToggleSwitch } from '../primitives/ToggleSwitch';
-import { SettingActionRow } from '../primitives/SettingActionRow';
+import { SettingActionRow } from './SettingActionRow';
 import {
   useSettingActionRowStore,
   type TelemetryNestedVariation,

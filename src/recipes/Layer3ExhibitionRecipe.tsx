@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Bot, Clock, Play, SlidersHorizontal, Users } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
+import { SettingSegmentedRow } from '../compounds/SettingSegmentedRow';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 

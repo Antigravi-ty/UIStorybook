@@ -6,7 +6,7 @@ import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';
 import { SliderControl } from '../../primitives/SliderControl';
 import { KickoffDuelMatrixCard } from '../../compounds/KickoffDuelMatrixCard';
-import { DemolishRespawnSlotMatrix } from '../../compounds/DemolishRespawnSlotMatrix';
+import { DemolishRespawnSlotMatrix } from './cards/DemolishRespawnSlotMatrix';
 import { MultiTrackReplayTimeline } from '../../charts/MultiTrackReplayTimeline';
 import { quickNotification } from '../../tokens/quickNotificationStore';
 

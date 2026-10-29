@@ -3,7 +3,7 @@ import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../../la
 import { useMenuLayoutStore } from '../../tokens/menuLayoutStore';
 import { createScopedSyncedState } from '../stores/crossClientSync';
 import { CodeBlock } from '../CodeBlock';
-import { PanelShellTuner } from './recipes/PanelShellTuner';
+import { PanelShellTuner } from './panels/PanelShellTuner';
 
 const useState = createScopedSyncedState('page:panels');
 
@@ -95,7 +95,7 @@ export const PanelsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false })
       <CodeBlock
         isLight={isLight}
         title="Agent 代码配方 (Compound Panel Recipe)"
-        code={`import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '@/components/layout';
+        code={`import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '@/layout/Panel';
 
 <PanelContainer isLight={isLight} className="w-full max-w-[520px]">
   <PanelHeader

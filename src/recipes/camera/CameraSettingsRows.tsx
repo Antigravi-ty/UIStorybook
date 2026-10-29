@@ -3,7 +3,7 @@ import * as SliderPrimitive from '@radix-ui/react-slider';
 import { RotateCcw, Minus, Plus } from 'lucide-react';
 import { Checkbox } from '../../primitives/Checkbox';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';
-import { SettingActionRow } from '../../primitives/SettingActionRow';
+import { SettingActionRow } from '../../compounds/SettingActionRow';
 import { getDecimalPlaces } from '../../primitives/PrecisionDigitPicker';
 import type { CameraSettingsStyleConfig } from '../../tokens/cameraSettingsStyleStore';
 import {

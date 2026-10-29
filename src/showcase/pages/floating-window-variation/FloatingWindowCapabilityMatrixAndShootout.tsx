@@ -2,8 +2,8 @@ import React from 'react';
 import { ShieldCheck, MoveDiagonal2, ArrowRight, Layers, } from 'lucide-react';
 import {
   useFloatingThreeStageStore, type FloatingShellVariant, type FloatingHeaderLeftSlotMode, type FloatingResizeHandleStyle,
-} from '../../stores/floatingThreeStageStore';
-import { CornerCurvedDragger } from '../../components/FloatingThreeStageWindow';
+} from '../../../tokens/floatingThreeStageStore';
+import { CornerCurvedDragger } from '../../../navigation/FloatingThreeStageWindow';
 import { resolvePanelHeaderBackBtnGeometry } from '../../../tokens/menuLayoutStore';
 import { Button } from '../../../primitives/Button';
 import { Badge } from '../../../primitives/Badge';

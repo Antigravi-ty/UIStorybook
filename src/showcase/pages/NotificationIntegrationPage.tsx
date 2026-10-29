@@ -13,7 +13,7 @@ import {
   useQuickNotificationStore, pushQuickNotification, pushOngoingNotification, updateOngoingNotification,
   dismissOngoingNotification, clearAllQuickNotifications, type QuickNotificationItem,
 } from '../../tokens/quickNotificationStore';
-import { dialogue, DialogueStackContainer } from '../../primitives/Dialogue';
+import { dialogue, DialogueStackContainer } from '../../compounds/Dialogue';
 import { QuickNotificationSystem } from '../../navigation/QuickNotificationSystem';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';

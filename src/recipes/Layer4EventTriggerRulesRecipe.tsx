@@ -14,14 +14,14 @@ import {
 import { Card } from '../layout/Card';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { DualGrabberSlider } from '../primitives/DualGrabberSlider';
-import { DropdownMenu } from '../primitives/DropdownMenu';
-import { SettingSliderRow } from '../primitives/SettingSliderRow';
-import { SettingToggleRow } from '../primitives/SettingToggleRow';
+import { DropdownMenu } from '../compounds/DropdownMenu';
+import { SettingSliderRow } from '../compounds/SettingSliderRow';
+import { SettingToggleRow } from '../compounds/SettingToggleRow';
 import { ToggleSwitch } from '../primitives/ToggleSwitch';
 import {
   EventFilterMatrix,
   EventCatalogEntry,
-} from '../primitives/tuner/EventFilterMatrix';
+} from '../compounds/tuner/EventFilterMatrix';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 

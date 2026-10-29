@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SliderControl } from '../../primitives/SliderControl';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';
-import { NameTagCalibrationMatrixCard } from '../../compounds/NameTagCalibrationMatrixCard';
+import { NameTagCalibrationMatrixCard } from './cards/NameTagCalibrationMatrixCard';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

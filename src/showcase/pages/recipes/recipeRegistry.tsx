@@ -54,17 +54,17 @@ const MainMenuStyleTuner = lazy(() =>
   }))
 );
 const PanelShellTuner = lazy(() =>
-  import('./PanelShellTuner').then((m) => ({
+  import('../panels/PanelShellTuner').then((m) => ({
     default: m.PanelShellTuner,
   }))
 );
 const SettingActionRowTuner = lazy(() =>
-  import('./SettingActionRowTuner').then((m) => ({
+  import('../tabs/SettingActionRowTuner').then((m) => ({
     default: m.SettingActionRowTuner,
   }))
 );
 const UnderlineTabsTuner = lazy(() =>
-  import('./UnderlineTabsTuner').then((m) => ({
+  import('../tabs/UnderlineTabsTuner').then((m) => ({
     default: m.UnderlineTabsTuner,
   }))
 );

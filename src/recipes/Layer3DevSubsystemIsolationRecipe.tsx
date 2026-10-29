@@ -17,7 +17,7 @@ import {
   PanelContent,
   PanelFooter,
 } from '../layout/Panel';
-import { SettingActionRow } from '../primitives/SettingActionRow';
+import { SettingActionRow } from '../compounds/SettingActionRow';
 import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens/menuLayoutStore';
 import type { PanelSizingConfig } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';

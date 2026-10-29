@@ -1,5 +1,5 @@
 import React from 'react';
-import { SettingSliderRow } from '../../primitives/SettingSliderRow';
+import { SettingSliderRow } from '../../compounds/SettingSliderRow';
 import { useFloatingStore, floatingSandboxStore } from '../../tokens/floatingStore';
 
 export interface FloatingWindowOpacityProps {

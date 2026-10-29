@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { MenuContainer } from '../layout/MenuContainer';
-import { MainMenuRow } from '../compounds/MainMenuRow';
+import { MainMenuRow } from '../layout/MainMenuRow';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import {
   useMainMenuStyleStore,

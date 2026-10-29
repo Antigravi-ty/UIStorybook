@@ -3,7 +3,7 @@ import { SliderControl } from '../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
 import { DualGrabberSlider } from '../../primitives/DualGrabberSlider';
 import { PacingOscilloscopeChart } from '../../charts/PacingOscilloscopeChart';
-import { CounterfactualComparisonStrip } from '../../compounds/CounterfactualComparisonStrip';
+import { CounterfactualComparisonStrip } from './cards/CounterfactualComparisonStrip';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

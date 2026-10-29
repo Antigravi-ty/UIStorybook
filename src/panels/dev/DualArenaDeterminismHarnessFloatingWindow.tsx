@@ -3,7 +3,7 @@ import { ShieldCheck, Play, RotateCcw } from 'lucide-react';
 import { SliderControl } from '../../primitives/SliderControl';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';
 import { Button } from '../../primitives/Button';
-import { CounterfactualComparisonStrip } from '../../compounds/CounterfactualComparisonStrip';
+import { CounterfactualComparisonStrip } from './cards/CounterfactualComparisonStrip';
 import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**

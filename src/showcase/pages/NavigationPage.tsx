@@ -225,8 +225,12 @@ export const NavigationPage: React.FC<{ isLight?: boolean }> = ({ isLight = fals
       <CodeBlock
         isLight={isLight}
         title="Agent 代码配方 (Morphing Shell Navigation Recipe)"
-        code={`import { MorphingShell } from '@/components/navigation';
-import { Layer1MainMenuRecipe, Layer2PlayRecipe, Layer2GarageRecipe, Layer2SettingsRecipe, Layer3AudioEqRecipe } from '@/recipes';
+        code={`import { MorphingShell } from '@/navigation/MorphingShell';
+import { Layer1MainMenuRecipe } from '@/recipes/Layer1MainMenuRecipe';
+import { Layer2PlayRecipe } from '@/recipes/Layer2PlayRecipe';
+import { Layer2GarageRecipe } from '@/recipes/Layer2GarageRecipe';
+import { Layer2SettingsRecipe } from '@/recipes/Layer2SettingsRecipe';
+import { Layer3AudioEqRecipe } from '@/recipes/Layer3AudioEqRecipe';
 
 // 路由与尺寸映射配置 (完整三级层级体系)
 const ROUTES = {

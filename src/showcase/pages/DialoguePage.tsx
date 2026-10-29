@@ -10,7 +10,7 @@ import {
 import {
   Dialogue, DialogueModal, dialogue, DialogueStackContainer,
   useDialogueStack, type DialogueTone, type DialogueButtonConfig, type DialogueButtonVariant,
-} from '../../primitives/Dialogue';
+} from '../../compounds/Dialogue';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
 import { CodeBlock } from '../CodeBlock';
@@ -92,7 +92,7 @@ export const DialoguePage: React.FC<{ isLight?: boolean }> = ({ isLight = false 
     setCopiedParams(true);
     setTimeout(() => setCopiedParams(false), 2200);
   };
-  const generatedCode = `import { Dialogue, dialogue, DialogueStackContainer } from '@/components/primitives';
+  const generatedCode = `import { Dialogue, dialogue, DialogueStackContainer } from '@/compounds/Dialogue';
 <Dialogue
   title="${title}"
   icon="${iconName}"

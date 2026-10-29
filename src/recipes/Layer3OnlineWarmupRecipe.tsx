@@ -10,7 +10,7 @@ import {
   useQuickNotificationStore,
   expandQuickNotificationCenter,
 } from '../tokens/quickNotificationStore';
-import { dialogue } from '../primitives/Dialogue';
+import { dialogue } from '../compounds/Dialogue';
 
 export interface Layer3OnlineWarmupRecipeProps {
   isLight?: boolean;

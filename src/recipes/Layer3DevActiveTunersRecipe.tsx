@@ -37,9 +37,9 @@ import {
   NETWORK_STRESS_INJECTION_PRESET,
 } from '../tokens/floatingPresets';
 import { FloatingWindowCard } from './settings/components/FloatingWindowCard';
-import { SettingActionRow } from '../primitives/SettingActionRow';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
-import { SettingSliderRow } from '../primitives/SettingSliderRow';
+import { SettingActionRow } from '../compounds/SettingActionRow';
+import { SettingSegmentedRow } from '../compounds/SettingSegmentedRow';
+import { SettingSliderRow } from '../compounds/SettingSliderRow';
 
 export interface BoostPhaseSelectionState {
   start: string;

@@ -9,7 +9,7 @@ import {
   User,
   UserMinus,
 } from 'lucide-react';
-import { SettingToggleRow } from '../../primitives/SettingToggleRow';
+import { SettingToggleRow } from '../../compounds/SettingToggleRow';
 import {
   ClientRoomTopBars,
   DoubleConfirmServerButton,

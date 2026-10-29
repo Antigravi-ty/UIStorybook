@@ -2,8 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Info } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { KeycapBadge } from '../primitives/KeycapBadge';
-import { CollapsibleNumberedRailList } from '../primitives/CollapsibleNumberedRailList';
-import { dialogue } from '../primitives/dialogue/dialogueStore';
+import { CollapsibleNumberedRailList } from '../compounds/CollapsibleNumberedRailList';
+import { dialogue } from '../compounds/dialogue/dialogueStore';
 import {
   INITIAL_TRAINING_SHOTS,
   MAX_SHOTS_PER_PACK,

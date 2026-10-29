@@ -8,7 +8,7 @@ import {
   SlidersHorizontal,
   Users,
 } from 'lucide-react';
-import { SettingSegmentedRow } from '../../primitives/SettingSegmentedRow';
+import { SettingSegmentedRow } from '../../compounds/SettingSegmentedRow';
 import { SliderControl } from '../../primitives/SliderControl';
 import {
   BOT_POLICY_LABELS,

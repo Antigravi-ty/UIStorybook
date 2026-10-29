@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SliderControl } from '../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
-import { ColorSwatchInput, TunerToggleRow, TunerSummaryStrip } from '../../primitives/TunerControls';
+import { ColorSwatchInput, TunerToggleRow, TunerSummaryStrip } from '../../compounds/TunerControls';
 import { ParametricTrajectoryChart } from '../../charts/ParametricTrajectoryChart';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 

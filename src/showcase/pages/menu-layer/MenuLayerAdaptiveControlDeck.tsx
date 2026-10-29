@@ -14,8 +14,8 @@ import {
 import { resolveNodePathInspectorLinks } from './menuLayerInspectorLinks';
 import { LocalPanelSizingTuner } from '../recipes/LocalPanelSizingTuner';
 import { MainMenuStyleTuner } from '../recipes/MainMenuStyleTuner';
-import { SettingActionRowTuner } from '../recipes/SettingActionRowTuner';
-import { UnderlineTabsTuner } from '../recipes/UnderlineTabsTuner';
+import { SettingActionRowTuner } from '../tabs/SettingActionRowTuner';
+import { UnderlineTabsTuner } from '../tabs/UnderlineTabsTuner';
 import { CameraSettingsStyleTuner } from '../recipes/CameraSettingsStyleTuner';
 
 export interface MenuLayerTopHeaderBarProps {

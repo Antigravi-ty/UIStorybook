@@ -19,13 +19,13 @@ import {
 import { StaticTrainingPackHUD } from '../../hud/StaticTrainingPackHUD';
 import { CircularBoostGauge } from '../../hud/CircularBoostGauge';
 import { VelocityProgressBar } from '../../hud/VelocityProgressBar';
-import { ArenaBackdrop } from '../../hud/ArenaBackdrop';
+import { ArenaBackdrop } from '../ArenaBackdrop';
 import { SliderControl } from '../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
 import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';
 import { KeycapBadge } from '../../primitives/KeycapBadge';
-import { useDialogueStack } from '../../primitives/dialogue/dialogueStore';
+import { useDialogueStack } from '../../compounds/dialogue/dialogueStore';
 import { CodeBlock } from '../CodeBlock';
 
 export interface EdgeInspectorSimulationPageProps {

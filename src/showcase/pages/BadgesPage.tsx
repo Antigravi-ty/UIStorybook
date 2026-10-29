@@ -193,7 +193,9 @@ export const BadgesPage: React.FC<{ isLight?: boolean }> = ({ isLight = true }) 
       <CodeBlock
         isLight={isLight}
         title="Agent 代码配方 (Badge & Keycap Recipe)"
-        code={`import { Badge, KeycapBadge, Button } from '@/components/primitives';
+        code={`import { Badge } from '@/primitives/Badge';
+import { KeycapBadge } from '@/primitives/KeycapBadge';
+import { Button } from '@/primitives/Button';
 
 // 1. 状态徽章：圆角矩形（默认）与胶囊形态
 <Badge variant="success" dot isLight={isLight}>ONLINE</Badge>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Zap, Box, Shield, History, CircleSlash2, Info } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
-import { SettingToggleRow } from '../primitives/SettingToggleRow';
+import { SettingSegmentedRow } from '../compounds/SettingSegmentedRow';
+import { SettingToggleRow } from '../compounds/SettingToggleRow';
 import { FloatingWindowCard } from './settings/components/FloatingWindowCard';
 import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens/menuLayoutStore';
 import type { PanelSizingConfig } from '../tokens/menuLayoutStore';

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SliderControl } from '../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';
-import { ColorSwatchInput } from '../../primitives/TunerControls';
+import { ColorSwatchInput } from '../../compounds/TunerControls';
 import { CubicBezierCurveEditor, CubicBezierValue } from '../../charts/CubicBezierCurveEditor';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 

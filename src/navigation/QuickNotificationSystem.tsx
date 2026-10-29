@@ -4,7 +4,7 @@ import { BellDot, Layers } from 'lucide-react';
 import {
   QuickNotificationDrawer,
   MONO_FONT_STACK,
-} from '../primitives/QuickNotification';
+} from '../compounds/QuickNotification';
 import {
   useQuickNotificationStore,
   QuickNotificationItem,

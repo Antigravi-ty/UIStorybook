@@ -7,9 +7,10 @@ import { CompactTelemetryBarHUD } from '../../../hud/CompactTelemetryBarHUD';
 import { FlipIndicatorPillHUD } from '../../../hud/FlipIndicatorPillHUD';
 import { ReplayControlBannerHUD } from '../../../hud/ReplayControlBannerHUD';
 import { KickoffRhythmOverlayHUD } from '../../../hud/KickoffRhythmOverlayHUD';
-import { ArenaBackdrop } from '../../../hud/ArenaBackdrop';
+import { StaticTrainingPackHUD } from '../../../hud/StaticTrainingPackHUD';
+import { ArenaBackdrop } from '../../ArenaBackdrop';
 import { type HudTransientChannel } from '../../../hud/hudTransientChannel';
-import { type HudSpeedListener, type HudBoostListener, type HudBallCamListener } from '../../../hud/types';
+import { type HudSpeedListener, type HudBoostListener, type HudBallCamListener, type EditSubMode } from '../../../hud/types';
 import { GameViewport } from '../../../viewport/GameViewport';
 import { Badge } from '../../../primitives/Badge';
 import { SectionErrorBoundary } from '../../../primitives/SectionErrorBoundary';
@@ -336,6 +337,46 @@ export const HudStageAndFollowupSection = React.memo<HudStageAndFollowupSectionP
             />
           </div>
         </SectionErrorBoundary>
+        <SectionErrorBoundary title="5A.10 StaticTrainingPackHUD" isLight={isLight}>
+          <div
+            id="hud-5a-10-static-training-pack"
+            className={`p-6 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${
+              isLight
+                ? 'bg-neutral-50 border-neutral-200 text-neutral-900 shadow-xs'
+                : 'bg-neutral-950 border-neutral-800/90 text-neutral-100'
+            }`}
+          >
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span
+                className={`text-xs font-bold font-mono uppercase tracking-wider ${
+                  isLight ? 'text-amber-600' : 'text-amber-400'
+                }`}
+              >
+                [5A.10] StaticTrainingPackHUD (Top-Center Shot Banner & Sub-Mode Selector)
+              </span>
+              <span className="text-[11px] font-mono text-sky-500 font-bold">
+                Pure Props Memo · Shared with 6E Edge Inspector
+              </span>
+            </div>
+            <div className="relative min-h-[110px] rounded-2xl border border-neutral-500/20 flex items-center justify-center overflow-hidden">
+              <StaticTrainingPackHUD
+                isLight={isLight}
+                shotIndex={0}
+                editSubMode={'car-heading' as EditSubMode}
+                shot={{
+                  car: {
+                    unlimitedBoost: isUnlimitedBoost,
+                    initialBoost: boostAmount,
+                    snapToGround: true,
+                    hasFlip: true,
+                    speedFollowsHeading: false,
+                  },
+                }}
+                className="!static !translate-x-0"
+              />
+            </div>
+          </div>
+        </SectionErrorBoundary>
       </section>
 
       {/* Agent Code Recipe Snippet */}
@@ -347,12 +388,10 @@ export const HudStageAndFollowupSection = React.memo<HudStageAndFollowupSectionP
         <CodeBlock
           isLight={isLight}
           title="120Hz 瞬态零重绘 HUD + 低频 BallCam 解耦调用示例"
-          code={`import {
-  BallCameraIndicator,
-  VelocityProgressBar,
-  CircularBoostGauge,
-  createHudTransientChannel,
-} from '@/hud';
+          code={`import { BallCameraIndicator } from '@/hud/BallCameraIndicator';
+import { VelocityProgressBar } from '@/hud/VelocityProgressBar';
+import { CircularBoostGauge } from '@/hud/CircularBoostGauge';
+import { createHudTransientChannel } from '@/hud/hudTransientChannel';
 
 const hudChannel = createHudTransientChannel({ speed: 0, boostAmount: 100 });
 

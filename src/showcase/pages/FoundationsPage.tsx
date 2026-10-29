@@ -17,7 +17,7 @@ import {
 import { UI_RADIUS } from '../../tokens/radius';
 import { UI_SPACING } from '../../tokens/spacing';
 import { UI_EASING } from '../../tokens/easing';
-import { useAccentStore } from '../stores/themeStore';
+import { useAccentStore } from '../../tokens/themeStore';
 import { CodeBlock } from '../CodeBlock';
 
 export const FoundationsPage: React.FC<{ isLight?: boolean }> = ({ isLight = true }) => {
@@ -318,7 +318,9 @@ export const FoundationsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
       <CodeBlock
         isLight={isLight}
         title="L0 Foundations 标准按需引用示例 (零上层依赖)"
-        code={`import { UI_SPACING, UI_RADIUS, UI_EASING, useAccentStore } from '@/tokens';
+        code={`import { UI_SPACING, UI_RADIUS } from '@/tokens/spacing';
+import { UI_EASING } from '@/tokens/easing';
+import { useAccentStore } from '@/tokens/themeStore';
 
 // 1. 直接读取语义化圆角与 3-Stage 衬距标准
 const headerClass = \`\${UI_SPACING.panel.header} \${UI_RADIUS.panel}\`;

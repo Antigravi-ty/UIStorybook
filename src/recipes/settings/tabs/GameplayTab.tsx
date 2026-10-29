@@ -9,9 +9,9 @@ import {
   SmilePlus,
 } from 'lucide-react';
 import { BounceSolidSvg } from '../../../primitives/packagedSvgIcons';
-import { SettingActionRow } from '../../../primitives/SettingActionRow';
-import { SettingToggleRow } from '../../../primitives/SettingToggleRow';
-import { SettingSegmentedRow } from '../../../primitives/SettingSegmentedRow';
+import { SettingActionRow } from '../../../compounds/SettingActionRow';
+import { SettingToggleRow } from '../../../compounds/SettingToggleRow';
+import { SettingSegmentedRow } from '../../../compounds/SettingSegmentedRow';
 import { useSettingActionRowStore } from '../../../tokens/settingRowStore';
 import {
   useSettingsPacingStore,

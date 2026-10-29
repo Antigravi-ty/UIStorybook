@@ -10,7 +10,7 @@ import {
 import {
   QuickNotificationDrawer, CollapseToRightIcon, getButtonColorClass, MONO_FONT_STACK,
   type QuickNotificationGlowLevel, type QuickNotificationType, type QuickNotificationButtonConfig,
-} from '../../primitives/QuickNotification';
+} from '../../compounds/QuickNotification';
 import { QuickNotificationSystem, type NotificationIconLifecycle, } from '../../navigation/QuickNotificationSystem';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
@@ -330,7 +330,7 @@ export const QuickNotificationPage: React.FC<{ isLight?: boolean }> = ({ isLight
     );
   };
 
-  const generatedUsageCode = `import { QuickNotificationDrawer } from '@/primitives/QuickNotification';
+  const generatedUsageCode = `import { QuickNotificationDrawer } from '@/compounds/QuickNotification';
 import { QuickNotificationSystem } from '@/navigation/QuickNotificationSystem';
 import {
   quickNotificationStore, pushQuickNotification, pushOngoingNotification, updateOngoingNotification,

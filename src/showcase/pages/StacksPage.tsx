@@ -381,7 +381,7 @@ export const StacksPage: React.FC<{ isLight?: boolean }> = ({ isLight = true }) 
   HudZone,
   HudSlot,
   HudRelativeAnchor,
-} from '@/layout';
+} from '@/layout/VStack';
 
 // 1. 顶栏 56px 共享垂直空间 (左 Telemetry 与右 40x40 Stack Icon + Bubble 垂直居中对齐)
 <HudAnchorStage strategy="reserve">

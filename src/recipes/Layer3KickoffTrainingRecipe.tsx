@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Check, Clock, Compass, Crosshair, Ghost, GraduationCap, Play, Zap } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
-import { SettingToggleRow } from '../primitives/SettingToggleRow';
+import { SettingSegmentedRow } from '../compounds/SettingSegmentedRow';
+import { SettingToggleRow } from '../compounds/SettingToggleRow';
 import { KICKOFF_TRAINING_PRESET } from '../tokens/floatingPresets';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';

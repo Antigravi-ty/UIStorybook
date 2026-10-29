@@ -1,25 +1,14 @@
 import React, { useState as useLocalState, useEffect, useRef } from 'react';
 import { createScopedSyncedState } from '../stores/crossClientSync';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const useState = createScopedSyncedState('page:live-preview');
-import { 
-  Eye, 
-  ChevronLeft, 
-  X, 
-  Sparkles, 
-  Layers, 
-  RotateCcw,
-  CheckCircle2,
-  Sliders
-} from 'lucide-react';
+import { Eye, X } from 'lucide-react';
 import { Button } from '../../primitives/Button';
-import { Badge } from '../../primitives/Badge';
 import { KeycapBadge } from '../../primitives/KeycapBadge';
 import { CodeBlock } from '../CodeBlock';
-import { useLivePreviewStore } from '../stores/livePreviewStore';
+import { useLivePreviewStore } from '../../tokens/livePreviewStore';
+import { MorphingStageShell } from '../../navigation/MorphingShell';
 import { Layer3BallTrajectoryRecipe } from '../../recipes/Layer3BallTrajectoryRecipe';
-import { UI_EASING } from '../../tokens/easing';
 
 export interface LivePreviewSimulationPageProps {
   isLight?: boolean;
@@ -237,94 +226,32 @@ export const LivePreviewSimulationPage: React.FC<LivePreviewSimulationPageProps>
           </div>
         </div>
 
-        {/* 
-          Single Morphing Container executing Sequenced Step Transition:
-          Four corners smoothly interpolate between expanded center rect and right-middle dock rect.
-          Equal-width 4-sided ambient shadow on all borders (offsets: 0, 0).
-        */}
-        <motion.div
-          animate={
-            isDockState
-              ? {
-                  left: xDock,
-                  top: yDock,
-                  width: dockW,
-                  height: dockH,
-                  borderRadius: 12,
-                }
-              : {
-                  left: xExpanded,
-                  top: yExpanded,
-                  width: expandedW,
-                  height: expandedH,
-                  borderRadius: 16,
-                }
-          }
-          transition={{
-            duration: 0.28,
-            ease: [0.2, 0.8, 0.25, 1],
-          }}
-          style={{
-            position: 'absolute',
-            transform: 'none',
-          }}
-          className={`select-none z-30 transition-shadow overflow-hidden ${
-            isDockState
-              ? isLight
-                ? 'border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_0_16px_rgba(0,0,0,0.15)] cursor-pointer'
-                : 'border border-neutral-700 bg-neutral-900 hover:bg-neutral-850 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_0_18px_rgba(255,255,255,0.08)] cursor-pointer'
-              : isLight
-              ? 'border border-neutral-300 bg-white text-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.12),0_0_24px_rgba(0,0,0,0.16),0_0_48px_rgba(0,0,0,0.10)]'
-              : 'border border-neutral-700 bg-neutral-900 text-neutral-100 shadow-[0_0_0_1px_rgba(255,255,255,0.18),0_0_25px_rgba(0,0,0,0.85),0_0_35px_rgba(255,255,255,0.08)]'
-          }`}
-          onClick={isDockState ? handleTriggerExpand : undefined}
-          onMouseEnter={() => isDockState && setIsPillHovered(true)}
-          onMouseLeave={() => setIsPillHovered(false)}
+        <MorphingStageShell
+          isLight={isLight}
+          targetX={isDockState ? xDock : xExpanded}
+          targetY={isDockState ? yDock : yExpanded}
+          targetW={isDockState ? dockW : expandedW}
+          targetH={isDockState ? dockH : expandedH}
+          targetRadius={isDockState ? 12 : 16}
+          isDockState={isDockState}
+          isPillHovered={isPillHovered}
+          onPillHoverChange={setIsPillHovered}
+          isPillContentVisible={isPillContentVisible}
+          isContentVisible={isContentVisible}
+          onExpandFromDock={handleTriggerExpand}
         >
-          {/* Phase 1 & 3: Content inside Expanded Container (Unmounted when in dock state to fully decouple container & content) */}
-          {!isDockState && (
-            <div
-              className={`transition-opacity duration-110 w-full h-full overflow-hidden ${
-                isContentVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-              }`}
-            >
-              {isContentVisible && (
-                <Layer3BallTrajectoryRecipe
-                  isLight={isLight}
-                  transparent={true}
-                  onBack={() => {
-                    exitPreview();
-                    setAnimPhase('expanded');
-                  }}
-                  onCollapsePreview={handleTriggerCollapse}
-                />
-              )}
-            </div>
+          {isContentVisible && (
+            <Layer3BallTrajectoryRecipe
+              isLight={isLight}
+              transparent={true}
+              onBack={() => {
+                exitPreview();
+                setAnimPhase('expanded');
+              }}
+              onCollapsePreview={handleTriggerCollapse}
+            />
           )}
-
-          {/* Collapsed Pill Content: '<' | TAB (Strictly centered inside container, decoupled from expanded content) */}
-          {isDockState && (
-            <div
-              className={`absolute inset-0 w-full h-full flex items-center justify-center gap-2 px-2.5 transition-opacity duration-110 ${
-                isPillContentVisible ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <motion.div
-                animate={{ x: isPillHovered ? -2.5 : 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                className={`flex items-center justify-center shrink-0 ${
-                  isLight ? 'text-neutral-900' : 'text-neutral-100'
-                }`}
-              >
-                <ChevronLeft className="h-4 w-4 stroke-[2.5]" />
-              </motion.div>
-
-              <div className={`h-3.5 w-px ${isLight ? 'bg-neutral-200' : 'bg-neutral-700'}`} />
-
-              <KeycapBadge shortcut="TAB" size="sm" isLight={isLight} />
-            </div>
-          )}
-        </motion.div>
+        </MorphingStageShell>
 
         {/* State Indicator pill in bottom-left */}
         <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-xl border bg-black/50 text-neutral-200 backdrop-blur border-white/10 select-none">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SliderControl } from '../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
-import { EventFilterMatrix, EventCatalogEntry } from '../../primitives/TunerControls';
+import { EventFilterMatrix, EventCatalogEntry } from '../../compounds/TunerControls';
 import { EventImpulseScatterChart, CollisionImpulseEvent } from '../../charts/EventImpulseScatterChart';
 
 const INITIAL_COLLISION_EVENTS: CollisionImpulseEvent[] = [

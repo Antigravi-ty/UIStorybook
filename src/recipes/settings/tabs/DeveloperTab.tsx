@@ -8,9 +8,9 @@ import {
   AlertTriangle,
   Scan,
 } from 'lucide-react';
-import { SettingActionRow } from '../../../primitives/SettingActionRow';
-import { SettingSegmentedRow } from '../../../primitives/SettingSegmentedRow';
-import { SettingToggleRow } from '../../../primitives/SettingToggleRow';
+import { SettingActionRow } from '../../../compounds/SettingActionRow';
+import { SettingSegmentedRow } from '../../../compounds/SettingSegmentedRow';
+import { SettingToggleRow } from '../../../compounds/SettingToggleRow';
 import { useSettingActionRowStore } from '../../../tokens/settingRowStore';
 import type { BallOpacityMode } from './GameplayTab';
 

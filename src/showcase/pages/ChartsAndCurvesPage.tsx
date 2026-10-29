@@ -475,7 +475,7 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         code={`import {
   TelemetryRingBuffer, TelemetrySparklineChart, EventImpulseScatterChart, CubicBezierCurveEditor,
   ParametricTrajectoryChart, PacingOscilloscopeChart, GoalBarrier2DEditor, MultiTrackReplayTimeline,
-} from '@/charts';
+} from '@/charts/TelemetrySparklineChart';
 
 // 1. 120Hz 零分配模式：在物理/网络循环中直接写入 Float32Array RingBuffer
 const rttRingBuffer = new TelemetryRingBuffer(240);

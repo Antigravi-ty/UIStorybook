@@ -279,7 +279,9 @@ export const ViewportSafeAreaPage: React.FC<{ isLight?: boolean }> = ({ isLight 
       <CodeBlock
         isLight={isLight}
         title="5C. GameViewport & SafeAreaHud 标准调用示例"
-        code={`import { GameViewport, SafeAreaHud, useViewportStore } from '@/viewport';
+        code={`import { GameViewport } from '@/viewport/GameViewport';
+import { SafeAreaHud } from '@/viewport/SafeAreaHud';
+import { useViewportStore } from '@/viewport/viewportStore';
 
 export const MatchStage = ({ isLight }: { isLight: boolean }) => {
   return (

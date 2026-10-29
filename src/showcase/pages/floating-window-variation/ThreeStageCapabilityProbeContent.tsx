@@ -7,14 +7,14 @@ import {
   Compass,
   Wrench,
 } from 'lucide-react';
-import { type FloatingThreeStageRenderContext } from '../../components/FloatingThreeStageWindow';
+import { type FloatingThreeStageRenderContext } from '../../../navigation/FloatingThreeStageWindow';
 import { FloatingWindowToolbar } from '../../../panels/FloatingWindowToolbar';
 import { Button } from '../../../primitives/Button';
 import { SliderControl } from '../../../primitives/SliderControl';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';
 import { SegmentedSwitch } from '../../../primitives/SegmentedSwitch';
 import { UnderlineTabs } from '../../../primitives/UnderlineTabs';
-import { SettingActionRow } from '../../../primitives/SettingActionRow';
+import { SettingActionRow } from '../../../compounds/SettingActionRow';
 
 export const PROBE_WINDOW_ID = '3stage-capability-probe';
 

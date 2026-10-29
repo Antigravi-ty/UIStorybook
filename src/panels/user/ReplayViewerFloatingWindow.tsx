@@ -13,8 +13,8 @@ import {
 import { MultiTrackReplayTimeline, DEFAULT_REPLAY_INCIDENT_MARKERS, DEFAULT_REPLAY_SIGNAL_MARKERS, type ReplayIncidentMarker, type ReplaySignalMarker } from '../../charts/MultiTrackReplayTimeline';
 import { KeycapBadge } from '../../primitives/KeycapBadge';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
-import { SettingActionRow } from '../../primitives/SettingActionRow';
-import { SettingSliderRow } from '../../primitives/SettingSliderRow';
+import { SettingActionRow } from '../../compounds/SettingActionRow';
+import { SettingSliderRow } from '../../compounds/SettingSliderRow';
 import { quickNotification } from '../../tokens/quickNotificationStore';
 
 export type PlaybackSpeedPreset = '100' | '75' | '50' | '25' | 'custom';

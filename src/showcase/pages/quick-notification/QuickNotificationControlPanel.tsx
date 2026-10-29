@@ -6,7 +6,7 @@ import { Sliders, Eye, Type, ThumbsDown, MinusCircle, Ban, Hand, Plus, X, } from
 import type {
   QuickNotificationGlowLevel, QuickNotificationType, QuickNotificationButtonConfig, QuickNotificationButtonVariant,
   QuickNotificationButtonFormat,
-} from '../../../primitives/QuickNotification';
+} from '../../../compounds/QuickNotification';
 import { SegmentedSwitch } from '../../../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Film } from 'lucide-react';
 import { SliderControl } from '../../primitives/SliderControl';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';
-import { ReplayDirectorKeyframeInspector } from '../../compounds/ReplayDirectorKeyframeInspector';
+import { ReplayDirectorKeyframeInspector } from './cards/ReplayDirectorKeyframeInspector';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

@@ -13,8 +13,8 @@ import { PrecisionDigitPicker, TunerPrecisionContext } from '../../primitives/Pr
 import { Badge } from '../../primitives/Badge';
 import { CodeBlock } from '../CodeBlock';
 import { PageJumpDirectory, JumpDirectoryItem } from '../PageJumpDirectory';
-import { SettingActionRowTuner } from './recipes/SettingActionRowTuner';
-import { UnderlineTabsTuner } from './recipes/UnderlineTabsTuner';
+import { SettingActionRowTuner } from './tabs/SettingActionRowTuner';
+import { UnderlineTabsTuner } from './tabs/UnderlineTabsTuner';
 
 const L1_TABS_JUMP_ITEMS: JumpDirectoryItem[] = [
   { id: 'l1-setting-action-row', code: 'L1.0', name: 'SettingActionRow',
@@ -470,7 +470,7 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
         code={`import {
   UnderlineTabs, SegmentedSwitch, SliderControl, DualGrabberSlider,
   PrecisionDigitPicker, TunerPrecisionContext, ToggleSwitch,
-} from '@/primitives';
+} from '@/primitives/UnderlineTabs';
 
 // 1. 中心对称双向填充滑动条 (支持正负值或自定义 origin 锚点 + 直接输入)
 <SliderControl

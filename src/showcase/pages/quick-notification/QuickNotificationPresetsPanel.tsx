@@ -15,7 +15,7 @@ import {
   type QuickNotificationGlowLevel,
   type QuickNotificationType,
   type QuickNotificationButtonConfig,
-} from '../../../primitives/QuickNotification';
+} from '../../../compounds/QuickNotification';
 import {
   dismissOngoingNotification,
   completeOngoingNotification,

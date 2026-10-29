@@ -14,7 +14,7 @@ import {
 import { FloatingWindowIcon } from '../../navigation/FloatingWindowIcon';
 import {
   FloatingWindowsMinWidthCalibrationBar, FloatingWindowsCanvasStage,
-} from './floating-window-variation/FloatingWindowsCanvasStage';
+} from './floating-windows/FloatingWindowsCanvasStage';
 
 const useState = createScopedSyncedState('page:floating-windows-v2');
 

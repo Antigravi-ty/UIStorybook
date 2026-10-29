@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Shield, Paintbrush } from 'lucide-react';
-import { SettingSegmentedRow } from '../../primitives/SettingSegmentedRow';
+import { SettingSegmentedRow } from '../../compounds/SettingSegmentedRow';
 import {
   PriorityQueueList,
   PriorityQueueItem,
-} from '../../primitives/tuner/PriorityQueueList';
+} from '../../compounds/tuner/PriorityQueueList';
 import { BLUE_TEAM_COLOURS, ORANGE_TEAM_COLOURS } from './garageConstants';
 
 export interface GarageColorTabProps {

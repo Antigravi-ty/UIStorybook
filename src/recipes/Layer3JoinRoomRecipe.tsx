@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AlertCircle, Eye, Wifi } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { InlineErrorNotice } from '../primitives/InlineErrorNotice';
-import { SettingToggleRow } from '../primitives/SettingToggleRow';
+import { SettingToggleRow } from '../compounds/SettingToggleRow';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 import { dispatchOnlineRoomErrorNotification } from './Layer3OnlineWarmupRecipe';

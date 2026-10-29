@@ -16,7 +16,7 @@ const HudElementsPage = lazy(() => import('./showcase/pages/HudElementsPage').th
 const CenterUpperInfoPage = lazy(() => import('./showcase/pages/CenterUpperInfoPage').then((m) => ({ default: m.CenterUpperInfoPage })));
 const StatsEventFeedPage = lazy(() => import('./showcase/pages/StatsEventFeedPage').then((m) => ({ default: m.StatsEventFeedPage })));
 const TemporalOverlayPage = lazy(() => import('./showcase/pages/TemporalOverlayPage').then((m) => ({ default: m.TemporalOverlayPage })));
-const MenusPage = lazy(() => import('./showcase/pages/MenusPage').then((m) => ({ default: m.MenusPage })));
+const MenusPage = lazy(() => import('./showcase/pages/PostMatchMenusPage').then((m) => ({ default: m.MenusPage })));
 const MenuLayerPreviewPage = lazy(() => import('./showcase/pages/MenuLayerPreviewPage').then((m) => ({ default: m.MenuLayerPreviewPage })));
 const LoadingScreenPreviewPage = lazy(() => import('./showcase/pages/LoadingScreenPreviewPage').then((m) => ({ default: m.LoadingScreenPreviewPage })));
 const NavigationPage = lazy(() => import('./showcase/pages/NavigationPage').then((m) => ({ default: m.NavigationPage })));
@@ -32,10 +32,10 @@ const FoundationsPage = lazy(() => import('./showcase/pages/FoundationsPage').th
 const ViewportSafeAreaPage = lazy(() => import('./showcase/pages/ViewportSafeAreaPage').then((m) => ({ default: m.ViewportSafeAreaPage })));
 import { SafeAreaHud } from './viewport/SafeAreaHud';
 import { useViewportStore, viewportStore } from './viewport/viewportStore';
-import { DialogueStackContainer } from './primitives/Dialogue';
+import { DialogueStackContainer } from './compounds/Dialogue';
 import { SectionErrorBoundary } from './primitives/SectionErrorBoundary';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
-import { useAccentStore } from './showcase/stores/themeStore';
+import { useAccentStore } from './tokens/themeStore';
 import { readUrlParams, updateUrlParams } from './showcase/stores/urlSync';
 import { useSyncedState } from './showcase/stores/crossClientSync';
 

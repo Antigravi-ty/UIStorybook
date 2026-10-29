@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Flame, Disc, Trophy, Speaker } from 'lucide-react';
 import { Card } from '../layout/Card';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
-import { SettingSliderRow } from '../primitives/SettingSliderRow';
+import { SettingSliderRow } from '../compounds/SettingSliderRow';
 import { PhaseVariationMatrix, PhaseVariationItem, PhaseVariationSelection, VariationPhaseId, DEFAULT_BOOST_VARIATION_ITEMS } from '../compounds/PhaseVariationMatrix';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';

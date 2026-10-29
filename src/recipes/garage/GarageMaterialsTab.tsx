@@ -8,7 +8,7 @@ import {
   Wand2,
 } from 'lucide-react';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
-import { SettingSegmentedRow } from '../../primitives/SettingSegmentedRow';
+import { SettingSegmentedRow } from '../../compounds/SettingSegmentedRow';
 import { useSettingActionRowStore } from '../../tokens/settingRowStore';
 
 export interface VisualMaterialsConfig {

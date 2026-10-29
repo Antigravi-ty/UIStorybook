@@ -9,8 +9,8 @@ import { USER_PRESET_WINDOWS, DEV_PRESET_WINDOWS, PRESET_WINDOWS, type PresetCon
 import { createScopedSyncedState } from '../stores/crossClientSync';
 import {
   floatingThreeStageSandboxStore, useFloatingThreeStageStore, FLOATING_THREE_STAGE_PRESETS,
-} from '../stores/floatingThreeStageStore';
-import { FloatingThreeStageWindowManager } from '../components/FloatingThreeStageWindow';
+} from '../../tokens/floatingThreeStageStore';
+import { FloatingThreeStageWindowManager } from '../../navigation/FloatingThreeStageWindow';
 import { FloatingStackIcon } from '../../navigation/FloatingStackIcon';
 import { FloatingWindowIcon } from '../../navigation/FloatingWindowIcon';
 import { renderFloatingWindowPanel } from '../../panels';

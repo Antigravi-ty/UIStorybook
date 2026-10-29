@@ -10,9 +10,9 @@ import {
   Monitor,
   Sliders,
 } from 'lucide-react';
-import { SettingSliderRow } from '../../../primitives/SettingSliderRow';
-import { SettingSegmentedRow } from '../../../primitives/SettingSegmentedRow';
-import { SettingPresetCustomRow } from '../../../primitives/SettingPresetCustomRow';
+import { SettingSliderRow } from '../../../compounds/SettingSliderRow';
+import { SettingSegmentedRow } from '../../../compounds/SettingSegmentedRow';
+import { SettingPresetCustomRow } from '../../../compounds/SettingPresetCustomRow';
 import { useSettingActionRowStore } from '../../../tokens/settingRowStore';
 
 export type MenuPowerSaveOption = 'extreme' | '15' | '30' | 'disable' | 'freeze' | 'match';

@@ -18,7 +18,7 @@ import { SegmentedSwitch } from '../../../primitives/SegmentedSwitch';
 import { Checkbox } from '../../../primitives/Checkbox';
 import { Badge } from '../../../primitives/Badge';
 import { Button } from '../../../primitives/Button';
-import { dialogue } from '../../../primitives/Dialogue';
+import { dialogue } from '../../../compounds/Dialogue';
 import { CodeBlock } from '../../CodeBlock';
 import { Layer3CameraRecipe, DEFAULT_CAMERA_SETTINGS } from '../../../recipes/Layer3CameraRecipe';
 import {

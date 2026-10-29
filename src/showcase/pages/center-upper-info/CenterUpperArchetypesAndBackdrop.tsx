@@ -9,14 +9,14 @@ import { EdgePlayerHudStrip } from '../../../hud/EdgePlayerHudStrip';
 import { VelocityProgressBar } from '../../../hud/VelocityProgressBar';
 import { CircularBoostGauge } from '../../../hud/CircularBoostGauge';
 import { BallCameraIndicator } from '../../../hud/BallCameraIndicator';
-import { ArenaBackdrop, ArenaLightingPreset } from '../../../hud/ArenaBackdrop';
+import { ArenaBackdrop, ArenaLightingPreset } from '../../ArenaBackdrop';
 import { DEFAULT_INITIAL_ROSTER } from '../../../hud/hudTransientChannel';
 import { HudAnchorStage, HudZone, HudSlot } from '../../../layout/HudAnchorStage';
 import { Badge } from '../../../primitives/Badge';
 import { SliderControl } from '../../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';
-import { ColorSwatchInput } from '../../../primitives/tuner/ColorSwatchInput';
+import { ColorSwatchInput } from '../../../compounds/tuner/ColorSwatchInput';
 import { JumpDirectoryItem } from '../../PageJumpDirectory';
 import { CodeBlock } from '../../CodeBlock';
 

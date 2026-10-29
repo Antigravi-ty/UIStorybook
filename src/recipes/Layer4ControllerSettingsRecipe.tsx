@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Gamepad2 } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { Badge } from '../primitives/Badge';
-import { DropdownMenu } from '../primitives/DropdownMenu';
-import { SettingActionRow } from '../primitives/SettingActionRow';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
-import { SettingToggleRow } from '../primitives/SettingToggleRow';
-import { SettingSliderRow } from '../primitives/SettingSliderRow';
+import { DropdownMenu } from '../compounds/DropdownMenu';
+import { SettingActionRow } from '../compounds/SettingActionRow';
+import { SettingSegmentedRow } from '../compounds/SettingSegmentedRow';
+import { SettingToggleRow } from '../compounds/SettingToggleRow';
+import { SettingSliderRow } from '../compounds/SettingSliderRow';
 import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 import {

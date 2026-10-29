@@ -12,9 +12,9 @@ import {
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { SegmentedSwitch } from '../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../primitives/ToggleSwitch';
-import { SettingActionRow } from '../primitives/SettingActionRow';
-import { SettingToggleRow } from '../primitives/SettingToggleRow';
-import { SettingSliderRow } from '../primitives/SettingSliderRow';
+import { SettingActionRow } from '../compounds/SettingActionRow';
+import { SettingToggleRow } from '../compounds/SettingToggleRow';
+import { SettingSliderRow } from '../compounds/SettingSliderRow';
 import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens/menuLayoutStore';
 import type { PanelSizingConfig } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';

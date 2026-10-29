@@ -4,7 +4,7 @@ import { SliderControl } from '../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
 import { ToggleSwitch } from '../../primitives/ToggleSwitch';
 import { CameraSwivelSimulatorCard } from '../../compounds/CameraSwivelSimulatorCard';
-import { ReferenceImageOverlayController } from '../../compounds/ReferenceImageOverlayController';
+import { ReferenceImageOverlayController } from './cards/ReferenceImageOverlayController';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

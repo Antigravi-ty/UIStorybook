@@ -117,7 +117,7 @@ export const CardsPage: React.FC<{
       <CodeBlock
         isLight={isLight}
         title="Agent 代码配方 (Card Recipe)"
-        code={`import { Card, CardHeader, CardBody, CardFooter, SelectableCard } from '@/components/layout';
+        code={`import { Card, CardHeader, CardBody, CardFooter, SelectableCard } from '@/layout/Card';
 
 // 1. 标准信息卡片
 <Card isLight={isLight}>

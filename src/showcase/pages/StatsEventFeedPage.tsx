@@ -7,7 +7,7 @@ import {
   StatsEventSvgPackagerSection, ACCENT_SWATCHES, STAT_EVENT_PRESETS, type StatPresetDefinition,
 } from './stats-event-feed/StatsEventSvgPackagerSection';
 import { HudAnchorStage, HudZone } from '../../layout/HudAnchorStage';
-import { ArenaBackdrop } from '../../hud/ArenaBackdrop';
+import { ArenaBackdrop } from '../ArenaBackdrop';
 import { StepperScoreboardHUD } from '../../hud/StepperScoreboardHUD';
 import {
   StatsEventFeedHUD, StatsEventFeedItem, StatsEventLayoutVariant, StatsEventCapsuleStyle,

@@ -4,7 +4,7 @@ import {
   Copy, Check, Code2, ArrowUpRight,
   Box, CheckCircle2, Palette,
 } from 'lucide-react';
-import { PlayModeCard } from '../../compounds/PlayModeCard';
+import { PlayModeCard } from '../../layout/PlayModeCard';
 import { PLAY_MODES } from '../../recipes/Layer2PlayRecipe';
 import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Trash2 } from 'lucide-react';
 import { Button } from '../../primitives/Button';
-import { RingBufferCapacityGaugeCard } from '../../compounds/RingBufferCapacityGaugeCard';
+import { RingBufferCapacityGaugeCard } from './cards/RingBufferCapacityGaugeCard';
 import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**

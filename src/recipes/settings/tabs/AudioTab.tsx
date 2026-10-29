@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppWindowMac, Volume2, Engine } from 'lucide-react';
-import { SettingSliderRow } from '../../../primitives/SettingSliderRow';
-import { SettingToggleRow } from '../../../primitives/SettingToggleRow';
+import { SettingSliderRow } from '../../../compounds/SettingSliderRow';
+import { SettingToggleRow } from '../../../compounds/SettingToggleRow';
 import { JetThrustSvg } from '../../../primitives/packagedSvgIcons';
 import { useSettingActionRowStore } from '../../../tokens/settingRowStore';
 

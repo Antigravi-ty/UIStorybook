@@ -1,5 +1,4 @@
-import type { EditSubMode } from '../../hud/types';
-export type { EditSubMode };
+export type EditSubMode = 'car-heading' | 'car-speed' | 'ball-speed' | 'free-cam';
 
 export const MAX_SHOTS_PER_PACK = 99;
 

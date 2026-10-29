@@ -10,7 +10,7 @@ import {
   Users,
 } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
+import { SettingSegmentedRow } from '../compounds/SettingSegmentedRow';
 import { SliderControl } from '../primitives/SliderControl';
 import { InlineErrorNotice } from '../primitives/InlineErrorNotice';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';

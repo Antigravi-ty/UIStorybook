@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, X, Activity } from 'lucide-react';
 import { Badge } from '../../../primitives/Badge';
-import { SettingActionRow } from '../../../primitives/SettingActionRow';
+import { SettingActionRow } from '../../../compounds/SettingActionRow';
 import { useFloatingStore, floatingStore } from '../../../tokens/floatingStore';
 import { useSettingActionRowStore } from '../../../tokens/settingRowStore';
 import type { PresetConfig } from '../../../tokens/floatingPresets';

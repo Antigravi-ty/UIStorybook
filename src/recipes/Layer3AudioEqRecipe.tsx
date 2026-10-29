@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { InlineErrorNotice } from '../primitives/InlineErrorNotice';
-import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
-import { SettingSliderRow } from '../primitives/SettingSliderRow';
-import { SettingToggleRow } from '../primitives/SettingToggleRow';
+import { SettingSegmentedRow } from '../compounds/SettingSegmentedRow';
+import { SettingSliderRow } from '../compounds/SettingSliderRow';
+import { SettingToggleRow } from '../compounds/SettingToggleRow';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 

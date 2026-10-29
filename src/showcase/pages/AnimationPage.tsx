@@ -428,7 +428,8 @@ export const AnimationPage: React.FC<{ isLight?: boolean }> = ({ isLight = true 
       <CodeBlock
         isLight={isLight}
         title="Agent 动效与容器过渡统一调用配方 (MorphContainer Architecture)"
-        code={`import { MorphContainer, MorphingShell } from '@/navigation';
+        code={`import { MorphContainer } from '@/navigation/transitions';
+import { MorphingShell } from '@/navigation/MorphingShell';
 import { UI_EASING } from '@/tokens/easing';
 
 // 1. 标准流体连续形变 (FluidMorphTransition)
