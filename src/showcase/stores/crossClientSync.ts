@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { attachSyncBridge } from '../../tokens/syncBridge';
+import {
+  cloneSerializable,
+  sanitizeSyncedValue,
+  isSyncSerializable,
+  encodeEntriesForWire,
+  decodeEntriesFromWire,
+  buildValueSignature,
+} from './crossClientSyncCodec';
+
+export { sanitizeSyncedValue, isSyncSerializable };
 
 export interface CrossClientSyncStatus {
   /** Whether the Vite WebSocket (or fallback channel) is active */
@@ -38,133 +48,7 @@ interface SyncBusSingleton {
 }
 
 const GLOBAL_BUS_KEY = '__UI_STORYBOOK_CROSS_CLIENT_SYNC_BUS_V3__';
-const UNDEFINED_SENTINEL = '__UI_STORYBOOK_SYNC_UNDEFINED__';
 const FLUSH_INTERVAL_MS = 16;
-
-function cloneSerializable<T>(val: T): T {
-  if (val === null || val === undefined || typeof val !== 'object') {
-    return val;
-  }
-  try {
-    return JSON.parse(JSON.stringify(val)) as T;
-  } catch {
-    return val;
-  }
-}
-
-function isPlainObject(val: unknown): val is Record<string, unknown> {
-  if (typeof val !== 'object' || val === null || Array.isArray(val)) return false;
-  const proto = Object.getPrototypeOf(val);
-  return proto === null || proto === Object.prototype;
-}
-
-/**
- * Validates and sanitizes an incoming or cached sync value against the hook's
- * canonical default value so that schema evolution, newly added fields, or stale
- * positional keys can never inject incompatible types (e.g. a number into an object)
- * or missing sub-properties into component state.
- */
-export function sanitizeSyncedValue<T>(candidate: unknown, defaultValue: T): T {
-  if (defaultValue === undefined || defaultValue === null) {
-    return (candidate === undefined ? defaultValue : candidate) as T;
-  }
-
-  if (typeof defaultValue === 'boolean') {
-    return (typeof candidate === 'boolean' ? candidate : defaultValue) as T;
-  }
-
-  if (typeof defaultValue === 'number') {
-    if (candidate === null) return candidate as unknown as T;
-    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
-      return candidate as T;
-    }
-    return defaultValue;
-  }
-
-  if (typeof defaultValue === 'string') {
-    if (candidate === null) return candidate as unknown as T;
-    if (typeof candidate === 'string') {
-      return candidate as T;
-    }
-    return defaultValue;
-  }
-
-  if (Array.isArray(defaultValue)) {
-    return (Array.isArray(candidate) ? candidate : cloneSerializable(defaultValue)) as T;
-  }
-
-  if (isPlainObject(defaultValue)) {
-    if (!isPlainObject(candidate)) {
-      return cloneSerializable(defaultValue);
-    }
-    const merged: Record<string, unknown> = { ...defaultValue, ...candidate };
-    for (const key of Object.keys(defaultValue)) {
-      merged[key] = sanitizeSyncedValue(candidate[key], defaultValue[key]);
-    }
-    return merged as T;
-  }
-
-  return (candidate ?? defaultValue) as T;
-}
-
-export function isSyncSerializable(val: unknown, depth = 0): boolean {
-  if (depth > 8) return false;
-  if (
-    val === null ||
-    val === undefined ||
-    typeof val === 'string' ||
-    typeof val === 'number' ||
-    typeof val === 'boolean'
-  ) {
-    return true;
-  }
-  if (typeof val === 'function' || typeof val === 'symbol' || typeof val === 'bigint') {
-    return false;
-  }
-  if (Array.isArray(val)) {
-    for (let i = 0; i < val.length; i += 1) {
-      if (!isSyncSerializable(val[i], depth + 1)) return false;
-    }
-    return true;
-  }
-  if (typeof val === 'object') {
-    const obj = val as Record<string, unknown>;
-    // Exclude React elements, DOM nodes, Events, RegExp, Map, Set, etc.
-    if (
-      '$$typeof' in obj ||
-      'nodeType' in obj ||
-      (typeof Element !== 'undefined' && val instanceof Element) ||
-      (typeof Event !== 'undefined' && val instanceof Event)
-    ) {
-      return false;
-    }
-    const proto = Object.getPrototypeOf(val);
-    if (proto !== null && proto !== Object.prototype) {
-      return false;
-    }
-    for (const k of Object.keys(obj)) {
-      if (!isSyncSerializable(obj[k], depth + 1)) return false;
-    }
-    return true;
-  }
-  return false;
-}
-
-function encodeEntriesForWire(entries: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(entries)) {
-    out[k] = v === undefined ? UNDEFINED_SENTINEL : v;
-  }
-  return out;
-}
-
-function decodeEntriesFromWire(entries: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(entries)) {
-    out[k] = v === UNDEFINED_SENTINEL ? undefined : v;
-  }
-  return out;
-}
 
 function getOrCreateBus(): SyncBusSingleton {
   const g = globalThis as Record<string, any>;
@@ -416,12 +300,10 @@ function initTransportOnce() {
       updateStatus({ connected: false });
     });
 
-    // Request initial snapshot immediately from Vite WebSocket server
     sendViaTransport('ui-storybook:sync-request', { senderId: bus.clientId });
     return;
   }
 
-  // Fallback for static build / vite preview where import.meta.hot is absent
   if (typeof BroadcastChannel !== 'undefined') {
     try {
       const bc = new BroadcastChannel('ui-storybook-ws-fallback');
@@ -498,20 +380,15 @@ export interface ExportedLayerParameters {
 }
 
 export const crossClientSync = {
-  /** Enable or disable cross-client synchronization transport (disabled by default in production host apps) */
   setEnabled: setCrossClientSyncEnabled,
-
-  /** Check if a key has already been populated in the sync mirror */
   has: (key: string): boolean => bus.mirror.has(key),
 
-  /** Register canonical code default value for a key so resetAll can restore it */
   registerDefault: <T>(key: string, defaultValue: T): void => {
     if (isSyncSerializable(defaultValue)) {
       bus.defaults.set(key, cloneSerializable(defaultValue));
     }
   },
 
-  /** Read value from mirror or seed with fallback */
   get: <T>(key: string, fallback: T): T => {
     if (!bus.defaults.has(key) && isSyncSerializable(fallback)) {
       bus.defaults.set(key, cloneSerializable(fallback));
@@ -528,7 +405,6 @@ export const crossClientSync = {
     return fallback;
   },
 
-  /** Seed an initial value without overwriting existing server state */
   seed: <T>(key: string, value: T): void => {
     if (!bus.defaults.has(key) && isSyncSerializable(value)) {
       bus.defaults.set(key, cloneSerializable(value));
@@ -540,7 +416,6 @@ export const crossClientSync = {
     }
   },
 
-  /** Set and broadcast a key-value update across all connected clients */
   set: <T>(key: string, value: T): void => {
     if (!isSyncSerializable(value)) return;
     const prev = bus.mirror.get(key);
@@ -555,7 +430,6 @@ export const crossClientSync = {
     scheduleFlush();
   },
 
-  /** Subscribe to updates for a specific sync key */
   subscribeKey: <T>(key: string, listener: (value: T) => void): (() => void) => {
     let set = bus.keyListeners.get(key);
     if (!set) {
@@ -571,7 +445,6 @@ export const crossClientSync = {
     };
   },
 
-  /** Subscribe to global or scoped reset events */
   onReset: (listener: ResetListener): (() => void) => {
     bus.resetListeners.add(listener);
     return () => {
@@ -579,11 +452,6 @@ export const crossClientSync = {
     };
   },
 
-  /**
-   * Reset all (or scoped) parameters & stores back to their initial code defaults,
-   * and broadcast `ui-storybook:sync-reset` so the Vite WebSocket server and all connected
-   * tabs/windows simultaneously purge stale state and return to initial defaults.
-   */
   resetAll: (options?: { scopePrefix?: string; preserveKeys?: string[] }): void => {
     const scopePrefix = options?.scopePrefix;
     const preserveKeys = options?.preserveKeys ?? ['app:activeTab'];
@@ -597,10 +465,6 @@ export const crossClientSync = {
     }
   },
 
-  /**
-   * Export tunable parameters for the currently active layer/page (or a specific scopePrefix),
-   * combining DOM `[data-tuner-label]` control readouts with underlying synced state.
-   */
   exportParameters: (options?: {
     scopePrefix?: string;
     includeDomControls?: boolean;
@@ -646,19 +510,14 @@ export const crossClientSync = {
     };
   },
 
-  /** Returns true while incoming remote state patches are being applied */
   isApplyingRemote: (): boolean => bus.applyingRemoteCount > 0,
-
-  /** Status snapshot for UI indicator */
   getStatus: (): CrossClientSyncStatus => bus.status,
 
-  /** Subscribe to sync connection / pause status changes */
   subscribeStatus: (listener: () => void): (() => void) => {
     bus.statusListeners.add(listener);
     return () => bus.statusListeners.delete(listener);
   },
 
-  /** Pause or resume synchronization for this specific window */
   setPaused: (paused: boolean): void => {
     if (bus.status.paused === paused) return;
     updateStatus({ paused });
@@ -667,12 +526,10 @@ export const crossClientSync = {
     }
   },
 
-  /** Toggle pause/resume synchronization for this window */
   togglePaused: (): void => {
     crossClientSync.setPaused(!bus.status.paused);
   },
 
-  /** Explicitly request full state snapshot from Vite server */
   requestSnapshot: (): void => {
     if (!bus.status.paused) {
       sendViaTransport('ui-storybook:sync-request', { senderId: bus.clientId });
@@ -682,11 +539,6 @@ export const crossClientSync = {
 
 attachSyncBridge(crossClientSync);
 
-/**
- * Drop-in replacement for `React.useState` that automatically synchronizes
- * state across all connected tabs, Safari Private windows, and LAN devices
- * via Vite's WebSocket server.
- */
 export function useSyncedState<T>(
   key: string,
   initialValue: T | (() => T)
@@ -757,27 +609,6 @@ export function useSyncedState<T>(
   return [normalizedState, setSyncedState];
 }
 
-function buildValueSignature(val: unknown): string {
-  if (val === null) return 'null';
-  if (val === undefined) return 'undef';
-  const t = typeof val;
-  if (t === 'boolean') return `b:${val ? 1 : 0}`;
-  if (t === 'number') return `n:${val}`;
-  if (t === 'string') return `s:${(val as string).slice(0, 20)}`;
-  if (Array.isArray(val)) return `a:${val.length}`;
-  if (isPlainObject(val)) {
-    const keys = Object.keys(val).sort().join(',');
-    return `o:${keys.slice(0, 48)}`;
-  }
-  return t;
-}
-
-/**
- * Creates a drop-in replacement for `React.useState` scoped to a specific component.
- * Each hook call receives either an explicit semantic subKey (`${scope}:${explicitSubKey}`)
- * or a concurrent-safe structural-signature-bucketed key (`${scope}:${sig}#${idx}`), ensuring that
- * adding, reordering, or interrupting a concurrent render never shifts unrelated state hooks.
- */
 export function createScopedSyncedState(scope: string) {
   let sigCounters = new Map<string, number>();
   let resetScheduled = false;
@@ -813,9 +644,6 @@ export function createScopedSyncedState(scope: string) {
   };
 }
 
-/**
- * Hook to inspect or toggle the current window's Vite WebSocket sync status.
- */
 export function useCrossClientSyncStatus() {
   const status = useSyncExternalStore(
     crossClientSync.subscribeStatus,

@@ -515,140 +515,184 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
       </div>
 
       <PanelContent scrollable>
-        {currentTab === 'gameplay' && (
-          <GameplayTab
-            isLight={isLight}
-            gameplayConfig={gameplayConfig}
-            defaultGameplayConfig={defaultGameplayConfig}
-            onGameplayConfigChange={onGameplayConfigChange}
-            ballCamIndicator={ballCamIndicator}
-            onBallCamIndicatorChange={onBallCamIndicatorChange}
-            trajectoryEnabled={trajectoryEnabled}
-            onTrajectoryEnabledChange={onTrajectoryEnabledChange}
-            experiencePriority={experiencePriority}
-            clockPacingPriority={clockPacingPriority}
-            onExperiencePriorityChange={onExperiencePriorityChange}
-            onClockPacingPriorityChange={onClockPacingPriorityChange}
-            onNavigateTrainingDetail={handleNavigateTraining}
-            onNavigateKeybindingsDetail={handleNavigateKeybindings}
-            onNavigateTrajectoryDetail={handleNavigateTrajectory}
-            onNavigateTrajectory={handleNavigateTrajectory}
-            onNavigateCameraDetail={handleNavigateCamera}
-            onHover={setHoveredDesc}
-            onLeave={() => setHoveredDesc(null)}
-          />
-        )}
+        <div className="grid grid-cols-1 items-start w-full shrink-0">
+          <div
+            aria-hidden={currentTab !== 'gameplay'}
+            inert={currentTab !== 'gameplay' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              currentTab === 'gameplay'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <GameplayTab
+              isLight={isLight}
+              gameplayConfig={gameplayConfig}
+              defaultGameplayConfig={defaultGameplayConfig}
+              onGameplayConfigChange={onGameplayConfigChange}
+              ballCamIndicator={ballCamIndicator}
+              onBallCamIndicatorChange={onBallCamIndicatorChange}
+              trajectoryEnabled={trajectoryEnabled}
+              onTrajectoryEnabledChange={onTrajectoryEnabledChange}
+              experiencePriority={experiencePriority}
+              clockPacingPriority={clockPacingPriority}
+              onExperiencePriorityChange={onExperiencePriorityChange}
+              onClockPacingPriorityChange={onClockPacingPriorityChange}
+              onNavigateTrainingDetail={handleNavigateTraining}
+              onNavigateKeybindingsDetail={handleNavigateKeybindings}
+              onNavigateTrajectoryDetail={handleNavigateTrajectory}
+              onNavigateTrajectory={handleNavigateTrajectory}
+              onNavigateCameraDetail={handleNavigateCamera}
+              onHover={setHoveredDesc}
+              onLeave={() => setHoveredDesc(null)}
+            />
+          </div>
 
-        {currentTab === 'audio' && (
-          <AudioTab
-            isLight={isLight}
-            developerMode={developerMode}
-            audioConfig={audioConfig}
-            defaultAudioConfig={defaultAudioConfig}
-            onAudioConfigChange={onAudioConfigChange}
-            muteWhenUnfocused={muteWhenUnfocused}
-            onMuteWhenUnfocusedChange={onMuteWhenUnfocusedChange}
-            masterVolume={masterVolume}
-            onMasterVolumeChange={onMasterVolumeChange}
-            engineVolume={engineVolume}
-            onEngineVolumeChange={onEngineVolumeChange}
-            boostVolume={boostVolume}
-            onBoostVolumeChange={onBoostVolumeChange}
-            onNavigateAudioDetail={onNavigateAudioDetail}
-            onHover={setHoveredDesc}
-            onLeave={() => setHoveredDesc(null)}
-          />
-        )}
+          <div
+            aria-hidden={currentTab !== 'audio'}
+            inert={currentTab !== 'audio' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              currentTab === 'audio'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <AudioTab
+              isLight={isLight}
+              developerMode={developerMode}
+              audioConfig={audioConfig}
+              defaultAudioConfig={defaultAudioConfig}
+              onAudioConfigChange={onAudioConfigChange}
+              muteWhenUnfocused={muteWhenUnfocused}
+              onMuteWhenUnfocusedChange={onMuteWhenUnfocusedChange}
+              masterVolume={masterVolume}
+              onMasterVolumeChange={onMasterVolumeChange}
+              engineVolume={engineVolume}
+              onEngineVolumeChange={onEngineVolumeChange}
+              boostVolume={boostVolume}
+              onBoostVolumeChange={onBoostVolumeChange}
+              onNavigateAudioDetail={onNavigateAudioDetail}
+              onHover={setHoveredDesc}
+              onLeave={() => setHoveredDesc(null)}
+            />
+          </div>
 
-        {currentTab === 'display' && (
-          <DisplayTab
-            isLight={isLight}
-            developerMode={developerMode}
-            graphicsConfig={graphicsConfig}
-            defaultGraphicsConfig={defaultGraphicsConfig}
-            onGraphicsConfigChange={onGraphicsConfigChange}
-            theme={theme}
-            onThemeChange={onThemeChange}
-            uiScale={uiScale}
-            onUiScaleChange={onUiScaleChange}
-            maxSafeScale={maxSafeScale}
-            safeAreaMargin={safeAreaMargin}
-            onSafeAreaMarginChange={onSafeAreaMarginChange}
-            limitFps={limitFps}
-            onLimitFpsChange={onLimitFpsChange}
-            maxFps={maxFps}
-            onMaxFpsChange={onMaxFpsChange}
-            fpsSelection={fpsSelection}
-            onFpsSelectionChange={onFpsSelectionChange}
-            customFps={customFps}
-            onCustomFpsChange={onCustomFpsChange}
-            renderScale={renderScale}
-            onRenderScaleChange={onRenderScaleChange}
-            menuPowerSave={menuPowerSave}
-            onMenuPowerSaveChange={onMenuPowerSaveChange}
-            highlightSetting={highlightSetting}
-            onClearHighlight={onClearHighlight}
-            onHover={setHoveredDesc}
-            onLeave={() => setHoveredDesc(null)}
-          />
-        )}
+          <div
+            aria-hidden={currentTab !== 'display'}
+            inert={currentTab !== 'display' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              currentTab === 'display'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <DisplayTab
+              isLight={isLight}
+              developerMode={developerMode}
+              graphicsConfig={graphicsConfig}
+              defaultGraphicsConfig={defaultGraphicsConfig}
+              onGraphicsConfigChange={onGraphicsConfigChange}
+              theme={theme}
+              onThemeChange={onThemeChange}
+              uiScale={uiScale}
+              onUiScaleChange={onUiScaleChange}
+              maxSafeScale={maxSafeScale}
+              safeAreaMargin={safeAreaMargin}
+              onSafeAreaMarginChange={onSafeAreaMarginChange}
+              limitFps={limitFps}
+              onLimitFpsChange={onLimitFpsChange}
+              maxFps={maxFps}
+              onMaxFpsChange={onMaxFpsChange}
+              fpsSelection={fpsSelection}
+              onFpsSelectionChange={onFpsSelectionChange}
+              customFps={customFps}
+              onCustomFpsChange={onCustomFpsChange}
+              renderScale={renderScale}
+              onRenderScaleChange={onRenderScaleChange}
+              menuPowerSave={menuPowerSave}
+              onMenuPowerSaveChange={onMenuPowerSaveChange}
+              highlightSetting={highlightSetting}
+              onClearHighlight={onClearHighlight}
+              onHover={setHoveredDesc}
+              onLeave={() => setHoveredDesc(null)}
+            />
+          </div>
 
-        {currentTab === 'advanced' && (
-          <AdvancedTab
-            isLight={isLight}
-            developerMode={developerMode}
-            onDeveloperModeChange={handleDeveloperModeChange}
-            onSpawnDiagnosticWindow={onSpawnDiagnosticWindow}
-            inputBufferTarget={inputBufferTarget}
-            defaultInputBufferTarget={defaultInputBufferTarget}
-            onInputBufferTargetChange={onInputBufferTargetChange}
-            inputBufferThreshold={inputBufferThreshold}
-            defaultInputBufferThreshold={defaultInputBufferThreshold}
-            onInputBufferThresholdChange={onInputBufferThresholdChange}
-            telemetryConfig={telemetryConfig}
-            defaultTelemetryConfig={defaultTelemetryConfig}
-            onTelemetryConfigChange={onTelemetryConfigChange}
-            audioDebug={audioDebug}
-            audioDebugEnabled={audioDebugEnabled}
-            onAudioDebugEnabledChange={onAudioDebugEnabledChange}
-            masterRmsDb={masterRmsDb}
-            masterPeakDb={masterPeakDb}
-            activeVoices={activeVoices}
-            maxVoices={maxVoices}
-            loadedBuffers={loadedBuffers}
-            totalBuffers={totalBuffers}
-            contextState={contextState}
-            verdictText={verdictText}
-            probeStatusText={probeStatusText}
-            onPlayTestTone={onPlayTestTone}
-            onDumpConsole={onDumpConsole}
-            onForceRecovery={onForceRecovery}
-            onHover={setHoveredDesc}
-            onLeave={() => setHoveredDesc(null)}
-          />
-        )}
+          <div
+            aria-hidden={currentTab !== 'advanced'}
+            inert={currentTab !== 'advanced' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              currentTab === 'advanced'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <AdvancedTab
+              isLight={isLight}
+              developerMode={developerMode}
+              onDeveloperModeChange={handleDeveloperModeChange}
+              onSpawnDiagnosticWindow={onSpawnDiagnosticWindow}
+              inputBufferTarget={inputBufferTarget}
+              defaultInputBufferTarget={defaultInputBufferTarget}
+              onInputBufferTargetChange={onInputBufferTargetChange}
+              inputBufferThreshold={inputBufferThreshold}
+              defaultInputBufferThreshold={defaultInputBufferThreshold}
+              onInputBufferThresholdChange={onInputBufferThresholdChange}
+              telemetryConfig={telemetryConfig}
+              defaultTelemetryConfig={defaultTelemetryConfig}
+              onTelemetryConfigChange={onTelemetryConfigChange}
+              audioDebug={audioDebug}
+              audioDebugEnabled={audioDebugEnabled}
+              onAudioDebugEnabledChange={onAudioDebugEnabledChange}
+              masterRmsDb={masterRmsDb}
+              masterPeakDb={masterPeakDb}
+              activeVoices={activeVoices}
+              maxVoices={maxVoices}
+              loadedBuffers={loadedBuffers}
+              totalBuffers={totalBuffers}
+              contextState={contextState}
+              verdictText={verdictText}
+              probeStatusText={probeStatusText}
+              onPlayTestTone={onPlayTestTone}
+              onDumpConsole={onDumpConsole}
+              onForceRecovery={onForceRecovery}
+              onHover={setHoveredDesc}
+              onLeave={() => setHoveredDesc(null)}
+            />
+          </div>
 
-        {currentTab === 'developer' && (
-          <DeveloperTab
-            isLight={isLight}
-            ballOpacityMode={ballOpacityMode}
-            defaultBallOpacityMode={defaultBallOpacityMode}
-            onBallOpacityModeChange={onBallOpacityModeChange}
-            observeSafeAreaBoundary={observeSafeAreaBoundary}
-            defaultObserveSafeAreaBoundary={defaultObserveSafeAreaBoundary}
-            onObserveSafeAreaBoundaryChange={onObserveSafeAreaBoundaryChange}
-            onNavigateAdvancedAudio={onNavigateAdvancedAudio}
-            onNavigateEventAndTriggerer={onNavigateEventAndTriggerer}
-            onNavigateExpMultiBots={onNavigateExpMultiBots}
-            onNavigateDevSandboxes={onNavigateDevSandboxes}
-            onNavigateDevSubsystemIsolation={onNavigateDevSubsystemIsolation}
-            onNavigateDevActiveTuners={onNavigateDevActiveTuners}
-            onNavigateDevCalibratedPresets={onNavigateDevCalibratedPresets}
-            onNavigateDevUnderDevelopment={onNavigateDevUnderDevelopment}
-            onHover={setHoveredDesc}
-            onLeave={() => setHoveredDesc(null)}
-          />
-        )}
+          {developerMode && (
+            <div
+              aria-hidden={currentTab !== 'developer'}
+              inert={currentTab !== 'developer' ? true : undefined}
+              className={`col-start-1 row-start-1 w-full ${
+                currentTab === 'developer'
+                  ? 'visible opacity-100 pointer-events-auto z-10'
+                  : 'invisible opacity-0 pointer-events-none select-none z-0'
+              }`}
+            >
+              <DeveloperTab
+                isLight={isLight}
+                ballOpacityMode={ballOpacityMode}
+                defaultBallOpacityMode={defaultBallOpacityMode}
+                onBallOpacityModeChange={onBallOpacityModeChange}
+                observeSafeAreaBoundary={observeSafeAreaBoundary}
+                defaultObserveSafeAreaBoundary={defaultObserveSafeAreaBoundary}
+                onObserveSafeAreaBoundaryChange={onObserveSafeAreaBoundaryChange}
+                onNavigateAdvancedAudio={onNavigateAdvancedAudio}
+                onNavigateEventAndTriggerer={onNavigateEventAndTriggerer}
+                onNavigateExpMultiBots={onNavigateExpMultiBots}
+                onNavigateDevSandboxes={onNavigateDevSandboxes}
+                onNavigateDevSubsystemIsolation={onNavigateDevSubsystemIsolation}
+                onNavigateDevActiveTuners={onNavigateDevActiveTuners}
+                onNavigateDevCalibratedPresets={onNavigateDevCalibratedPresets}
+                onNavigateDevUnderDevelopment={onNavigateDevUnderDevelopment}
+                onHover={setHoveredDesc}
+                onLeave={() => setHoveredDesc(null)}
+              />
+            </div>
+          )}
+        </div>
       </PanelContent>
 
       <PanelFooter

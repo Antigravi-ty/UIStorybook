@@ -168,6 +168,7 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
       <div
         style={{ paddingLeft: `${panelBodyPaddingX}px`, paddingRight: `${panelBodyPaddingX}px` }}
         className="pt-1 shrink-0"
+        data-panel-section="tabs"
       >
         <UnderlineTabs
           items={tabs}
@@ -179,61 +180,103 @@ export const Layer2GarageRecipe: React.FC<Layer2GarageRecipeProps> = ({
       </div>
 
       <PanelContent scrollable>
-        {activeTab === 'car' && (
-          <GarageCarTab
-            selectedCar={selectedCar}
-            onSelectCar={handleSelectCar}
-            onHoverDesc={setHoveredDesc}
-            isLight={isLight}
-          />
-        )}
+        <div className="grid grid-cols-1 items-start w-full shrink-0">
+          <div
+            aria-hidden={activeTab !== 'car'}
+            inert={activeTab !== 'car' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              activeTab === 'car'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <GarageCarTab
+              selectedCar={selectedCar}
+              onSelectCar={handleSelectCar}
+              onHoverDesc={setHoveredDesc}
+              isLight={isLight}
+            />
+          </div>
 
-        {activeTab === 'paint' && (
-          <GarageColorTab
-            primaryTeam={primaryTeam}
-            defaultPrimaryTeam={defaultPrimaryTeam}
-            onPrimaryTeamChange={onPrimaryTeamChange}
-            paintFinish={paintFinish}
-            defaultPaintFinish={defaultPaintFinish}
-            onPaintFinishChange={onPaintFinishChange}
-            blueOrder={blueOrder}
-            defaultBlueOrder={defaultBlueOrder}
-            onBlueOrderChange={onBlueOrderChange}
-            orangeOrder={orangeOrder}
-            defaultOrangeOrder={defaultOrangeOrder}
-            onOrangeOrderChange={onOrangeOrderChange}
-            onHoverDesc={setHoveredDesc}
-            isLight={isLight}
-          />
-        )}
+          <div
+            aria-hidden={activeTab !== 'paint'}
+            inert={activeTab !== 'paint' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              activeTab === 'paint'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <GarageColorTab
+              primaryTeam={primaryTeam}
+              defaultPrimaryTeam={defaultPrimaryTeam}
+              onPrimaryTeamChange={onPrimaryTeamChange}
+              paintFinish={paintFinish}
+              defaultPaintFinish={defaultPaintFinish}
+              onPaintFinishChange={onPaintFinishChange}
+              blueOrder={blueOrder}
+              defaultBlueOrder={defaultBlueOrder}
+              onBlueOrderChange={onBlueOrderChange}
+              orangeOrder={orangeOrder}
+              defaultOrangeOrder={defaultOrangeOrder}
+              onOrangeOrderChange={onOrangeOrderChange}
+              onHoverDesc={setHoveredDesc}
+              isLight={isLight}
+            />
+          </div>
 
-        {activeTab === 'loadout' && (
-          <GarageMaterialsTab
-            materials={materials}
-            onUpdateMaterials={onUpdateMaterials}
-            onHoverDesc={setHoveredDesc}
-            isLight={isLight}
-          />
-        )}
+          <div
+            aria-hidden={activeTab !== 'loadout'}
+            inert={activeTab !== 'loadout' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              activeTab === 'loadout'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <GarageMaterialsTab
+              materials={materials}
+              onUpdateMaterials={onUpdateMaterials}
+              onHoverDesc={setHoveredDesc}
+              isLight={isLight}
+            />
+          </div>
 
-        {activeTab === 'anthem' && (
-          <GarageAnthemTab
-            selectedAnthem={selectedAnthem}
-            onSelectAnthem={handleSelectAnthem}
-            anthemAvailable={anthemAvailable}
-            onHoverDesc={setHoveredDesc}
-            isLight={isLight}
-          />
-        )}
+          <div
+            aria-hidden={activeTab !== 'anthem'}
+            inert={activeTab !== 'anthem' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              activeTab === 'anthem'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <GarageAnthemTab
+              selectedAnthem={selectedAnthem}
+              onSelectAnthem={handleSelectAnthem}
+              anthemAvailable={anthemAvailable}
+              onHoverDesc={setHoveredDesc}
+              isLight={isLight}
+            />
+          </div>
 
-        {activeTab === 'sync' && (
-          <UnderConstructionPlaceholder
-            title="Cloud Sync Configuration Under Construction"
-            description="Cloud profile synchronization, cross-device loadout backup and account binding modules are currently under construction."
-            badge="IN DEVELOPMENT"
-            isLight={isLight}
-          />
-        )}
+          <div
+            aria-hidden={activeTab !== 'sync'}
+            inert={activeTab !== 'sync' ? true : undefined}
+            className={`col-start-1 row-start-1 w-full ${
+              activeTab === 'sync'
+                ? 'visible opacity-100 pointer-events-auto z-10'
+                : 'invisible opacity-0 pointer-events-none select-none z-0'
+            }`}
+          >
+            <UnderConstructionPlaceholder
+              title="Cloud Sync Configuration Under Construction"
+              description="Cloud profile synchronization, cross-device loadout backup and account binding modules are currently under construction."
+              badge="IN DEVELOPMENT"
+              isLight={isLight}
+            />
+          </div>
+        </div>
       </PanelContent>
 
       <PanelFooter

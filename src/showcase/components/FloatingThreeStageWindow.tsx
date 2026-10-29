@@ -1,15 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft,
-  Info,
-  Minus,
-  Minimize2,
-  Pin,
-  X,
-  MoveDiagonal2,
-} from 'lucide-react';
-import {
   useFloatingStore,
   type FloatingWindowItem,
   type FloatingStoreInstance,
@@ -21,11 +12,15 @@ import {
 import {
   useFloatingThreeStageStore,
   type FloatingThreeStageConfig,
-  type FloatingResizeHandleStyle,
-  type FloatingCornerArcColorMode,
 } from '../stores/floatingThreeStageStore';
-import { KeycapBadge } from '../../primitives/KeycapBadge';
-import { getFloatingWindowIcon } from '../../navigation/FloatingWindowIcon';
+import {
+  CornerCurvedDragger,
+  type CornerCurvedDraggerProps,
+} from '../../navigation/CornerCurvedDragger';
+import {
+  FloatingThreeStageHeader,
+  FloatingThreeStageFooterAndResizers,
+} from './FloatingThreeStageChrome';
 
 export interface FloatingThreeStageRenderContext {
   isLight: boolean;
@@ -37,11 +32,6 @@ export interface FloatingThreeStageRenderContext {
   pushSubView: (title: string) => void;
   popSubView: () => void;
 }
-
-import {
-  CornerCurvedDragger,
-  type CornerCurvedDraggerProps,
-} from '../../navigation/CornerCurvedDragger';
 
 export { CornerCurvedDragger, type CornerCurvedDraggerProps };
 
@@ -626,232 +616,28 @@ export const FloatingThreeStageWindowInstance: React.FC<FloatingThreeStageWindow
         </div>
       )}
 
-      {/* ════════════════════════════════════════════════════════════════════
-          STAGE 1: HEADER
-         ════════════════════════════════════════════════════════════════════ */}
-      <div
-        onMouseDown={handleTitleBarMouseDown}
-        data-floating-stage="header"
-        style={{
-          paddingLeft: `${config.headerPaddingX}px`,
-          paddingRight: `${config.headerPaddingX}px`,
-          paddingTop: `${config.headerPaddingY}px`,
-          paddingBottom: `${config.headerPaddingY}px`,
-          minHeight: `${minHeaderHeight}px`,
-        }}
-        className={`relative flex items-center justify-between border-b shrink-0 transition-colors ${
-          isPinned ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
-        } ${
-          isLight
-            ? 'border-neutral-200/90 bg-neutral-100/75 text-neutral-900'
-            : 'border-neutral-800/90 bg-neutral-950/60 text-white'
-        } ${
-          config.showStageAnatomyBorders
-            ? 'outline-1 -outline-offset-1 outline-dashed outline-amber-500/70'
-            : ''
-        }`}
-      >
-        {/* Centered Title Mode (L2 Standard) */}
-        {config.headerTitleAlign === 'center' && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden px-12">
-            <span
-              style={{ fontSize: `${config.headerTitleFontSize}px` }}
-              className="font-bold tracking-wider uppercase whitespace-nowrap truncate leading-none text-center"
-            >
-              {activeTitle}
-            </span>
-          </div>
-        )}
-
-        {/* Left Slot: None / Category Icon / Back Button */}
-        <div className="relative z-10 flex items-center gap-2 shrink-0 min-w-0">
-          {config.headerLeftSlotMode === 'back-button' && (
-            <button
-              type="button"
-              onClick={() => {
-                if (subViewStack.length > 0) {
-                  setSubViewStack((prev) => prev.slice(0, -1));
-                }
-              }}
-              onMouseEnter={() =>
-                config.footerHoverLinkage &&
-                setHoveredDesc(
-                  subViewStack.length > 0
-                    ? 'Stage 1 Left Slot [Back]: Return to parent floating window view.'
-                    : 'Stage 1 Left Slot [Back]: At root view of floating window (click inside content to push a sub-view).'
-                )
-              }
-              onMouseLeave={() => config.footerHoverLinkage && setHoveredDesc(null)}
-              style={{
-                minWidth: `${btnGeom.width}px`,
-                height: `${btnGeom.height}px`,
-                borderRadius: btnGeom.borderRadiusCss,
-              }}
-              className={`inline-flex items-center justify-center shrink-0 ${leftBorderStructureClass} transition-all outline-none ${getHeaderBtnSurfaceClasses(
-                subViewStack.length > 0
-              )}`}
-              title="Back to parent view in floating window"
-            >
-              <ArrowLeft
-                style={{ width: `${btnGeom.iconSize}px`, height: `${btnGeom.iconSize}px` }}
-              />
-            </button>
-          )}
-
-          {config.headerLeftSlotMode === 'category-icon' && (
-            <div
-              onMouseEnter={() =>
-                config.footerHoverLinkage &&
-                setHoveredDesc(
-                  `Window Category Icon (${item.category || 'telemetry'}): Drag titlebar to reposition window anywhere on canvas.`
-                )
-              }
-              onMouseLeave={() => config.footerHoverLinkage && setHoveredDesc(null)}
-              style={
-                config.headerTitleAlign === 'center'
-                  ? {
-                      minWidth: `${btnGeom.width}px`,
-                      height: `${btnGeom.height}px`,
-                      borderRadius: btnGeom.borderRadiusCss,
-                    }
-                  : {
-                      paddingLeft: config.headerPaddingX === 0 ? '12px' : '2px',
-                    }
-              }
-              className={`inline-flex items-center justify-center shrink-0 ${
-                config.headerTitleAlign === 'center'
-                  ? `${leftBorderStructureClass} ${
-                      isLight ? 'border-neutral-200/90' : 'border-neutral-800/80'
-                    }`
-                  : ''
-              }`}
-            >
-              {getFloatingWindowIcon(item.category, item.id)}
-            </div>
-          )}
-
-          {/* Left-Aligned Title Mode (Calibrated Default) */}
-          {config.headerTitleAlign === 'left' && (
-            <span
-              style={{
-                fontSize: `${config.headerTitleFontSize}px`,
-                paddingLeft: config.headerLeftSlotMode === 'none' ? '10px' : '0px',
-              }}
-              className="font-bold tracking-tight truncate max-w-[360px] leading-none"
-            >
-              {activeTitle}
-            </span>
-          )}
-        </div>
-
-        {/* Right Slot: Minimize Button (+ Optional Pin / Close) */}
-        <div className="relative z-10 flex items-center shrink-0 ml-auto">
-          {config.headerRightActionMode === 'minimize-and-pin' && (
-            <button
-              type="button"
-              onClick={() => setIsPinned((v) => !v)}
-              onMouseEnter={() =>
-                config.footerHoverLinkage &&
-                setHoveredDesc(
-                  isPinned
-                    ? 'Unpin Window: Allow dragging and batch ESC minimization.'
-                    : 'Pin Window: Lock window position on screen and ignore batch ESC minimize.'
-                )
-              }
-              onMouseLeave={() => config.footerHoverLinkage && setHoveredDesc(null)}
-              style={{
-                minWidth: `${Math.max(22, btnGeom.width)}px`,
-                height: `${btnGeom.height}px`,
-              }}
-              className={`inline-flex items-center justify-center shrink-0 ${rightBorderStructureClass} transition-all outline-none ${getHeaderBtnSurfaceClasses(
-                isPinned
-              )}`}
-              title={isPinned ? 'Unpin Window' : 'Pin Window Position'}
-            >
-              <Pin className="h-3 w-3" />
-            </button>
-          )}
-
-          {/* Minimize-to-Stack Button */}
-          <button
-            type="button"
-            onClick={handleTriggerMinimize}
-            onMouseEnter={() => {
-              setRightHovered(true);
-              if (config.footerHoverLinkage) {
-                setHoveredDesc(
-                  'Minimize to Stack [-]: Collapse window via 3-phase sequenced transition into top-right Floating Stack Icon.'
-                );
-              }
-            }}
-            onMouseLeave={() => {
-              setRightHovered(false);
-              if (config.footerHoverLinkage) {
-                setHoveredDesc(null);
-              }
-            }}
-            style={{
-              minWidth: `${btnGeom.width}px`,
-              width: isRightExpanded ? 'auto' : `${btnGeom.width}px`,
-              height: `${btnGeom.height}px`,
-              borderRadius:
-                config.headerRightActionMode === 'minimize-and-close'
-                  ? '0px'
-                  : btnGeom.rightBorderRadiusCss,
-              paddingLeft: isRightExpanded ? '10px' : undefined,
-              paddingRight: isRightExpanded ? '10px' : undefined,
-            }}
-            className={`inline-flex items-center justify-center gap-1.5 shrink-0 ${rightBorderStructureClass} transition-all outline-none ${getHeaderBtnSurfaceClasses(
-              false
-            )}`}
-            title="最小化收缩至右上角 Stack"
-          >
-            {isRightExpanded && (
-              <span
-                style={{ fontSize: `${labelFontSize}px` }}
-                className="font-bold tracking-wider uppercase leading-none whitespace-nowrap select-none"
-              >
-                STACK
-              </span>
-            )}
-            {config.headerRightIconStyle === 'minimize-2' ? (
-              <Minimize2
-                style={{ width: `${btnGeom.iconSize}px`, height: `${btnGeom.iconSize}px` }}
-              />
-            ) : (
-              <Minus
-                className="stroke-[2.5]"
-                style={{ width: `${btnGeom.iconSize}px`, height: `${btnGeom.iconSize}px` }}
-              />
-            )}
-          </button>
-
-          {config.headerRightActionMode === 'minimize-and-close' && (
-            <button
-              type="button"
-              onClick={onClose}
-              onMouseEnter={() =>
-                config.footerHoverLinkage &&
-                setHoveredDesc('Close Window [×]: Permanently close and remove from Floating Stack.')
-              }
-              onMouseLeave={() => config.footerHoverLinkage && setHoveredDesc(null)}
-              style={{
-                minWidth: `${btnGeom.width}px`,
-                height: `${btnGeom.height}px`,
-                borderRadius: btnGeom.rightBorderRadiusCss,
-              }}
-              className={`inline-flex items-center justify-center shrink-0 ${rightBorderStructureClass} transition-all outline-none hover:bg-rose-500/20 hover:text-rose-500 ${getHeaderBtnSurfaceClasses(
-                false
-              )}`}
-              title="关闭窗口"
-            >
-              <X
-                style={{ width: `${btnGeom.iconSize}px`, height: `${btnGeom.iconSize}px` }}
-              />
-            </button>
-          )}
-        </div>
-      </div>
+      <FloatingThreeStageHeader
+        item={item}
+        config={config}
+        isLight={isLight}
+        isPinned={isPinned}
+        setIsPinned={setIsPinned}
+        activeTitle={activeTitle}
+        subViewStack={subViewStack}
+        setSubViewStack={setSubViewStack}
+        btnGeom={btnGeom}
+        minHeaderHeight={minHeaderHeight}
+        labelFontSize={labelFontSize}
+        isRightExpanded={isRightExpanded}
+        setRightHovered={setRightHovered}
+        setHoveredDesc={setHoveredDesc}
+        leftBorderStructureClass={leftBorderStructureClass}
+        rightBorderStructureClass={rightBorderStructureClass}
+        getHeaderBtnSurfaceClasses={getHeaderBtnSurfaceClasses}
+        handleTitleBarMouseDown={handleTitleBarMouseDown}
+        handleTriggerMinimize={handleTriggerMinimize}
+        onClose={onClose}
+      />
 
       {/* ════════════════════════════════════════════════════════════════════
           STAGE 2: CONTENT BODY
@@ -877,224 +663,28 @@ export const FloatingThreeStageWindowInstance: React.FC<FloatingThreeStageWindow
         {customContent}
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════════
-          STAGE 3: FOOTER
-         ════════════════════════════════════════════════════════════════════ */}
-      {effectiveShowFooter && !isContentHidden && (
-        <div
-          data-floating-stage="footer"
-          style={{
-            paddingLeft: hasFooterRightCompartment ? '0px' : `${config.footerPaddingX}px`,
-            paddingRight: hasFooterRightCompartment
-              ? '0px'
-              : showCornerDragger
-              ? `${Math.max(config.footerPaddingX, 24)}px`
-              : `${config.footerPaddingX}px`,
-            paddingTop: hasFooterRightCompartment ? '0px' : `${config.footerPaddingY}px`,
-            paddingBottom: hasFooterRightCompartment ? '0px' : `${config.footerPaddingY}px`,
-            fontSize: `${config.footerFontSize}px`,
-          }}
-          className={`flex items-stretch justify-between border-t select-none shrink-0 mt-auto relative z-10 transition-colors duration-150 ${
-            isLight
-              ? 'border-neutral-200/90 text-neutral-600 bg-neutral-100/70'
-              : 'border-neutral-800/90 text-neutral-400 bg-neutral-950/60'
-          } ${
-            config.showStageAnatomyBorders
-              ? 'outline-1 -outline-offset-1 outline-dashed outline-sky-500/70'
-              : ''
-          }`}
-        >
-          {/* Left Compartment: Info Icon + Idle Muted / Hover High-Contrast Description */}
-          <div
-            style={
-              hasFooterRightCompartment
-                ? {
-                    paddingLeft: `${config.footerPaddingX}px`,
-                    paddingRight: '10px',
-                    paddingTop: `${config.footerPaddingY}px`,
-                    paddingBottom: `${config.footerPaddingY}px`,
-                  }
-                : undefined
-            }
-            className="flex items-center gap-2 min-w-0 flex-1 truncate"
-          >
-            <Info
-              className={`h-3.5 w-3.5 shrink-0 transition-colors ${
-                hoveredDesc
-                  ? 'text-amber-500'
-                  : isLight
-                  ? 'text-neutral-400'
-                  : 'text-neutral-500'
-              }`}
-            />
-            <span
-              className={`truncate transition-colors duration-150 ${
-                hoveredDesc
-                  ? isLight
-                    ? 'text-neutral-950 font-semibold'
-                    : 'text-white font-semibold'
-                  : isLight
-                  ? 'text-neutral-500'
-                  : 'text-neutral-400'
-              }`}
-            >
-              {hoveredDesc || defaultDescription}
-            </span>
-          </div>
-
-          {/* Optional Right Compartment: Carved Resize Grip / Live Dimensions / Shortcut Badge */}
-          {hasFooterRightCompartment && (
-            <div
-              onMouseDown={
-                effectiveFooterRightMode === 'carved-resize-grip'
-                  ? startResize('both')
-                  : undefined
-              }
-              onClick={
-                effectiveFooterRightMode === 'shortcut-badge'
-                  ? handleTriggerMinimize
-                  : undefined
-              }
-              onMouseEnter={() => {
-                if (!config.footerHoverLinkage) return;
-                if (effectiveFooterRightMode === 'carved-resize-grip') {
-                  setHoveredDesc(
-                    `Stage 3 Carved Resize Slot: Drag diagonally to resize (${size.width}×${size.height}px).`
-                  );
-                } else if (effectiveFooterRightMode === 'live-dimensions') {
-                  setHoveredDesc(
-                    `Window Geometry Readout: ${size.width}×${size.height}px at Canvas (${pos.x}, ${pos.y}).`
-                  );
-                } else if (effectiveFooterRightMode === 'shortcut-badge') {
-                  setHoveredDesc(
-                    'Stage 3 Right Action: Click or press [ESC] to fold floating window into top-right Stack.'
-                  );
-                }
-              }}
-              onMouseLeave={() => config.footerHoverLinkage && setHoveredDesc(null)}
-              style={{
-                paddingLeft: `${config.footerRightPaddingX}px`,
-                paddingRight: `${config.footerRightPaddingX}px`,
-                paddingTop: `${config.footerPaddingY}px`,
-                paddingBottom: `${config.footerPaddingY}px`,
-              }}
-              className={`flex items-center gap-1.5 shrink-0 font-mono transition-colors ${
-                config.footerRightDivider
-                  ? isLight
-                    ? 'border-l border-neutral-200/90'
-                    : 'border-l border-neutral-800/90'
-                  : ''
-              } ${
-                effectiveFooterRightMode === 'carved-resize-grip'
-                  ? isLight
-                    ? 'cursor-nwse-resize hover:bg-amber-500/15 hover:text-amber-600 text-neutral-500'
-                    : 'cursor-nwse-resize hover:bg-amber-500/20 hover:text-amber-400 text-neutral-400'
-                  : effectiveFooterRightMode === 'shortcut-badge'
-                  ? isLight
-                    ? 'cursor-pointer hover:bg-neutral-200/75 text-neutral-600 hover:text-neutral-950'
-                    : 'cursor-pointer hover:bg-neutral-800/80 text-neutral-400 hover:text-white'
-                  : isLight
-                  ? 'text-neutral-500'
-                  : 'text-neutral-400'
-              }`}
-              title={
-                effectiveFooterRightMode === 'carved-resize-grip'
-                  ? '拖拽此槽调整窗口宽高 (Carved 2D Resize Handle)'
-                  : undefined
-              }
-            >
-              {effectiveFooterRightMode === 'carved-resize-grip' && (
-                <>
-                  <span className="text-[10px] opacity-80">
-                    {size.width}×{size.height}
-                  </span>
-                  <MoveDiagonal2 className="h-3 w-3 text-amber-500 shrink-0" />
-                </>
-              )}
-              {effectiveFooterRightMode === 'live-dimensions' && (
-                <span className="text-[10px]">
-                  {size.width}×{size.height}px
-                </span>
-              )}
-              {effectiveFooterRightMode === 'shortcut-badge' && (
-                <>
-                  <span className="font-sans font-medium whitespace-nowrap leading-none">
-                    Stack
-                  </span>
-                  <KeycapBadge shortcut="ESC" size="sm" isLight={isLight} />
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════════════
-          BOTTOM-RIGHT CURVED / CORNER DRAGGER
-         ════════════════════════════════════════════════════════════════════ */}
-      {showCornerDragger && (
-        <div
-          onMouseDown={startResize('both')}
-          onMouseEnter={() => {
-            setCornerGripHovered(true);
-            if (config.footerHoverLinkage) {
-              setHoveredDesc(
-                `Corner Resize Dragger (${size.width}×${size.height}px · Unrestricted Max Size): Drag diagonally to freely scale window.`
-              );
-            }
-          }}
-          onMouseLeave={() => {
-            setCornerGripHovered(false);
-            if (config.footerHoverLinkage) {
-              setHoveredDesc(null);
-            }
-          }}
-          title="拖拽右下角圆弧握把自由缩放窗口 (Unbounded 2D Resize Dragger)"
-          className="absolute bottom-0 right-0 cursor-nwse-resize flex items-end justify-end select-none z-30"
-        >
-          <CornerCurvedDragger
-            styleVariant={
-              isCornerDraggerStyle ? config.resizeHandleStyle : 'corner-arc'
-            }
-            outerRadius={config.outerRadius}
-            concentric={config.cornerArcConcentric}
-            arcRadius={config.cornerArcRadius}
-            inset={config.cornerArcInset}
-            sweepDeg={config.cornerArcSweepDeg}
-            strokeWidth={config.cornerArcStrokeWidth}
-            idleOpacity={config.cornerArcIdleOpacity}
-            colorMode={config.cornerArcColorMode}
-            isLight={isLight}
-            isActiveOrHovered={cornerGripHovered || isResizingNow}
-          />
-        </div>
-      )}
-
-      {showInvisibleEdges && (
-        <>
-          {/* Right Edge Horizontal Resize Hit-Zone */}
-          {(config.enableRightEdgeResize ||
-            config.resizeHandleStyle === 'invisible-edges-and-corner' ||
-            config.resizeHandleStyle === 'both-slot-and-edges') && (
-            <div
-              onMouseDown={startResize('w')}
-              title="拖拽右边缘调整宽度 (Resize Width)"
-              className="absolute top-8 bottom-4 right-0 w-2 cursor-ew-resize z-20 hover:bg-amber-500/30 transition-colors"
-            />
-          )}
-          {/* Bottom Edge Vertical Resize Hit-Zone */}
-          {(config.enableBottomEdgeResize ||
-            config.resizeHandleStyle === 'invisible-edges-and-corner' ||
-            config.resizeHandleStyle === 'both-slot-and-edges') &&
-            !isAutoFitHeight && (
-              <div
-                onMouseDown={startResize('h')}
-                title="拖拽下边缘调整高度 (Resize Height)"
-                className="absolute left-4 right-8 bottom-0 h-2 cursor-ns-resize z-20 hover:bg-amber-500/30 transition-colors"
-              />
-            )}
-        </>
-      )}
+      <FloatingThreeStageFooterAndResizers
+        config={config}
+        isLight={isLight}
+        effectiveShowFooter={effectiveShowFooter}
+        isContentHidden={isContentHidden}
+        hasFooterRightCompartment={hasFooterRightCompartment}
+        effectiveFooterRightMode={effectiveFooterRightMode}
+        showCornerDragger={showCornerDragger}
+        isCornerDraggerStyle={isCornerDraggerStyle}
+        showInvisibleEdges={showInvisibleEdges}
+        isAutoFitHeight={isAutoFitHeight}
+        cornerGripHovered={cornerGripHovered}
+        setCornerGripHovered={setCornerGripHovered}
+        isResizingNow={isResizingNow}
+        hoveredDesc={hoveredDesc}
+        setHoveredDesc={setHoveredDesc}
+        defaultDescription={defaultDescription}
+        size={size}
+        pos={pos}
+        startResize={startResize}
+        handleTriggerMinimize={handleTriggerMinimize}
+      />
     </motion.div>
   );
 };

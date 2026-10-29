@@ -53,8 +53,14 @@ export interface ClampedMenuPanelGeometry {
   modeLabel: string;
 }
 
-function getVerticalMargin(style: CSSStyleDeclaration): number {
-  return (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
+function getExplicitVerticalMargin(el: HTMLElement, style: CSSStyleDeclaration): number {
+  const isTopAuto =
+    el.classList.contains('mt-auto') ||
+    el.getAttribute('data-panel-section') === 'footer';
+  const isBottomAuto = el.classList.contains('mb-auto');
+  const mt = isTopAuto ? 0 : parseFloat(style.marginTop) || 0;
+  const mb = isBottomAuto ? 0 : parseFloat(style.marginBottom) || 0;
+  return mt + mb;
 }
 
 function getVerticalPaddingAndBorder(style: CSSStyleDeclaration): number {
@@ -68,7 +74,7 @@ function getVerticalPaddingAndBorder(style: CSSStyleDeclaration): number {
 
 /**
  * Measures the natural un-stretched height of a flex/grid container's children
- * without being fooled by `flex-1` stretching or `justify-between` empty space.
+ * without being fooled by `flex-1` stretching, `mt-auto`, or `justify-between` empty space.
  */
 export function measureNaturalElementHeight(el: HTMLElement, depth = 0): number {
   if (typeof window === 'undefined') return el.offsetHeight;
@@ -91,7 +97,7 @@ export function measureNaturalElementHeight(el: HTMLElement, depth = 0): number 
   }
 
   if (visibleChildren.length === 0) {
-    return Math.ceil(Math.max(el.offsetHeight, el.scrollHeight));
+    return Math.max(el.getBoundingClientRect().height, el.scrollHeight);
   }
 
   // Multi-column CSS Grid (e.g. Layer 4 .RCSPack Browser 12-col split view or Layer 2 Play 3-col grid)
@@ -112,15 +118,16 @@ export function measureNaturalElementHeight(el: HTMLElement, depth = 0): number 
       for (const col of visibleChildren) {
         const colStyle = window.getComputedStyle(col);
         const colH =
-          measureNaturalElementHeight(col, depth + 1) + getVerticalMargin(colStyle);
+          measureNaturalElementHeight(col, depth + 1) +
+          getExplicitVerticalMargin(col, colStyle);
         if (colH > maxColH) maxColH = colH;
       }
-      return Math.ceil(padBorderY + maxColH);
+      return padBorderY + maxColH;
     }
 
-    // Standard auto-sizing grid (e.g. PlayModeCard grid or Garage Car grid):
-    // Its offsetHeight is already its exact natural grid height.
-    return Math.ceil(el.offsetHeight);
+    // Standard auto-sizing grid (e.g. PlayModeCard grid or single-cell multi-tab stack grid):
+    // Its bounding rect height is already its exact natural grid height.
+    return el.getBoundingClientRect().height;
   }
 
   const gapY = parseFloat(style.rowGap) || parseFloat(style.gap) || 0;
@@ -128,7 +135,7 @@ export function measureNaturalElementHeight(el: HTMLElement, depth = 0): number 
 
   for (const child of visibleChildren) {
     const cStyle = window.getComputedStyle(child);
-    const marginY = getVerticalMargin(cStyle);
+    const marginY = getExplicitVerticalMargin(child, cStyle);
     const isFlexStretched =
       parseFloat(cStyle.flexGrow) > 0 ||
       child.classList.contains('grow') ||
@@ -139,16 +146,27 @@ export function measureNaturalElementHeight(el: HTMLElement, depth = 0): number 
     if (depth < 3 && isFlexStretched && child.children.length > 0) {
       sumChildrenH += measureNaturalElementHeight(child, depth + 1) + marginY;
     } else {
-      sumChildrenH += Math.ceil(child.offsetHeight) + marginY;
+      sumChildrenH += child.getBoundingClientRect().height + marginY;
     }
   }
 
   sumChildrenH += Math.max(0, visibleChildren.length - 1) * gapY;
-  return Math.ceil(padBorderY + sumChildrenH);
+  return padBorderY + sumChildrenH;
+}
+
+function measureTextContentWidth(el: HTMLElement): number {
+  if (typeof document !== 'undefined' && document.createRange) {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const rect = range.getBoundingClientRect();
+    if (rect.width > 0) return Math.ceil(rect.width);
+  }
+  return Math.ceil(el.scrollWidth);
 }
 
 /**
- * Measures the minimum non-overlapping width required by PanelHeader and UnderlineTabs.
+ * Measures the minimum non-overlapping width required by PanelHeader and UnderlineTabs
+ * without being fooled by block-level `<h1>` widths or `flex-1` stretched tab buttons.
  */
 function measureChromeMinWidth(panelEl: HTMLElement): number {
   let minW = 300;
@@ -159,15 +177,15 @@ function measureChromeMinWidth(panelEl: HTMLElement): number {
     const padX =
       (parseFloat(hStyle.paddingLeft) || 0) + (parseFloat(hStyle.paddingRight) || 0);
     const titleEl = headerEl.querySelector<HTMLElement>('h1, h2');
-    const titleW = titleEl ? Math.ceil(titleEl.scrollWidth) : 140;
+    const titleW = titleEl ? measureTextContentWidth(titleEl) : 120;
     const buttons = headerEl.querySelectorAll<HTMLElement>('button');
-    let maxBtnW = 42;
+    let maxBtnW = 0;
     buttons.forEach((btn) => {
       const bw = Math.ceil(btn.getBoundingClientRect().width);
       if (bw > maxBtnW) maxBtnW = bw;
     });
-    // Because PanelHeader centers its title across the full header width, reserve symmetric space on both sides
-    const headerNeeded = titleW + (maxBtnW + 16) * 2 + padX + 4;
+    const sideBtnReserve = buttons.length > 0 ? (maxBtnW + 12) * 2 : 0;
+    const headerNeeded = titleW + sideBtnReserve + padX + 8;
     if (headerNeeded > minW) minW = headerNeeded;
   }
 
@@ -183,12 +201,34 @@ function measureChromeMinWidth(panelEl: HTMLElement): number {
     const tabs = tablistEl.querySelectorAll<HTMLElement>('[role="tab"]');
     let tabsSumW = 0;
     tabs.forEach((tab) => {
-      tabsSumW += Math.ceil(tab.scrollWidth) + 8;
+      const tabStyle = window.getComputedStyle(tab);
+      const tabPadX =
+        (parseFloat(tabStyle.paddingLeft) || 0) +
+        (parseFloat(tabStyle.paddingRight) || 0);
+      const tabGap = parseFloat(tabStyle.columnGap) || parseFloat(tabStyle.gap) || 4;
+      let innerW = 0;
+      let visibleSubCount = 0;
+      for (let i = 0; i < tab.children.length; i++) {
+        const sub = tab.children[i] as HTMLElement;
+        const subStyle = window.getComputedStyle(sub);
+        if (
+          subStyle.display === 'none' ||
+          subStyle.position === 'absolute' ||
+          subStyle.position === 'fixed'
+        ) {
+          continue;
+        }
+        innerW += Math.ceil(sub.scrollWidth || sub.getBoundingClientRect().width);
+        visibleSubCount++;
+      }
+      const naturalTabW =
+        innerW + Math.max(0, visibleSubCount - 1) * tabGap + tabPadX + 4;
+      tabsSumW += naturalTabW;
     });
     const tStyle = window.getComputedStyle(tablistEl);
-    const gap = parseFloat(tStyle.columnGap) || parseFloat(tStyle.gap) || 4;
+    const gap = parseFloat(tStyle.columnGap) || parseFloat(tStyle.gap) || 0;
     const tabsNeeded =
-      tabsSumW + Math.max(0, tabs.length - 1) * gap + padX + 16;
+      tabsSumW + Math.max(0, tabs.length - 1) * gap + padX + 8;
     if (tabsNeeded > minW) minW = tabsNeeded;
   }
 
@@ -231,12 +271,12 @@ export function measureMenuPanelIntrinsicDimensions(
     ) {
       continue;
     }
-    const marginY = getVerticalMargin(cStyle);
+    const marginY = getExplicitVerticalMargin(child, cStyle);
     if (child.getAttribute('data-panel-section') === 'content') {
       contentEl = child;
       totalH += measureNaturalElementHeight(child, 0) + marginY;
     } else {
-      totalH += Math.ceil(child.offsetHeight) + marginY;
+      totalH += child.getBoundingClientRect().height + marginY;
     }
   }
 

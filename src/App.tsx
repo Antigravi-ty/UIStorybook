@@ -33,7 +33,7 @@ const ViewportSafeAreaPage = lazy(() => import('./showcase/pages/ViewportSafeAre
 import { SafeAreaHud, useViewportStore, viewportStore } from './viewport';
 import { DialogueStackContainer } from './primitives/Dialogue';
 import { SectionErrorBoundary } from './primitives/SectionErrorBoundary';
-import { ExternalLink, Code2, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import { useAccentStore, readUrlParams, updateUrlParams, useSyncedState } from './showcase/stores';
 
 interface JumpOriginRecord {
@@ -221,27 +221,14 @@ export const App: React.FC = () => {
           }`}
         >
           <div className="flex items-center gap-3 text-xs">
-            <span className="font-bold tracking-tight">RLCleanWASM</span>
+            <span className="font-bold tracking-tight">UIStorybook</span>
             <span className="text-neutral-400">/</span>
-            <span className={`font-mono font-medium ${tokens.text}`}>UIStorybook Architecture</span>
+            <span className={`font-mono font-medium ${tokens.text}`}>Component Architecture</span>
           </div>
 
-          {/* Right Toolbar: UI Scaling Slider + Safe Area Margin Button + HUD Toggle + Links */}
+          {/* Right Toolbar: UI Scaling Slider + Safe Area Margin Button + HUD Toggle */}
           <div className="flex items-center gap-4">
             <ViewportControls isLight={isLight} />
-
-            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-800 hidden md:block" />
-
-            <a
-              href="https://github.com/Antigravi-ty/RLCleanWASM"
-              target="_blank"
-              rel="noreferrer"
-              className="hidden lg:flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
-            >
-              <Code2 className="h-3.5 w-3.5" />
-              <span>Reference Repo</span>
-              <ExternalLink className="h-3 w-3 opacity-60" />
-            </a>
           </div>
         </header>
 

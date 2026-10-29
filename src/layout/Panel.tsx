@@ -549,7 +549,7 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
 
   const effectiveWidth = sizing?.width ?? width;
   const resolvedMaxWidth =
-    effectiveWidth !== undefined
+    !inMorphContainer && effectiveWidth !== undefined
       ? typeof effectiveWidth === 'number'
         ? `${effectiveWidth}px`
         : effectiveWidth
