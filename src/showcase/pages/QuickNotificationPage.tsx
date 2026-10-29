@@ -1,37 +1,17 @@
 import React, { useEffect, useRef } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:quick-notification');
+import { BellDot, Layers, Sparkles, CircleSlash, Trash2, Loader2, Eye, Send, } from 'lucide-react';
 import {
-  BellDot,
-  Layers,
-  Sparkles,
-  CircleSlash,
-  Trash2,
-  Loader2,
-  Eye,
-  Send,
-} from 'lucide-react';
-import {
-  useQuickNotificationStore,
-  QuickNotificationItem,
-  pushOngoingNotification,
-  updateOngoingNotification,
+  useQuickNotificationStore, QuickNotificationItem, pushOngoingNotification, updateOngoingNotification,
   completeOngoingNotification,
 } from '../../tokens/quickNotificationStore';
 import {
-  QuickNotificationDrawer,
-  CollapseToRightIcon,
-  getButtonColorClass,
-  MONO_FONT_STACK,
-  type QuickNotificationGlowLevel,
-  type QuickNotificationType,
-  type QuickNotificationButtonConfig,
+  QuickNotificationDrawer, CollapseToRightIcon, getButtonColorClass, MONO_FONT_STACK,
+  type QuickNotificationGlowLevel, type QuickNotificationType, type QuickNotificationButtonConfig,
 } from '../../primitives/QuickNotification';
-import {
-  QuickNotificationSystem,
-  type NotificationIconLifecycle,
-} from '../../navigation/QuickNotificationSystem';
+import { QuickNotificationSystem, type NotificationIconLifecycle, } from '../../navigation/QuickNotificationSystem';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
 import { CodeBlock } from '../CodeBlock';
@@ -353,12 +333,8 @@ export const QuickNotificationPage: React.FC<{ isLight?: boolean }> = ({ isLight
   const generatedUsageCode = `import { QuickNotificationDrawer } from '@/primitives/QuickNotification';
 import { QuickNotificationSystem } from '@/navigation/QuickNotificationSystem';
 import {
-  quickNotificationStore,
-  pushQuickNotification,
-  pushOngoingNotification,
-  updateOngoingNotification,
-  dismissOngoingNotification,
-  completeOngoingNotification,
+  quickNotificationStore, pushQuickNotification, pushOngoingNotification, updateOngoingNotification,
+  dismissOngoingNotification, completeOngoingNotification,
 } from '@/tokens/quickNotificationStore';
 
 // ── 场景 A: 后台任务 / Lazy Loading 通知 (最低优先级、用户不可关闭、自动覆盖与恢复) ──
@@ -402,10 +378,7 @@ pushQuickNotification({
 />`;
 
   return (
-    <div
-      style={{ fontFamily: MONO_FONT_STACK }}
-      className="flex flex-col gap-5 w-full relative font-mono text-xs"
-    >
+    <div style={{ fontFamily: MONO_FONT_STACK }} className="flex flex-col gap-5 w-full relative font-mono text-xs">
       {/* ──────────────────────────────────────────────────────────────────
           1. Page Header (顶栏标题)
          ────────────────────────────────────────────────────────────────── */}
@@ -415,9 +388,7 @@ pushQuickNotification({
             <BellDot className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              Quick Notification 快速通知系统
-            </h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Quick Notification 快速通知系统</h1>
             <p className={`text-xs mt-0.5 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
               轻量级抽屉式通知。4 级内发光及无发光常规底板、最右侧收起黑键、多业务按钮色卡与横向抽屉展开动效。
             </p>
@@ -430,17 +401,10 @@ pushQuickNotification({
          ────────────────────────────────────────────────────────────────── */}
       <div
         className={`relative w-full min-h-[520px] rounded-2xl border p-6 overflow-hidden select-none transition-colors ${
-          isLight
-            ? 'bg-neutral-100/70 border-neutral-200 shadow-inner'
-            : 'bg-neutral-950/80 border-neutral-800 shadow-inner'
-        }`}
-        style={{
-          backgroundImage: isLight
-            ? 'radial-gradient(#d4d4d8 1px, transparent 1px)'
-            : 'radial-gradient(#27272a 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }}
-      >
+        isLight ? 'bg-neutral-100/70 border-neutral-200 shadow-inner'
+        : 'bg-neutral-950/80 border-neutral-800 shadow-inner' }`} style={{ backgroundImage: isLight
+        ? 'radial-gradient(#d4d4d8 1px, transparent 1px)' : 'radial-gradient(#27272a 1px, transparent 1px)',
+        backgroundSize: '24px 24px', }}>
         {/* Background Canvas Ambient Notice */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-30 select-none">
           <span className="text-3xl mb-1">🔔</span>
@@ -456,13 +420,8 @@ pushQuickNotification({
           Quick Notification Visual System (Hosts the top-right cluster, drawer, and unread dropdown)
           Decoupled: supports controlled previewNotification, custom slotRight, and autonomous animation lifecycle.
         */}
-        <QuickNotificationSystem
-          isLight={isLight}
-          absolute={true}
-          slotRight={showStackIcon}
-          previewNotification={liveMode ? livePreviewDraft : null}
-          onLifecycleChange={setIconLifecycle}
-        />
+        <QuickNotificationSystem isLight={isLight} absolute={true} slotRight={showStackIcon}
+          previewNotification={liveMode ? livePreviewDraft : null} onLifecycleChange={setIconLifecycle} />
 
         {/* Floating live mode watermark overlay on canvas */}
         {liveMode && (
@@ -479,25 +438,14 @@ pushQuickNotification({
          ────────────────────────────────────────────────────────────────── */}
       <div
         className={`px-4 py-2.5 rounded-xl border flex flex-wrap items-center justify-between gap-3 text-xs font-mono transition-colors ${
-          isLight
-            ? 'bg-neutral-50/80 border-neutral-200 text-neutral-700 shadow-2xs'
-            : 'bg-neutral-900/60 border-neutral-800 text-neutral-300'
-        }`}
-      >
+        isLight ? 'bg-neutral-50/80 border-neutral-200 text-neutral-700 shadow-2xs'
+        : 'bg-neutral-900/60 border-neutral-800 text-neutral-300' }`}>
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
             <span className="text-neutral-400">Icon State:</span>
-            <span
-              className={`font-bold ${
-                iconLifecycle === 'visible'
-                  ? 'text-emerald-500'
-                  : iconLifecycle === 'spawning'
-                  ? 'text-amber-500'
-                  : iconLifecycle === 'hidden'
-                  ? 'text-neutral-500'
-                  : 'text-red-500'
-              }`}
-            >
+            <span className={`font-bold ${ iconLifecycle === 'visible' ? 'text-emerald-500'
+              : iconLifecycle === 'spawning' ? 'text-amber-500' : iconLifecycle === 'hidden' ? 'text-neutral-500'
+              : 'text-red-500' }`}>
               {iconLifecycle.toUpperCase()}
             </span>
           </div>
@@ -521,11 +469,7 @@ pushQuickNotification({
             <span className="text-neutral-400">Ongoing Task:</span>
             {activeOngoingTask ? (
               <span className="flex items-center gap-1">
-                <span
-                  className={`font-bold ${
-                    activeNotification ? 'text-amber-500' : 'text-emerald-500'
-                  }`}
-                >
+                <span className={`font-bold ${ activeNotification ? 'text-amber-500' : 'text-emerald-500' }`}>
                   {activeNotification ? '[YIELDED / COVERED]' : '[ACTIVE]'}
                 </span>
                 <span className="text-neutral-900 dark:text-neutral-100 font-bold max-w-[130px] truncate">
@@ -566,9 +510,7 @@ pushQuickNotification({
 
           <div className="flex items-center gap-1.5">
             <span className="text-neutral-400">Unread in Stack:</span>
-            <strong className="text-neutral-900 dark:text-neutral-100 font-bold">
-              {totalUnreadCount}
-            </strong>
+            <strong className="text-neutral-900 dark:text-neutral-100 font-bold">{totalUnreadCount}</strong>
           </div>
 
           <span className="text-neutral-300 dark:text-neutral-700">|</span>
@@ -609,13 +551,9 @@ pushQuickNotification({
 
           <div className="flex items-center gap-2 text-[11px] text-neutral-400">
             <span>Mode:</span>
-            <span
-              className={`font-bold px-1.5 py-0.5 rounded ${
-                liveMode
-                  ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
-                  : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
-              }`}
-            >
+            <span className={`font-bold px-1.5 py-0.5 rounded ${ liveMode
+              ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
+              : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300' }`}>
               {liveMode ? 'LIVE' : 'PUSH'}
             </span>
           </div>
@@ -626,61 +564,31 @@ pushQuickNotification({
           4. Lower Grid: Control Panel (Left 7 cols) & Test Presets (Right 5 cols)
          ────────────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <QuickNotificationControlPanel
-          isLight={isLight}
-          showStackIcon={showStackIcon}
-          setShowStackIcon={setShowStackIcon}
-          liveMode={liveMode}
-          setLiveMode={setLiveMode}
-          totalChars={totalChars}
-          chineseChars={chineseChars}
-          asciiChars={asciiChars}
-          estimatedContentWidthPx={estimatedContentWidthPx}
-          temporalType={temporalType}
-          setTemporalType={setTemporalType}
-          effectiveDuration={effectiveDuration}
-          durationPreset={durationPreset}
-          setDurationPreset={setDurationPreset}
-          customDurationMs={customDurationMs}
-          setCustomDurationMs={setCustomDurationMs}
-          ongoingProgressMode={ongoingProgressMode}
-          setOngoingProgressMode={setOngoingProgressMode}
-          ongoingProgressPct={ongoingProgressPct}
-          setOngoingProgressPct={setOngoingProgressPct}
-          isSpinningIcon={isSpinningIcon}
-          setIsSpinningIcon={setIsSpinningIcon}
-          tone={tone}
-          setTone={setTone}
-          iconName={iconName}
-          setIconName={setIconName}
-          content={content}
-          setContent={setContent}
-          buttons={buttons}
-          setButtons={setButtons}
-        />
+        <QuickNotificationControlPanel isLight={isLight} showStackIcon={showStackIcon}
+          setShowStackIcon={setShowStackIcon} liveMode={liveMode} setLiveMode={setLiveMode} totalChars={totalChars}
+          chineseChars={chineseChars} asciiChars={asciiChars} estimatedContentWidthPx={estimatedContentWidthPx}
+          temporalType={temporalType} setTemporalType={setTemporalType} effectiveDuration={effectiveDuration}
+          durationPreset={durationPreset} setDurationPreset={setDurationPreset} customDurationMs={customDurationMs}
+          setCustomDurationMs={setCustomDurationMs} ongoingProgressMode={ongoingProgressMode}
+          setOngoingProgressMode={setOngoingProgressMode} ongoingProgressPct={ongoingProgressPct}
+          setOngoingProgressPct={setOngoingProgressPct} isSpinningIcon={isSpinningIcon}
+          setIsSpinningIcon={setIsSpinningIcon} tone={tone} setTone={setTone} iconName={iconName}
+          setIconName={setIconName} content={content} setContent={setContent} buttons={buttons}
+          setButtons={setButtons} />
 
-        <QuickNotificationPresetsPanel
-          isLight={isLight}
-          handlePushCurrent={handlePushCurrent}
-          handlePushPreset={handlePushPreset}
-          handlePushBatch={handlePushBatch}
+        <QuickNotificationPresetsPanel isLight={isLight} handlePushCurrent={handlePushCurrent}
+          handlePushPreset={handlePushPreset} handlePushBatch={handlePushBatch}
           handleRunLazyLoadingSimulation={handleRunLazyLoadingSimulation}
           handleRunPriorityPreemptionTest={handleRunPriorityPreemptionTest}
-          handleRunMultiTaskTest={handleRunMultiTaskTest}
-          ongoingConflictPolicy={ongoingConflictPolicy}
-          activeOngoingTask={activeOngoingTask}
-        />
+          handleRunMultiTaskTest={handleRunMultiTaskTest} ongoingConflictPolicy={ongoingConflictPolicy}
+          activeOngoingTask={activeOngoingTask} />
       </div>
 
       {/* ──────────────────────────────────────────────────────────────────
           5. Code Recipe & Export Block
          ────────────────────────────────────────────────────────────────── */}
       <div className="mt-2">
-        <CodeBlock
-          code={generatedUsageCode}
-          language="tsx"
-          title="QuickNotification Recipe (代码使用示范)"
-        />
+        <CodeBlock code={generatedUsageCode} language="tsx" title="QuickNotification Recipe (代码使用示范)" />
       </div>
     </div>
   );

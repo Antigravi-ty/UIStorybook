@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Camera, CheckCircle2, Play } from 'lucide-react';
-import { SliderControl, ToggleSwitch, Button } from '../../primitives';
-import { CounterfactualComparisonStrip } from '../../compounds';
-import { quickNotification } from '../../tokens';
+import { SliderControl } from '../../primitives/SliderControl';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { Button } from '../../primitives/Button';
+import { CounterfactualComparisonStrip } from '../../compounds/CounterfactualComparisonStrip';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**
  * 15. [Dev] Camera Determinism & Quaternion Slerp Harness (`camera-determinism-harness`)

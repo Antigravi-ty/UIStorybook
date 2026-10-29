@@ -29,7 +29,7 @@ import {
   PanelRightClose,
   Megaphone,
 } from 'lucide-react';
-import { useAccentStore } from './stores';
+import { useAccentStore } from './stores/themeStore';
 import { AccentColor } from '../tokens/colors';
 
 export type ShowcaseTab =

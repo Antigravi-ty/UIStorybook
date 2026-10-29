@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { Activity, Pause, Play, Cpu, RotateCcw } from 'lucide-react';
 import { TelemetryRingBuffer, TelemetryComputedStats } from './telemetryRingBuffer';
-import { CanvasRenderCache, drawTelemetryCanvas } from './telemetrySparklinePainter';
+import { CanvasRenderCache, drawTelemetryCanvas, syncTelemetryDomReadouts, type TelemetryDomDirtyState } from './telemetrySparklinePainter';
 
 export interface TelemetryPhaseItem {
   phase: string;
@@ -148,16 +148,9 @@ export const TelemetrySparklineChart = React.memo(
       const budgetBoxRef = useRef<HTMLDivElement | null>(null);
       const budgetTextRef = useRef<HTMLSpanElement | null>(null);
 
-      const domDirtyStateRef = useRef({
-        currentStr: '',
-        fpsStr: '',
-        p50Str: '',
-        p95Str: '',
-        p99Str: '',
-        peakStr: '',
-        budgetStr: '',
-        isPeakOver: null as boolean | null,
-        isBudgetOver: null as boolean | null,
+      const domDirtyStateRef = useRef<TelemetryDomDirtyState>({
+        currentStr: '', fpsStr: '', p50Str: '', p95Str: '', p99Str: '', peakStr: '', budgetStr: '',
+        isPeakOver: null, isBudgetOver: null,
       });
 
       useImperativeHandle(
@@ -198,72 +191,17 @@ export const TelemetrySparklineChart = React.memo(
         return () => ro.disconnect();
       }, []);
 
-      // Dirty-checked DOM readout updater (only mutates textContent/className when value actually changes)
       const syncDomReadouts = useCallback(
-        (s: TelemetryComputedStats) => {
-          const d = domDirtyStateRef.current;
-          const curStr = s.currentMs.toFixed(2);
-          if (d.currentStr !== curStr && currentValRef.current) {
-            d.currentStr = curStr;
-            currentValRef.current.textContent = curStr;
-          }
-
-          if (showFpsReadout && fpsValRef.current) {
-            const fStr = `(${s.fps} fps)`;
-            if (d.fpsStr !== fStr) {
-              d.fpsStr = fStr;
-              fpsValRef.current.textContent = fStr;
-            }
-          }
-
-          const p50Str = `${s.p50.toFixed(2)}${unit}`;
-          if (d.p50Str !== p50Str && p50ValRef.current) {
-            d.p50Str = p50Str;
-            p50ValRef.current.textContent = p50Str;
-          }
-
-          const p95Str = `${s.p95.toFixed(2)}${unit}`;
-          if (d.p95Str !== p95Str && p95ValRef.current) {
-            d.p95Str = p95Str;
-            p95ValRef.current.textContent = p95Str;
-          }
-
-          const p99Str = `${s.p99.toFixed(2)}${unit}`;
-          if (d.p99Str !== p99Str && p99ValRef.current) {
-            d.p99Str = p99Str;
-            p99ValRef.current.textContent = p99Str;
-          }
-
-          const peakStr = `${s.worstMs.toFixed(2)}${unit}`;
-          if (d.peakStr !== peakStr && peakValRef.current) {
-            d.peakStr = peakStr;
-            peakValRef.current.textContent = peakStr;
-          }
-
-          const isPeakOver = s.worstMs > budgetMs * 1.2;
-          if (d.isPeakOver !== isPeakOver && peakValRef.current) {
-            d.isPeakOver = isPeakOver;
-            peakValRef.current.className = `text-[11px] font-bold tabular-nums ${
-              isPeakOver ? 'text-rose-500' : ''
-            }`;
-          }
-
-          const hasOver = s.overBudgetCount > 0;
-          if (d.isBudgetOver !== hasOver && budgetBoxRef.current) {
-            d.isBudgetOver = hasOver;
-            budgetBoxRef.current.className = `p-1.5 rounded-lg border ${
-              hasOver
-                ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
-                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
-            }`;
-          }
-
-          const budgetStr = hasOver ? `${s.overBudgetPct}% Over` : '100% OK';
-          if (d.budgetStr !== budgetStr && budgetTextRef.current) {
-            d.budgetStr = budgetStr;
-            budgetTextRef.current.textContent = budgetStr;
-          }
-        },
+        (s: TelemetryComputedStats) =>
+          syncTelemetryDomReadouts(
+            s, domDirtyStateRef.current,
+            {
+              currentVal: currentValRef.current, fpsVal: fpsValRef.current,
+              p50Val: p50ValRef.current, p95Val: p95ValRef.current, p99Val: p99ValRef.current,
+              peakVal: peakValRef.current, budgetBox: budgetBoxRef.current, budgetText: budgetTextRef.current,
+            },
+            budgetMs, showFpsReadout, unit
+          ),
         [budgetMs, showFpsReadout, unit]
       );
 
@@ -290,62 +228,18 @@ export const TelemetrySparklineChart = React.memo(
           refreshHz,
           isFrozen ? frozenSnapshot : null
         );
-        drawTelemetryCanvas(
-          canvas,
-          renderCacheRef.current,
-          getSampleCount(),
-          getSampleAt,
-          stats.ceiling,
-          {
-            canvasWidth,
-            height,
-            budgetMs,
-            refreshHz,
-            unit,
-            isLight,
-            hoverIndex,
-            isFrozen,
-          }
-        );
+        drawTelemetryCanvas(canvas, renderCacheRef.current, getSampleCount(), getSampleAt, stats.ceiling, {
+          canvasWidth, height, budgetMs, refreshHz, unit, isLight, hoverIndex, isFrozen,
+        });
         syncDomReadouts(stats);
       }, [
-        activeRingBuffer,
-        frozenSnapshot,
-        getSampleCount,
-        getSampleAt,
-        canvasWidth,
-        height,
-        budgetMs,
-        refreshHz,
-        unit,
-        isLight,
-        hoverIndex,
-        isFrozen,
-        syncDomReadouts,
-        history,
+        activeRingBuffer, frozenSnapshot, getSampleCount, getSampleAt,
+        canvasWidth, height, budgetMs, refreshHz, unit, isLight, hoverIndex, isFrozen, syncDomReadouts, history,
       ]);
 
       // Event-driven coalesced rAF draw on ringBuffer push (0% CPU when idle or frozen!)
-      const liveOptsRef = useRef({
-        canvasWidth,
-        height,
-        budgetMs,
-        refreshHz,
-        unit,
-        isLight,
-        hoverIndex,
-        isFrozen,
-      });
-      liveOptsRef.current = {
-        canvasWidth,
-        height,
-        budgetMs,
-        refreshHz,
-        unit,
-        isLight,
-        hoverIndex,
-        isFrozen,
-      };
+      const liveOptsRef = useRef({ canvasWidth, height, budgetMs, refreshHz, unit, isLight, hoverIndex, isFrozen });
+      liveOptsRef.current = { canvasWidth, height, budgetMs, refreshHz, unit, isLight, hoverIndex, isFrozen };
 
       useEffect(() => {
         let rafId = 0;
@@ -603,55 +497,29 @@ export const TelemetrySparklineChart = React.memo(
           {/* Quantile Breakdown Chips */}
           {showQuantiles && !compact && !isEmbedded && (
             <div className="grid grid-cols-5 gap-1.5 text-center font-mono">
-              <div
-                className={`p-1.5 rounded-lg border ${
-                  isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
-                }`}
-              >
-                <span className="text-[9px] text-neutral-400 block">p50</span>
-                <span ref={p50ValRef} className="text-[11px] font-bold tabular-nums">
-                  {initialStats.p50.toFixed(2)}
-                  {unit}
-                </span>
-              </div>
-              <div
-                className={`p-1.5 rounded-lg border ${
-                  isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
-                }`}
-              >
-                <span className="text-[9px] text-neutral-400 block">p95</span>
-                <span ref={p95ValRef} className="text-[11px] font-bold tabular-nums">
-                  {initialStats.p95.toFixed(2)}
-                  {unit}
-                </span>
-              </div>
-              <div
-                className={`p-1.5 rounded-lg border ${
-                  isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
-                }`}
-              >
-                <span className="text-[9px] text-neutral-400 block">p99</span>
-                <span ref={p99ValRef} className="text-[11px] font-bold text-amber-500 tabular-nums">
-                  {initialStats.p99.toFixed(2)}
-                  {unit}
-                </span>
-              </div>
-              <div
-                className={`p-1.5 rounded-lg border ${
-                  isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
-                }`}
-              >
-                <span className="text-[9px] text-neutral-400 block">Peak</span>
-                <span
-                  ref={peakValRef}
-                  className={`text-[11px] font-bold tabular-nums ${
-                    initialStats.worstMs > budgetMs * 1.2 ? 'text-rose-500' : ''
+              {[
+                { label: 'p50', ref: p50ValRef, val: initialStats.p50.toFixed(2) + unit, cls: '' },
+                { label: 'p95', ref: p95ValRef, val: initialStats.p95.toFixed(2) + unit, cls: '' },
+                { label: 'p99', ref: p99ValRef, val: initialStats.p99.toFixed(2) + unit, cls: 'text-amber-500' },
+                {
+                  label: 'Peak',
+                  ref: peakValRef,
+                  val: initialStats.worstMs.toFixed(2) + unit,
+                  cls: initialStats.worstMs > budgetMs * 1.2 ? 'text-rose-500' : '',
+                },
+              ].map((q) => (
+                <div
+                  key={q.label}
+                  className={`p-1.5 rounded-lg border ${
+                    isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
                   }`}
                 >
-                  {initialStats.worstMs.toFixed(2)}
-                  {unit}
-                </span>
-              </div>
+                  <span className="text-[9px] text-neutral-400 block">{q.label}</span>
+                  <span ref={q.ref} className={`text-[11px] font-bold tabular-nums ${q.cls}`}>
+                    {q.val}
+                  </span>
+                </div>
+              ))}
               <div
                 ref={budgetBoxRef}
                 className={`p-1.5 rounded-lg border ${
@@ -665,9 +533,7 @@ export const TelemetrySparklineChart = React.memo(
                   ref={budgetTextRef}
                   className="text-[11px] font-bold tabular-nums flex items-center justify-center gap-0.5"
                 >
-                  {initialStats.overBudgetCount > 0
-                    ? `${initialStats.overBudgetPct}% Over`
-                    : '100% OK'}
+                  {initialStats.overBudgetCount > 0 ? `${initialStats.overBudgetPct}% Over` : '100% OK'}
                 </span>
               </div>
             </div>

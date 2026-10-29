@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Crosshair, Compass, Wind, RotateCcw, Activity, Copy, Check } from 'lucide-react';
-import { SliderControl, SegmentedSwitch, ToggleSwitch } from '../../primitives';
-import { quickNotification } from '../../tokens';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**
  * 6. [Dev] Reachability & Intercept Cone Tuner (`reachability-tuner`)

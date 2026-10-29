@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { UI_RADIUS, type ContainerTransitionMode, type FluidMorphConfig, type SequencedStepConfig } from '../tokens';
+import { UI_RADIUS } from '../tokens/spacing';
+import { type ContainerTransitionMode, type FluidMorphConfig, type SequencedStepConfig } from '../tokens/easing';
 import { MorphContainer, type TransitionPhase } from './transitions';
 
 export interface MorphingShellProps {

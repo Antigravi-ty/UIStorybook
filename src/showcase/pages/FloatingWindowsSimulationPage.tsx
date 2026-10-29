@@ -1,33 +1,19 @@
 import React, { useRef, useEffect } from 'react';
-import {
-  quickNotification,
-} from '../../tokens';
-import { createScopedSyncedState, readUrlParams, updateUrlParams } from '../stores';
-import {
-  AppWindow,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  User,
-  Terminal,
-  Eye,
-  Layers,
-} from 'lucide-react';
+import { quickNotification } from '../../tokens/quickNotificationStore';
+import { createScopedSyncedState } from '../stores/crossClientSync';
+import { readUrlParams, updateUrlParams } from '../stores/urlSync';
+import { AppWindow, X, ChevronLeft, ChevronRight, User, Terminal, Eye, Layers, } from 'lucide-react';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
 import { SliderControl } from '../../primitives/SliderControl';
 import { floatingSandboxStore, useFloatingStore } from '../../tokens/floatingStore';
 import {
-  USER_PRESET_WINDOWS,
-  DEV_PRESET_WINDOWS,
-  PRESET_WINDOWS,
-  type PresetConfig,
+  USER_PRESET_WINDOWS, DEV_PRESET_WINDOWS, PRESET_WINDOWS, type PresetConfig,
   type FloatingWindowVisibilityTier,
 } from '../../tokens/floatingPresets';
 import { FloatingWindowIcon } from '../../navigation/FloatingWindowIcon';
 import {
-  FloatingWindowsMinWidthCalibrationBar,
-  FloatingWindowsCanvasStage,
+  FloatingWindowsMinWidthCalibrationBar, FloatingWindowsCanvasStage,
 } from './floating-window-variation/FloatingWindowsCanvasStage';
 
 const useState = createScopedSyncedState('page:floating-windows-v2');
@@ -178,10 +164,7 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
     updateMinWidth(currentPreset.id, clampedPx);
     updateSize(
       currentPreset.id,
-      {
-        width: clampedPx,
-        height: activeWindowInstance?.height ?? currentPreset.height,
-      },
+      { width: clampedPx, height: activeWindowInstance?.height ?? currentPreset.height },
       true
     );
   };
@@ -196,10 +179,7 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
     updateMinWidth(currentPreset.id, undefined);
     updateSize(
       currentPreset.id,
-      {
-        width: Math.max(resolvedAutoMinW, currentPreset.width),
-        height: currentPreset.height,
-      },
+      { width: Math.max(resolvedAutoMinW, currentPreset.width), height: currentPreset.height },
       false
     );
     quickNotification.info(
@@ -214,10 +194,7 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
       : Math.round(currentPreset.height);
     updateSize(
       currentPreset.id,
-      {
-        width: resolvedEffectiveMinW,
-        height: targetH,
-      },
+      { width: resolvedEffectiveMinW, height: targetH },
       withVerticalScrollbar
     );
   };
@@ -310,9 +287,7 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
             <AppWindow className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              6D · Floating Window 悬浮窗口全集 (6 User + 19 Developer)
-            </h1>
+            <h1 className="text-2xl font-bold tracking-tight">6D · Floating Window 悬浮窗口全集 (6 User + 19 Developer)</h1>
             <p className={`text-xs mt-0.5 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
               严格分离 <strong>User Only (6 个普通玩家悬浮窗)</strong> 与 <strong>Developer Only (19 个开发者调参器/实验室)</strong>。支持单窗快速扫描与多窗 Stack 堆叠编排，路径实时同步至地址栏。
             </p>
@@ -353,262 +328,103 @@ export const FloatingWindowsSimulationPage: React.FC<FloatingWindowsSimulationPa
           </div>
 
           {totalCount > 0 && (
-            <Button
-              variant="danger"
-              size="sm"
-              isLight={isLight}
-              icon={<X className="h-4 w-4" />}
-              onClick={clearAll}
-            >
-              清空窗口 ({totalCount})
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Strict User vs Developer Control Bar + < Prev Window | Next Window > Scanner */}
-      <div
-        className={`p-4 rounded-2xl border flex flex-col gap-3.5 transition-colors ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
-        }`}
-      >
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
-          {/* Strict Tier Toggle */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
-              视图隔离 (Strict Tier):
-            </span>
-            <div className="flex items-center gap-1 p-1 rounded-xl border bg-neutral-100/80 dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800">
-              <button
-                type="button"
-                onClick={() => handleSwitchTier('user')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                  tier === 'user'
-                    ? 'bg-emerald-500 text-white shadow-2xs'
-                    : isLight
-                    ? 'text-neutral-600 hover:text-neutral-900'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <User className="h-3.5 w-3.5" />
-                <span>User Only ({USER_PRESET_WINDOWS.length} Windows)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSwitchTier('developer')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                  tier === 'developer'
-                    ? 'bg-amber-500 text-white shadow-2xs'
-                    : isLight
-                    ? 'text-neutral-600 hover:text-neutral-900'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <Terminal className="h-3.5 w-3.5" />
-                <span>Developer Only ({DEV_PRESET_WINDOWS.length} Windows)</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Linear Prev / Next Window Scanner */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => handleStepWindow(-1)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all active:scale-95 ${
-                isLight
-                  ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
-                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-100'
-              }`}
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              <span>Prev Window</span>
-            </button>
-
-            <div
-              className={`px-3 py-1.5 rounded-xl border font-mono text-xs flex items-center gap-2 ${
-                isLight
-                  ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
-                  : 'bg-neutral-950 border-neutral-800 text-neutral-200'
-              }`}
-            >
-              <span className="font-bold text-amber-500">
-                [{currentIndex + 1} / {activeTierWindows.length}]
+            <Button variant="danger" size="sm" isLight={isLight} icon={<X className="h-4 w-4" />}
+              onClick={clearAll} > 清空窗口 ({totalCount}) </Button> )} </div> </div>
+              {/* Strict User vs Developer Control Bar + < Prev Window | Next Window > Scanner */} <div
+              className={`p-4 rounded-2xl border flex flex-col gap-3.5 transition-colors ${
+              isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800' }`} >
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
+              {/* Strict Tier Toggle */} <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400"> 视图隔离 (Strict Tier):
               </span>
-              <span className="font-semibold truncate max-w-[240px]">
-                {currentPreset?.title}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handleStepWindow(1)}
+              <div className="flex items-center gap-1 p-1 rounded-xl border bg-neutral-100/80 dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800">
+              <button type="button" onClick={() => handleSwitchTier('user')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+              tier === 'user' ? 'bg-emerald-500 text-white shadow-2xs' : isLight
+              ? 'text-neutral-600 hover:text-neutral-900' : 'text-neutral-400 hover:text-neutral-200' }`} >
+              <User className="h-3.5 w-3.5" /> <span>User Only ({USER_PRESET_WINDOWS.length} Windows)</span>
+              </button> <button type="button" onClick={() => handleSwitchTier('developer')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+              tier === 'developer' ? 'bg-amber-500 text-white shadow-2xs' : isLight
+              ? 'text-neutral-600 hover:text-neutral-900' : 'text-neutral-400 hover:text-neutral-200' }`} >
+              <Terminal className="h-3.5 w-3.5" />
+              <span>Developer Only ({DEV_PRESET_WINDOWS.length} Windows)</span> </button> </div> </div>
+              {/* Linear Prev / Next Window Scanner */} <div className="flex items-center gap-2 flex-wrap"> <button
+              type="button" onClick={() => handleStepWindow(-1)}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all active:scale-95 ${
-                isLight
-                  ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
-                  : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-100'
-              }`}
-            >
-              <span>Next Window</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Window Pill Grid for Active Tier */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {activeTierWindows.map((preset, idx) => {
-            const isSelected = preset.id === currentPreset?.id;
-            const isOpen = windows.some((w) => w.id === preset.id || w.id.startsWith(preset.id));
-            return (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => handleSelectPreset(preset)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-amber-500 text-white border-amber-500 font-bold shadow-2xs'
-                    : isLight
-                    ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-800'
-                    : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
-                }`}
-              >
-                <span className="font-mono text-[10px] opacity-70">{idx + 1}.</span>
-                <FloatingWindowIcon
-                  id={preset.id}
-                  category={preset.category}
-                  className="h-3.5 w-3.5 shrink-0"
-                />
-                <span>{preset.title}</span>
-                {isOpen && !isSelected && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" title="Currently Open" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Selected Window Metadata & Sub-Tab Selector + Global Opacity Slider */}
-        {currentPreset && (
-          <div
-            className={`p-3 rounded-xl border flex flex-col gap-3 text-xs ${
-              isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
-            }`}
-          >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant={tier === 'user' ? 'success' : 'warning'} size="sm" isLight={isLight}>
-                    {tier === 'user' ? 'USER VISIBLE' : 'DEVELOPER ONLY'}
-                  </Badge>
-                  <span className="font-bold text-sm">{currentPreset.title}</span>
-                  <span className="font-mono text-[11px] opacity-65">
-                    (Default {currentPreset.width}×{currentPreset.height}px · Effective MinW {resolvedEffectiveMinW}px [Auto {resolvedAutoMinW}px
-                    {resolvedScrollbarReserve > 0 ? `, incl. ${resolvedScrollbarReserve}px scrollbar reserve` : ''}] ·{' '}
-                    {currentPreset.resizable
-                      ? 'Auto Intrinsic MaxHeight & 4-Corner Clamped'
-                      : 'Auto-Fit Non-Resizable'})
-                  </span>
-                </div>
-                {currentPreset.summary && (
-                  <span className="text-[11px] opacity-75">{currentPreset.summary}</span>
-                )}
-                {currentPreset.menuEntryPath && (
-                  <span className="text-[10px] font-mono text-amber-500">
-                    触发路径: {currentPreset.menuEntryPath}
-                  </span>
-                )}
-              </div>
-
+              isLight ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
+              : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-100' }`} >
+              <ChevronLeft className="h-3.5 w-3.5" /> <span>Prev Window</span> </button> <div
+              className={`px-3 py-1.5 rounded-xl border font-mono text-xs flex items-center gap-2 ${ isLight
+              ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
+              : 'bg-neutral-950 border-neutral-800 text-neutral-200' }`} >
+              <span className="font-bold text-amber-500"> [{currentIndex + 1} / {activeTierWindows.length}] </span>
+              <span className="font-semibold truncate max-w-[240px]"> {currentPreset?.title} </span> </div> <button
+              type="button" onClick={() => handleStepWindow(1)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all active:scale-95 ${
+              isLight ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
+              : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-100' }`} >
+              <span>Next Window</span> <ChevronRight className="h-3.5 w-3.5" /> </button> </div> </div>
+              {/* Window Pill Grid for Active Tier */} <div className="flex flex-wrap items-center gap-1.5">
+              {activeTierWindows.map((preset, idx) => { const isSelected = preset.id === currentPreset?.id;
+              const isOpen = windows.some((w) => w.id === preset.id || w.id.startsWith(preset.id)); return (
+              <button key={preset.id} type="button" onClick={() => handleSelectPreset(preset)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+              isSelected ? 'bg-amber-500 text-white border-amber-500 font-bold shadow-2xs' : isLight
+              ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-800'
+              : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200' }`} >
+              <span className="font-mono text-[10px] opacity-70">{idx + 1}.</span> <FloatingWindowIcon
+              id={preset.id} category={preset.category} className="h-3.5 w-3.5 shrink-0" />
+              <span>{preset.title}</span> {isOpen && !isSelected && (
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" title="Currently Open" /> )} </button> );
+              })} </div> {/* Selected Window Metadata & Sub-Tab Selector + Global Opacity Slider */}
+              {currentPreset && ( <div className={`p-3 rounded-xl border flex flex-col gap-3 text-xs ${
+              isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800' }`} >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="flex flex-col gap-1"> <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={tier === 'user' ? 'success' : 'warning'} size="sm" isLight={isLight}>
+              {tier === 'user' ? 'USER VISIBLE' : 'DEVELOPER ONLY'} </Badge>
+              <span className="font-bold text-sm">{currentPreset.title}</span>
+              <span className="font-mono text-[11px] opacity-65">
+              (Default {currentPreset.width}×{currentPreset.height}px · Effective MinW {resolvedEffectiveMinW}px [Auto {resolvedAutoMinW}px
+              {resolvedScrollbarReserve > 0 ? `, incl. ${resolvedScrollbarReserve}px scrollbar reserve` : ''}] ·{' '}
+              {currentPreset.resizable ? 'Auto Intrinsic MaxHeight & 4-Corner Clamped' : 'Auto-Fit Non-Resizable'})
+              </span> </div> {currentPreset.summary && (
+              <span className="text-[11px] opacity-75">{currentPreset.summary}</span> )}
+              {currentPreset.menuEntryPath && ( <span className="text-[10px] font-mono text-amber-500">
+              触发路径: {currentPreset.menuEntryPath} </span> )} </div>
               <div className="flex items-center gap-3 flex-wrap">
-                {/* Container Bounds / Multi-Monitor Squeeze Simulator */}
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] font-mono opacity-65 mr-1">容器边界/跨屏挤压测试:</span>
-                  {(
-                    [
-                      { id: 'full', label: '1440p Full (100%×700px)' },
-                      { id: '1080p-compact', label: '1080p Compact (760×520px)' },
-                      { id: 'small-squeeze', label: 'Tight Squeeze (520×380px)' },
-                    ] as const
-                  ).map((mode) => {
-                    const active = containerPreset === mode.id;
-                    return (
-                      <button
-                        key={mode.id}
-                        type="button"
-                        onClick={() => setContainerPreset(mode.id)}
-                        className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-semibold cursor-pointer transition-colors ${
-                          active
-                            ? 'bg-amber-500/20 text-amber-500 border-amber-500/40'
-                            : isLight
-                            ? 'bg-white border-neutral-200 text-neutral-600 hover:text-neutral-900'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
-                        }`}
-                      >
-                        {mode.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {currentPreset.tabs && currentPreset.tabs.length > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-mono opacity-65 mr-1">内部子页签:</span>
-                    {currentPreset.tabs.map((t) => {
-                      const active = (activeSubTab || currentPreset.tabs![0].id) === t.id;
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => setActiveSubTab(t.id)}
-                          className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-semibold cursor-pointer transition-colors ${
-                            active
-                              ? 'bg-sky-500/20 text-sky-400 border-sky-500/40'
-                              : isLight
-                              ? 'bg-white border-neutral-200 text-neutral-600'
-                              : 'bg-neutral-900 border-neutral-800 text-neutral-400'
-                          }`}
-                        >
-                          {t.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <div className="w-48">
-                  <SliderControl
-                    label="Global Opacity"
-                    value={opacity}
-                    min={1}
-                    max={100}
-                    step={1}
-                    defaultValue={85}
-                    unit="%"
-                    onChange={setOpacity}
-                    isLight={isLight}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <FloatingWindowsMinWidthCalibrationBar
-              isLight={isLight}
-              currentPreset={currentPreset}
-              activeManualMinW={activeManualMinW}
-              resolvedAutoMinW={resolvedAutoMinW}
-              resolvedEffectiveMinW={resolvedEffectiveMinW}
-              resolvedScrollbarReserve={resolvedScrollbarReserve}
-              activeWindowInstance={activeWindowInstance}
-              minWidthDraft={minWidthDraft}
-              setMinWidthDraft={setMinWidthDraft}
-              setIsEditingMinWidth={setIsEditingMinWidth}
-              applyManualMinWidth={applyManualMinWidth}
-              handleSnapToMinWidth={handleSnapToMinWidth}
+              {/* Container Bounds / Multi-Monitor Squeeze Simulator */} <div className="flex items-center gap-1">
+              <span className="text-[10px] font-mono opacity-65 mr-1">容器边界/跨屏挤压测试:</span> {( [
+              { id: 'full', label: '1440p Full (100%×700px)' },
+              { id: '1080p-compact', label: '1080p Compact (760×520px)' },
+              { id: 'small-squeeze', label: 'Tight Squeeze (520×380px)' }, ] as const ).map((mode) => {
+              const active = containerPreset === mode.id; return ( <button key={mode.id} type="button"
+              onClick={() => setContainerPreset(mode.id)}
+              className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-semibold cursor-pointer transition-colors ${
+              active ? 'bg-amber-500/20 text-amber-500 border-amber-500/40' : isLight
+              ? 'bg-white border-neutral-200 text-neutral-600 hover:text-neutral-900'
+              : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200' }`} > {mode.label}
+              </button> ); })} </div> {currentPreset.tabs && currentPreset.tabs.length > 0 && (
+              <div className="flex items-center gap-1">
+              <span className="text-[10px] font-mono opacity-65 mr-1">内部子页签:</span>
+              {currentPreset.tabs.map((t) => { const active = (activeSubTab || currentPreset.tabs![0].id) === t.id;
+              return ( <button key={t.id} type="button" onClick={() => setActiveSubTab(t.id)}
+              className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-semibold cursor-pointer transition-colors ${
+              active ? 'bg-sky-500/20 text-sky-400 border-sky-500/40' : isLight
+              ? 'bg-white border-neutral-200 text-neutral-600'
+              : 'bg-neutral-900 border-neutral-800 text-neutral-400' }`} > {t.label} </button> ); })} </div> )}
+              <div className="w-48">
+              <SliderControl label="Global Opacity" value={opacity} min={1} max={100} step={1}
+              defaultValue={85} unit="%" onChange={setOpacity} isLight={isLight} /> </div> </div> </div>
+              <FloatingWindowsMinWidthCalibrationBar isLight={isLight} currentPreset={currentPreset}
+              activeManualMinW={activeManualMinW} resolvedAutoMinW={resolvedAutoMinW}
+              resolvedEffectiveMinW={resolvedEffectiveMinW} resolvedScrollbarReserve={resolvedScrollbarReserve}
+              activeWindowInstance={activeWindowInstance} minWidthDraft={minWidthDraft}
+              setMinWidthDraft={setMinWidthDraft} setIsEditingMinWidth={setIsEditingMinWidth}
+              applyManualMinWidth={applyManualMinWidth} handleSnapToMinWidth={handleSnapToMinWidth}
               handleResetAutoMinWidth={handleResetAutoMinWidth}
-              handleCopyCalibratedParams={handleCopyCalibratedParams}
-            />
+              handleCopyCalibratedParams={handleCopyCalibratedParams} />
           </div>
         )}
       </div>

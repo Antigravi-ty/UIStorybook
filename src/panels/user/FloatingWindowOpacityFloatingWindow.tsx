@@ -1,6 +1,6 @@
 import React from 'react';
-import { SettingSliderRow } from '../../primitives';
-import { useFloatingStore, floatingSandboxStore } from '../../tokens';
+import { SettingSliderRow } from '../../primitives/SettingSliderRow';
+import { useFloatingStore, floatingSandboxStore } from '../../tokens/floatingStore';
 
 export interface FloatingWindowOpacityProps {
   isLight?: boolean;

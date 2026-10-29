@@ -1,31 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:charts-curves');
-import {
-  Activity,
-  Zap,
-  Spline,
-  MoveVertical,
-  CheckCircle2,
-  XCircle,
-  Plus,
-  Flame,
-  Gauge,
-  Wifi,
-} from 'lucide-react';
-import {
-  TelemetryRingBuffer,
-  TelemetrySparklineChart,
-  EventImpulseScatterChart,
-  CubicBezierCurveEditor,
-  ParametricTrajectoryChart,
-  CollisionImpulseEvent,
-  CubicBezierValue,
-  PacingOscilloscopeChart,
-  GoalBarrier2DEditor,
-  MultiTrackReplayTimeline,
-} from '../../charts';
+import { Activity, Zap, Spline, MoveVertical, CheckCircle2, XCircle, Plus, Flame, Gauge, Wifi, } from 'lucide-react';
+import { TelemetryRingBuffer } from '../../charts/telemetryRingBuffer';
+import { TelemetrySparklineChart } from '../../charts/TelemetrySparklineChart';
+import { EventImpulseScatterChart, CollisionImpulseEvent } from '../../charts/EventImpulseScatterChart';
+import { CubicBezierCurveEditor, CubicBezierValue } from '../../charts/CubicBezierCurveEditor';
+import { ParametricTrajectoryChart } from '../../charts/ParametricTrajectoryChart';
+import { PacingOscilloscopeChart } from '../../charts/PacingOscilloscopeChart';
+import { GoalBarrier2DEditor } from '../../charts/GoalBarrier2DEditor';
+import { MultiTrackReplayTimeline } from '../../charts/MultiTrackReplayTimeline';
 import { SliderControl } from '../../primitives/SliderControl';
 import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';
@@ -194,33 +179,21 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
             120Hz Float32 RingBuffer · Zero Heap Allocation · Cached Skia Gradient
           </Badge>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Charts & Curves 高性能清晰图表与曲线系统
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight">Charts & Curves 高性能清晰图表与曲线系统</h1>
         <p className={`text-xs leading-relaxed ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
           针对 <code className="font-mono text-amber-500">RocketCompanion</code> 120Hz 物理帧耗时与网络遥测场景进行零耦合强化。彻底移除旧版低频 React State 数组驱动，全面采用预分配 <code className="font-mono text-emerald-500">TelemetryRingBuffer (Float32Array)</code> + 缓存式 <code className="font-mono">CanvasGradient</code>，在长时间连续运行下实现<strong>每秒 0 次 React 重绘、0 堆内存与 Skia 原生着色器分配、杜绝周期性 GC 掉帧</strong>。
         </p>
       </div>
 
       {/* Top Jump Directory */}
-      <PageJumpDirectory
-        title="5B · High-Clarity 遥测图表与曲线快速跳转目录 (Charts Jump Index)"
-        subtitle="点击快速定位至指定图表组件，点击右侧复制图标可复制规范化引用代号"
-        items={CHARTS_JUMP_ITEMS}
-        isLight={isLight}
-      />
+      <PageJumpDirectory title="5B · High-Clarity 遥测图表与曲线快速跳转目录 (Charts Jump Index)"
+        subtitle="点击快速定位至指定图表组件，点击右侧复制图标可复制规范化引用代号" items={CHARTS_JUMP_ITEMS} isLight={isLight} />
 
       {/* Diagnostic Comparison: Why RLCleanWASM's raw charts needed standardization */}
-      <div
-        className={`p-5 rounded-2xl border grid grid-cols-1 md:grid-cols-2 gap-4 text-xs ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
-        <div
-          className={`p-4 rounded-xl border flex flex-col gap-2 ${
-            isLight ? 'bg-red-50/60 border-red-200' : 'bg-red-950/30 border-red-800/60'
-          }`}
-        >
+      <div className={`p-5 rounded-2xl border grid grid-cols-1 md:grid-cols-2 gap-4 text-xs ${
+        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
+        <div className={`p-4 rounded-xl border flex flex-col gap-2 ${
+          isLight ? 'bg-red-50/60 border-red-200' : 'bg-red-950/30 border-red-800/60' }`}>
           <div className="flex items-center gap-2 font-bold text-red-500">
             <XCircle className="h-4 w-4 shrink-0" />
             <span>原图表与周期性 GC 卡顿根源</span>
@@ -241,11 +214,8 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
           </ul>
         </div>
 
-        <div
-          className={`p-4 rounded-xl border flex flex-col gap-2 ${
-            isLight ? 'bg-emerald-50/60 border-emerald-200' : 'bg-emerald-950/30 border-emerald-800/60'
-          }`}
-        >
+        <div className={`p-4 rounded-xl border flex flex-col gap-2 ${
+          isLight ? 'bg-emerald-50/60 border-emerald-200' : 'bg-emerald-950/30 border-emerald-800/60' }`}>
           <div className="flex items-center gap-2 font-bold text-emerald-500">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>UIStorybook 120Hz 零分配稳态架构</span>
@@ -268,18 +238,12 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
       </div>
 
       {/* Chart 1: TelemetrySparklineChart (Pure 120Hz RingBuffer Stream) */}
-      <div
-        id="chart-5b-1-sparkline"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <div id="chart-5b-1-sparkline" className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
+        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-amber-500" />
-            <span className="font-bold text-sm">
-              1. 120Hz 零分配遥测示波图 (TelemetrySparklineChart · Float32 RingBuffer)
-            </span>
+            <span className="font-bold text-sm">1. 120Hz 零分配遥测示波图 (TelemetrySparklineChart · Float32 RingBuffer)</span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Button
@@ -297,11 +261,8 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         {/* Live 120Hz Channel Control Bar + Zero-Rerender Telemetry Proof */}
         <div
           className={`p-3 rounded-xl border flex flex-wrap items-center justify-between gap-3 text-xs font-mono ${
-            isLight
-              ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
-              : 'bg-neutral-950/70 border-neutral-800 text-neutral-200'
-          }`}
-        >
+          isLight ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
+          : 'bg-neutral-950/70 border-neutral-800 text-neutral-200' }`}>
           {/* Left: Telemetry Channel Preset */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] text-neutral-400 mr-1">遥测数据源:</span>
@@ -339,15 +300,11 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
           <div className="flex items-center gap-3 text-[11px]">
             <div className="flex items-center gap-1">
               <span className="text-neutral-400">采样率:</span>
-              <span ref={sampleRateReadoutRef} className="font-bold text-sky-400 tabular-nums">
-                120 Hz
-              </span>
+              <span ref={sampleRateReadoutRef} className="font-bold text-sky-400 tabular-nums">120 Hz</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-neutral-400">React Re-renders:</span>
-              <span ref={reactRenderReadoutRef} className="font-bold text-emerald-400 tabular-nums">
-                0 / sec
-              </span>
+              <span ref={reactRenderReadoutRef} className="font-bold text-emerald-400 tabular-nums">0 / sec</span>
             </div>
           </div>
         </div>
@@ -384,74 +341,33 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
       </div>
 
       {/* Chart 2: EventImpulseScatterChart */}
-      <div
-        id="chart-5b-2-scatter"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <div id="chart-5b-2-scatter" className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
+        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Zap className="h-4 w-4 text-amber-500" />
-            <span className="font-bold text-sm">
-              2. 物理碰撞冲量散点与音频阈值追踪图 (EventImpulseScatterChart)
-            </span>
+            <span className="font-bold text-sm">2. 物理碰撞冲量散点与音频阈值追踪图 (EventImpulseScatterChart)</span>
           </div>
-          <Button
-            size="sm"
-            variant="secondary"
-            isLight={isLight}
-            icon={<Plus className="h-3.5 w-3.5 text-amber-500" />}
-            onClick={emitCollisionBurst}
-          >
-            触发随机物理碰撞 (Emit Collision)
-          </Button>
-        </div>
-        <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-          采用垂线脉冲杆 (Lollipop Stem) + 正圆散点，清晰区分高于音频门限（高亮描边）与低于门限被静音（半透明灰）的碰撞事件。鼠标靠近任意散点自动吸附锁定：
-        </p>
-
-        <EventImpulseScatterChart
-          events={events}
-          threshold={threshold}
-          onThresholdChange={setThreshold}
-          onClear={() => setEvents([])}
-          isLight={isLight}
-        />
-      </div>
-
-      {/* Chart 3 & 4: CubicBezierCurveEditor + ParametricTrajectoryChart */}
-      <div
-        id="chart-5b-3-bezier"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-5 ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <Spline className="h-4 w-4 text-amber-500" />
+          <Button size="sm" variant="secondary" isLight={isLight}
+            icon={<Plus className="h-3.5 w-3.5 text-amber-500" />} onClick={emitCollisionBurst} >
+            触发随机物理碰撞 (Emit Collision) </Button> </div>
+            <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+            采用垂线脉冲杆 (Lollipop Stem) + 正圆散点，清晰区分高于音频门限（高亮描边）与低于门限被静音（半透明灰）的碰撞事件。鼠标靠近任意散点自动吸附锁定： </p>
+            <EventImpulseScatterChart events={events} threshold={threshold} onThresholdChange={setThreshold}
+            onClear={() => setEvents([])} isLight={isLight} /> </div>
+            {/* Chart 3 & 4: CubicBezierCurveEditor + ParametricTrajectoryChart */} <div id="chart-5b-3-bezier"
+            className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-5 ${
+            isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`} >
+            <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2"> <Spline className="h-4 w-4 text-amber-500" />
             <span className="font-bold text-sm">
-              3 & 4. 交互式三次贝塞尔曲线与参数化物理轨迹极值分析 (CubicBezierCurveEditor & ParametricTrajectoryChart)
-            </span>
-          </div>
-          <Badge size="sm" variant="amber" isLight={isLight}>
-            画布直接拖拽控制点 + 中心正负双向滑块联动
-          </Badge>
-        </div>
-        <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-          左图支持直接在 SVG 画布上拖拽 <code className="font-mono text-amber-500">P1</code> 与 <code className="font-mono text-pink-500">P2</code> 手柄（或点击预设按钮），右图实时通过解析导数 <code className="font-mono">dy/du = 0</code> 计算大加速球拾取时的向上跃升峰值 (<code className="font-mono">Peak Lift +uu</code>) 与触顶时刻。下方控制条使用中心双向填充 <code className="font-mono">variation="centered"</code> 调节正负控制点坐标：
-        </p>
-
-        <div id="chart-5b-4-trajectory" className="scroll-mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <CubicBezierCurveEditor
-            title="Orb Collect Easing (Drag P1 / P2)"
-            p1x={orbBezier.p1x}
-            p1y={orbBezier.p1y}
-            p2x={orbBezier.p2x}
-            p2y={orbBezier.p2y}
-            onChange={setOrbBezier}
-            isLight={isLight}
-          />
+            3 & 4. 交互式三次贝塞尔曲线与参数化物理轨迹极值分析 (CubicBezierCurveEditor & ParametricTrajectoryChart) </span> </div>
+            <Badge size="sm" variant="amber" isLight={isLight}> 画布直接拖拽控制点 + 中心正负双向滑块联动 </Badge> </div>
+            <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+            左图支持直接在 SVG 画布上拖拽 <code className="font-mono text-amber-500">P1</code> 与 <code className="font-mono text-pink-500">P2</code> 手柄（或点击预设按钮），右图实时通过解析导数 <code className="font-mono">dy/du = 0</code> 计算大加速球拾取时的向上跃升峰值 (<code className="font-mono">Peak Lift +uu</code>) 与触顶时刻。下方控制条使用中心双向填充 <code className="font-mono">variation="centered"</code> 调节正负控制点坐标：
+            </p> <div id="chart-5b-4-trajectory" className="scroll-mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <CubicBezierCurveEditor title="Orb Collect Easing (Drag P1 / P2)" p1x={orbBezier.p1x}
+            p1y={orbBezier.p1y} p2x={orbBezier.p2x} p2y={orbBezier.p2y} onChange={setOrbBezier} isLight={isLight} />
 
           <ParametricTrajectoryChart
             title="Big Boost Orb Vertical Trajectory"
@@ -466,68 +382,23 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         </div>
 
         {/* Centered Bipolar Sliders controlling P1.Y, P2.Y, Duration, Drop Distance */}
-        <div
-          className={`p-4 rounded-xl border grid grid-cols-1 md:grid-cols-2 gap-4 ${
-            isLight ? 'bg-neutral-50/80 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
-          }`}
-        >
-          <SliderControl
-            label="Orb P1.Y (Negative = Upward Leap)"
-            value={orbBezier.p1y}
-            min={-4.0}
-            max={3.0}
-            step={0.05}
-            origin={0}
-            variation="centered"
-            showSign={true}
-            colorScheme="amber"
-            negativeColorScheme="sky"
-            editable={true}
-            onChange={(val) => setOrbBezier((prev) => ({ ...prev, p1y: val }))}
-            isLight={isLight}
-          />
+        <div className={`p-4 rounded-xl border grid grid-cols-1 md:grid-cols-2 gap-4 ${
+          isLight ? 'bg-neutral-50/80 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800' }`}>
+          <SliderControl label="Orb P1.Y (Negative = Upward Leap)" value={orbBezier.p1y} min={-4.0} max={3.0}
+            step={0.05} origin={0} variation="centered" showSign={true} colorScheme="amber"
+            negativeColorScheme="sky" editable={true}
+            onChange={(val) => setOrbBezier((prev) => ({ ...prev, p1y: val }))} isLight={isLight} />
 
-          <SliderControl
-            label="Orb P2.Y (Terminal Plunge Tangent)"
-            value={orbBezier.p2y}
-            min={-4.0}
-            max={3.0}
-            step={0.05}
-            origin={0}
-            variation="centered"
-            showSign={true}
-            colorScheme="amber"
-            negativeColorScheme="sky"
-            editable={true}
-            onChange={(val) => setOrbBezier((prev) => ({ ...prev, p2y: val }))}
-            isLight={isLight}
-          />
+          <SliderControl label="Orb P2.Y (Terminal Plunge Tangent)" value={orbBezier.p2y} min={-4.0} max={3.0}
+            step={0.05} origin={0} variation="centered" showSign={true} colorScheme="amber"
+            negativeColorScheme="sky" editable={true}
+            onChange={(val) => setOrbBezier((prev) => ({ ...prev, p2y: val }))} isLight={isLight} />
 
-          <SliderControl
-            label="Collect Duration"
-            value={orbDurationMs}
-            min={50}
-            max={800}
-            step={10}
-            unit="ms"
-            colorScheme="neutral"
-            editable={true}
-            onChange={setOrbDurationMs}
-            isLight={isLight}
-          />
+          <SliderControl label="Collect Duration" value={orbDurationMs} min={50} max={800} step={10} unit="ms"
+            colorScheme="neutral" editable={true} onChange={setOrbDurationMs} isLight={isLight} />
 
-          <SliderControl
-            label="Drop Distance"
-            value={orbDropDistance}
-            min={20}
-            max={300}
-            step={5}
-            unit="uu"
-            colorScheme="neutral"
-            editable={true}
-            onChange={setOrbDropDistance}
-            isLight={isLight}
-          />
+          <SliderControl label="Drop Distance" value={orbDropDistance} min={20} max={300} step={5} unit="uu"
+            colorScheme="neutral" editable={true} onChange={setOrbDropDistance} isLight={isLight} />
         </div>
 
         {/* Second Simultaneous Instance Proof (No SVG Gradient ID Collision) */}
@@ -551,12 +422,8 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
       </div>
 
       {/* Chart 5: PacingOscilloscopeChart (3-Pane Synchronized 120Hz Clock-Pacing & Deadband Corridor) */}
-      <div
-        id="chart-5b-5-pacing"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <div id="chart-5b-5-pacing" className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
+        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-amber-500" />
@@ -572,18 +439,12 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
       </div>
 
       {/* Chart 6: GoalBarrier2DEditor (2D Boolean Goal Mouth Mask Canvas Editor) */}
-      <div
-        id="chart-5b-6-barrier"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <div id="chart-5b-6-barrier" className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
+        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Spline className="h-4 w-4 text-amber-500" />
-            <span className="font-bold text-sm">
-              6. 球门布尔遮罩 2D 几何编辑器 (GoalBarrier2DEditor · 1792 × 644 UU 正交吸附分解)
-            </span>
+            <span className="font-bold text-sm">6. 球门布尔遮罩 2D 几何编辑器 (GoalBarrier2DEditor · 1792 × 644 UU 正交吸附分解)</span>
           </div>
           <Badge size="sm" variant="neutral" isLight={isLight}>
             New / Add / Subtract / Clear · Disjoint Quad Decomposition
@@ -593,18 +454,12 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
       </div>
 
       {/* Chart 7: MultiTrackReplayTimeline (3-Track Synchronized Replay Scrubber) */}
-      <div
-        id="chart-5b-7-timeline"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
-          isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <div id="chart-5b-7-timeline" className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-4 ${
+        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Gauge className="h-4 w-4 text-amber-500" />
-            <span className="font-bold text-sm">
-              7. 三轨同步回放与输入信号时间轴 (MultiTrackReplayTimeline · 120Hz Playhead Ref)
-            </span>
+            <span className="font-bold text-sm">7. 三轨同步回放与输入信号时间轴 (MultiTrackReplayTimeline · 120Hz Playhead Ref)</span>
           </div>
           <Badge size="sm" variant="amber" isLight={isLight}>
             Track A Input · Track B Incidents · Track C Signals
@@ -618,14 +473,8 @@ export const ChartsAndCurvesPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         isLight={isLight}
         title="Agent 高性能清晰图表调用配方 (120Hz RingBuffer & Charts Recipe)"
         code={`import {
-  TelemetryRingBuffer,
-  TelemetrySparklineChart,
-  EventImpulseScatterChart,
-  CubicBezierCurveEditor,
-  ParametricTrajectoryChart,
-  PacingOscilloscopeChart,
-  GoalBarrier2DEditor,
-  MultiTrackReplayTimeline,
+  TelemetryRingBuffer, TelemetrySparklineChart, EventImpulseScatterChart, CubicBezierCurveEditor,
+  ParametricTrajectoryChart, PacingOscilloscopeChart, GoalBarrier2DEditor, MultiTrackReplayTimeline,
 } from '@/charts';
 
 // 1. 120Hz 零分配模式：在物理/网络循环中直接写入 Float32Array RingBuffer

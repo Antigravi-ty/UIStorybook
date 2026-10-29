@@ -2,7 +2,7 @@ import React from 'react';
 import { SliderControl } from '../../../primitives/SliderControl';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';
 import { CodeBlock } from '../../CodeBlock';
-import { useMenuLayoutStore } from '../../../tokens';
+import { useMenuLayoutStore } from '../../../tokens/menuLayoutStore';
 
 export interface PanelShellStagesTwoThreeProps {
   isLight: boolean;

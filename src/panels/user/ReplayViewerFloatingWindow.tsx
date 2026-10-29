@@ -10,20 +10,12 @@ import {
   Timer,
   RotateCcw,
 } from 'lucide-react';
-import {
-  MultiTrackReplayTimeline,
-  DEFAULT_REPLAY_INCIDENT_MARKERS,
-  DEFAULT_REPLAY_SIGNAL_MARKERS,
-  type ReplayIncidentMarker,
-  type ReplaySignalMarker,
-} from '../../charts';
-import {
-  KeycapBadge,
-  SegmentedSwitch,
-  SettingActionRow,
-  SettingSliderRow,
-} from '../../primitives';
-import { quickNotification } from '../../tokens';
+import { MultiTrackReplayTimeline, DEFAULT_REPLAY_INCIDENT_MARKERS, DEFAULT_REPLAY_SIGNAL_MARKERS, type ReplayIncidentMarker, type ReplaySignalMarker } from '../../charts/MultiTrackReplayTimeline';
+import { KeycapBadge } from '../../primitives/KeycapBadge';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { SettingActionRow } from '../../primitives/SettingActionRow';
+import { SettingSliderRow } from '../../primitives/SettingSliderRow';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 export type PlaybackSpeedPreset = '100' | '75' | '50' | '25' | 'custom';
 export type DownCounterOption = '3' | '2' | '1' | '0';

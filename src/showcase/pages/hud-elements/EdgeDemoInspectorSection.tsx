@@ -1,14 +1,8 @@
 import React, { useMemo } from 'react';
-import { createScopedSyncedState } from '../../stores';
+import { createScopedSyncedState } from '../../stores/crossClientSync';
 import { ShieldAlert, Sliders, RotateCcw } from 'lucide-react';
-import {
-  EdgePlayerHudStrip,
-  DEFAULT_DEMO_INDICATOR_CONFIG,
-  resolveDemoIndicatorConfig,
-  type EdgeDemoIndicatorConfig,
-  type EdgePlayerSlotState,
-  type HudRosterViewMode,
-} from '../../../hud';
+import { EdgePlayerHudStrip } from '../../../hud/EdgePlayerHudStrip';
+import { DEFAULT_DEMO_INDICATOR_CONFIG, resolveDemoIndicatorConfig, type EdgeDemoIndicatorConfig, type EdgePlayerSlotState, type HudRosterViewMode } from '../../../hud/hudTransientChannel';
 import { BombEmojiSvg, buildSvgDropShadowFilter } from '../../../primitives/packagedSvgIcons';
 import { SliderControl } from '../../../primitives/SliderControl';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';

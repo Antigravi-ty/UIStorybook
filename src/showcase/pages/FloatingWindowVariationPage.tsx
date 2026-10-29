@@ -1,30 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import {
-  Sparkles,
-  AppWindow,
-  LayoutTemplate,
-  RotateCcw,
-  Copy,
-  Check,
-  Code2,
-  Eye,
-  Layers,
-  CheckCircle2,
-  Terminal,
-  User,
+  Sparkles, AppWindow, LayoutTemplate, RotateCcw,
+  Copy, Check, Code2, Eye,
+  Layers, CheckCircle2, Terminal, User,
 } from 'lucide-react';
+import { useFloatingStore } from '../../tokens/floatingStore';
+import { USER_PRESET_WINDOWS, DEV_PRESET_WINDOWS, PRESET_WINDOWS, type PresetConfig } from '../../tokens/floatingPresets';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import {
-  useFloatingStore,
-  USER_PRESET_WINDOWS,
-  DEV_PRESET_WINDOWS,
-  PRESET_WINDOWS,
-  type PresetConfig,
-} from '../../tokens';
-import { createScopedSyncedState } from '../stores';
-import {
-  floatingThreeStageSandboxStore,
-  useFloatingThreeStageStore,
-  FLOATING_THREE_STAGE_PRESETS,
+  floatingThreeStageSandboxStore, useFloatingThreeStageStore, FLOATING_THREE_STAGE_PRESETS,
 } from '../stores/floatingThreeStageStore';
 import { FloatingThreeStageWindowManager } from '../components/FloatingThreeStageWindow';
 import { FloatingStackIcon } from '../../navigation/FloatingStackIcon';
@@ -37,13 +21,10 @@ import { ToggleSwitch } from '../../primitives/ToggleSwitch';
 import { CodeBlock } from '../CodeBlock';
 import { PageJumpDirectory, type JumpDirectoryItem } from '../PageJumpDirectory';
 import {
-  PROBE_WINDOW_ID,
-  ThreeStageCapabilityProbeContent,
+  PROBE_WINDOW_ID, ThreeStageCapabilityProbeContent,
 } from './floating-window-variation/ThreeStageCapabilityProbeContent';
 import {
-  FloatingWindowCornerDraggerStrip,
-  FloatingWindowCapabilityMatrixSection,
-  FloatingWindowShootoutSection,
+  FloatingWindowCornerDraggerStrip, FloatingWindowCapabilityMatrixSection, FloatingWindowShootoutSection,
 } from './floating-window-variation/FloatingWindowCapabilityMatrixAndShootout';
 import { FloatingWindowParameterTunerSection } from './floating-window-variation/FloatingWindowParameterTunerSection';
 
@@ -204,11 +185,7 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
                 零改动 6D 原页 · 独立沙盒与 Store
               </Badge>
             </div>
-            <p
-              className={`text-xs leading-relaxed max-w-3xl ${
-                isLight ? 'text-neutral-600' : 'text-neutral-400'
-              }`}
-            >
+            <p className={`text-xs leading-relaxed max-w-3xl ${ isLight ? 'text-neutral-600' : 'text-neutral-400' }`}>
               在完全保留 <strong>6D · Floating Window 编排</strong> 现有实现不动的前提下，本专页专门验证将{' '}
               <strong>L2 Panel 3-Stage Combiner (`Header + Content + Footer`)</strong> 引入{' '}
               <strong>Floating Window</strong> 的各类变体：包括{' '}
@@ -249,41 +226,27 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
         </div>
 
         {showCodeBlock && (
-          <CodeBlock
-            isLight={isLight}
+          <CodeBlock isLight={isLight}
             title="当前 6D+ 3-Stage Floating Window 变体配置快照 (src/tokens/floatingThreeStageStore.ts)"
-            code={exportConfigCode()}
-          />
+            code={exportConfigCode()} />
         )}
 
-        <PageJumpDirectory
-          title="6D+ · 3-Stage 悬浮窗变体实验台快速跳转目录 (Quick Jump Index)"
-          subtitle="点击卡片定位至实时交互画布、Footer/Resize 支持度验证矩阵、全量参数调优台或三壳体同屏对照"
-          items={JUMP_ITEMS}
-          isLight={isLight}
-        />
+        <PageJumpDirectory title="6D+ · 3-Stage 悬浮窗变体实验台快速跳转目录 (Quick Jump Index)"
+          subtitle="点击卡片定位至实时交互画布、Footer/Resize 支持度验证矩阵、全量参数调优台或三壳体同屏对照" items={JUMP_ITEMS} isLight={isLight} />
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════
           SECTION 1 (6D+.1): Interactive 3-Stage Floating Window Canvas Stage
          ════════════════════════════════════════════════════════════════════ */}
-      <section
-        id="fw-3stage-6d-1-stage"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-5 ${
-          isLight
-            ? 'bg-white border-neutral-200/90 shadow-2xs'
-            : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <section id="fw-3stage-6d-1-stage" className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-5 ${
+        isLight ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded-md text-xs font-mono font-extrabold bg-amber-500/15 text-amber-500 border border-amber-500/30">
               6D+.1
             </span>
             <AppWindow className="h-4 w-4 text-amber-500" />
-            <h2 className="text-base font-bold">
-              3-Stage 悬浮窗实时交互画布 (Interactive 3-Stage Floating Window Stage)
-            </h2>
+            <h2 className="text-base font-bold">3-Stage 悬浮窗实时交互画布 (Interactive 3-Stage Floating Window Stage)</h2>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -319,13 +282,9 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
               </button>
             </div>
 
-            <ToggleSwitch
-              checked={config.showStageAnatomyBorders}
+            <ToggleSwitch checked={config.showStageAnatomyBorders}
               onCheckedChange={(v) => setParam('showStageAnatomyBorders', v)}
-              label="显示三段式解剖虚线框 (Stage 1/2/3 Borders)"
-              variant="neutral"
-              isLight={isLight}
-            />
+              label="显示三段式解剖虚线框 (Stage 1/2/3 Borders)" variant="neutral" isLight={isLight} />
           </div>
         </div>
 
@@ -364,11 +323,7 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
                   )}
                 </div>
                 <span className="font-bold text-xs">{preset.label}</span>
-                <span
-                  className={`text-[11px] leading-snug ${
-                    isLight ? 'text-neutral-600' : 'text-neutral-400'
-                  }`}
-                >
+                <span className={`text-[11px] leading-snug ${ isLight ? 'text-neutral-600' : 'text-neutral-400' }`}>
                   {preset.subtitle}
                 </span>
               </button>
@@ -380,17 +335,12 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
         <FloatingWindowCornerDraggerStrip isLight={isLight} />
 
         {/* Payload Source Switcher + Quick Size / Resize Stress Bar */}
-        <div
-          className={`p-3.5 rounded-xl border flex flex-col gap-3 ${
-            isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800'
-          }`}
-        >
+        <div className={`p-3.5 rounded-xl border flex flex-col gap-3 ${
+          isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/60 border-neutral-800' }`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Payload Source */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-bold text-neutral-400 mr-1">
-                窗口内部载荷 (Window Payload):
-              </span>
+              <span className="text-xs font-bold text-neutral-400 mr-1">窗口内部载荷 (Window Payload):</span>
               <button
                 type="button"
                 onClick={() => setPayloadSource('probe')}
@@ -443,9 +393,7 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
 
             {/* Quick Resize Dimension Presets */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] font-mono text-neutral-400">
-                一键尺寸压力测试 (Resize Stress):
-              </span>
+              <span className="text-[11px] font-mono text-neutral-400">一键尺寸压力测试 (Resize Stress):</span>
               {[
                 { label: '最小钳制 (300×190)', w: 300, h: 190 },
                 { label: '紧凑 (380×260)', w: 380, h: 260 },
@@ -507,20 +455,12 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
         </div>
 
         {/* Active 3D Arena Canvas Stage */}
-        <div
-          ref={canvasRef}
+        <div ref={canvasRef}
           className={`relative w-full min-h-[620px] rounded-2xl border p-6 overflow-hidden select-none transition-colors ${
-            isLight
-              ? 'bg-neutral-100/70 border-neutral-200 shadow-inner'
-              : 'bg-neutral-950/85 border-neutral-800 shadow-inner'
-          }`}
-          style={{
-            backgroundImage: isLight
-              ? 'radial-gradient(#d4d4d8 1px, transparent 1px)'
-              : 'radial-gradient(#27272a 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        >
+          isLight ? 'bg-neutral-100/70 border-neutral-200 shadow-inner'
+          : 'bg-neutral-950/85 border-neutral-800 shadow-inner' }`} style={{ backgroundImage: isLight
+          ? 'radial-gradient(#d4d4d8 1px, transparent 1px)' : 'radial-gradient(#27272a 1px, transparent 1px)',
+          backgroundSize: '24px 24px', }}>
           {/* Ambient Canvas Guide */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-25 select-none">
             <span className="text-xs font-mono font-bold text-neutral-800 dark:text-neutral-200">
@@ -583,22 +523,11 @@ export const FloatingWindowVariationPage: React.FC<FloatingWindowVariationPagePr
           {/* Bottom-Right Quick Re-Spawn / Opacity Dock inside Canvas */}
           <div
             className={`absolute bottom-4 right-4 z-30 flex items-center gap-3 px-3.5 py-2 rounded-xl border text-xs ${
-              isLight
-                ? 'bg-white/95 border-neutral-300 text-neutral-800 shadow-md'
-                : 'bg-neutral-900/95 border-neutral-700 text-neutral-200 shadow-md'
-            }`}
-          >
+            isLight ? 'bg-white/95 border-neutral-300 text-neutral-800 shadow-md'
+            : 'bg-neutral-900/95 border-neutral-700 text-neutral-200 shadow-md' }`}>
             <div className="w-40">
-              <SliderControl
-                label="Opacity"
-                value={opacity}
-                min={15}
-                max={100}
-                step={1}
-                unit="%"
-                onChange={setOpacity}
-                isLight={isLight}
-              />
+              <SliderControl label="Opacity" value={opacity} min={15} max={100} step={1} unit="%"
+                onChange={setOpacity} isLight={isLight} />
             </div>
             <Button
               size="sm"

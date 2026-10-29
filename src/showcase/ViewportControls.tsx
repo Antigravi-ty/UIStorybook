@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useViewportStore, viewportStore } from '../viewport';
-import { useCrossClientSyncStatus } from './stores';
+import { useViewportStore, viewportStore } from '../viewport/viewportStore';
+import { useCrossClientSyncStatus } from './stores/crossClientSync';
 import { Sliders, Shield, Eye, EyeOff, Radio, RotateCcw, Copy, Check } from 'lucide-react';
 import { Badge } from '../primitives/Badge';
 

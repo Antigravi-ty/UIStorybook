@@ -7,14 +7,14 @@ import {
   Compass,
 } from 'lucide-react';
 import { Badge } from '../../../primitives/Badge';
-import { type MenuPanelId } from '../../../tokens';
+import { type MenuPanelId } from '../../../tokens/menuLayoutStore';
 import {
   useCameraSettingsStyleStore,
   CAMERA_SETTINGS_STYLE_PRESETS,
   type CameraSettingsPresetId,
 } from '../../../tokens/cameraSettingsStyleStore';
 import { useQuickNotificationStore } from '../../../tokens/quickNotificationStore';
-import { dispatchOnlineRoomErrorNotification } from '../../../recipes';
+import { dispatchOnlineRoomErrorNotification } from '../../../recipes/Layer3OnlineWarmupRecipe';
 import type { ShowcaseTab } from '../../Sidebar';
 import {
   type ActiveMenuRoute,

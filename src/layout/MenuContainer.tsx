@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { UI_SPACING, useMenuLayoutStore } from '../tokens';
+import { UI_SPACING } from '../tokens/spacing';
+import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 
 export interface MenuContainerProps {
   children: React.ReactNode;

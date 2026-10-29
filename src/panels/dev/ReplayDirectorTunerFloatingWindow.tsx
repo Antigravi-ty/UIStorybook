@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Film } from 'lucide-react';
-import { SliderControl, ToggleSwitch } from '../../primitives';
-import { ReplayDirectorKeyframeInspector } from '../../compounds';
+import { SliderControl } from '../../primitives/SliderControl';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { ReplayDirectorKeyframeInspector } from '../../compounds/ReplayDirectorKeyframeInspector';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

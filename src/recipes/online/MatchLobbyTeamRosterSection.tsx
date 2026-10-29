@@ -1,6 +1,18 @@
 import React from 'react';
 import { Bot, Check, Columns3, Rows3, User, UserMinus } from 'lucide-react';
-import type { LobbyPlayerSlot, LobbyTeamAssignment } from './MatchLobbyRoomRecipe';
+
+export type LobbyTeamAssignment = 'blue' | 'neutral' | 'orange';
+
+export interface LobbyPlayerSlot {
+  id: string;
+  name: string;
+  pingMs: number;
+  team: LobbyTeamAssignment;
+  isHost?: boolean;
+  isSelf?: boolean;
+  isBot?: boolean;
+  botLabel?: string;
+}
 
 export interface MatchLobbyTeamRosterSectionProps {
   isLight: boolean;

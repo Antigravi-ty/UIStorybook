@@ -5,7 +5,7 @@ import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
 import type {
   StaticPackDownCounterOption,
   StaticTrainingPackSummary,
-} from '../Layer4StaticTrainingPackBrowseRecipe';
+} from './StaticTrainingPackFolderList';
 
 export interface StaticTrainingPackMetadataInspectorProps {
   isLight: boolean;

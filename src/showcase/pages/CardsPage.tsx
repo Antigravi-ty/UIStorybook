@@ -1,5 +1,5 @@
 import React from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import { Square, CheckCircle, ExternalLink } from 'lucide-react';
 
 const useState = createScopedSyncedState('page:cards');

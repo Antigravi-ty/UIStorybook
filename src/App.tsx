@@ -30,11 +30,14 @@ const ChartsAndCurvesPage = lazy(() => import('./showcase/pages/ChartsAndCurvesP
 const ComposableNestingPage = lazy(() => import('./showcase/pages/ComposableNestingPage').then((m) => ({ default: m.ComposableNestingPage })));
 const FoundationsPage = lazy(() => import('./showcase/pages/FoundationsPage').then((m) => ({ default: m.FoundationsPage })));
 const ViewportSafeAreaPage = lazy(() => import('./showcase/pages/ViewportSafeAreaPage').then((m) => ({ default: m.ViewportSafeAreaPage })));
-import { SafeAreaHud, useViewportStore, viewportStore } from './viewport';
+import { SafeAreaHud } from './viewport/SafeAreaHud';
+import { useViewportStore, viewportStore } from './viewport/viewportStore';
 import { DialogueStackContainer } from './primitives/Dialogue';
 import { SectionErrorBoundary } from './primitives/SectionErrorBoundary';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
-import { useAccentStore, readUrlParams, updateUrlParams, useSyncedState } from './showcase/stores';
+import { useAccentStore } from './showcase/stores/themeStore';
+import { readUrlParams, updateUrlParams } from './showcase/stores/urlSync';
+import { useSyncedState } from './showcase/stores/crossClientSync';
 
 interface JumpOriginRecord {
   fromTab: ShowcaseTab;

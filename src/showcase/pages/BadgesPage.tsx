@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import { Tag, Gamepad2, Keyboard as KeyboardIcon, CheckCircle, AlertTriangle, Layers } from 'lucide-react';
 
 const useState = createScopedSyncedState('page:badges');

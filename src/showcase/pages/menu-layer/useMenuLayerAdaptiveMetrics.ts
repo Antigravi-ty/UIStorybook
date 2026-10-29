@@ -5,10 +5,7 @@ import {
   type MenuPanelIntrinsicMetrics,
   type MenuPanelWidthAdaptiveMode,
 } from '../../../navigation/menuPanelAdaptive';
-import {
-  useMenuLayoutStore,
-  DEFAULT_PANEL_SIZING,
-} from '../../../tokens';
+import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../../../tokens/menuLayoutStore';
 import { useMainMenuStyleStore } from '../../../tokens/mainMenuStyleStore';
 import type { Layer1MenuContextMode } from '../../../recipes/Layer1MainMenuRecipe';
 import {

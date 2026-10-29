@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { UI_SPACING, UI_RADIUS, useMenuLayoutStore } from '../tokens';
+import { UI_SPACING, UI_RADIUS } from '../tokens/spacing';
+import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { KeycapBadge } from '../primitives/KeycapBadge';
 
 export interface MenuItemProps {

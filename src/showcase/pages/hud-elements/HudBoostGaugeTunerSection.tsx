@@ -1,16 +1,9 @@
 import React from 'react';
-import { useBoostGaugeStore } from '../../../tokens';
-import { createScopedSyncedState } from '../../stores';
+import { useBoostGaugeStore } from '../../../tokens/boostGaugeStore';
+import { createScopedSyncedState } from '../../stores/crossClientSync';
 import { Flame, RotateCcw, Moon, Sun, Copy, Check, Code2 } from 'lucide-react';
-import {
-  CircularBoostGauge,
-  getBoostSegmentColor,
-  STEP_12_TIER_PRESETS,
-  type BoostColorScheme,
-  type BoostColorMode,
-  type BoostThemeOverride,
-  type HudBoostListener,
-} from '../../../hud';
+import { CircularBoostGauge, getBoostSegmentColor, STEP_12_TIER_PRESETS, type BoostColorScheme, type BoostColorMode, type BoostThemeOverride } from '../../../hud/CircularBoostGauge';
+import { type HudBoostListener } from '../../../hud/types';
 import { SliderControl } from '../../../primitives/SliderControl';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';
 import { Badge } from '../../../primitives/Badge';
@@ -121,9 +114,7 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
           <div className="h-6 w-6 rounded-md bg-sky-500/10 text-sky-500 flex items-center justify-center font-bold text-xs font-mono">
             5A.5
           </div>
-          <h2 className="text-base font-bold tracking-tight">
-            CircularBoostGauge (高频 120Hz · 全参数化圆形推进量表盘)
-          </h2>
+          <h2 className="text-base font-bold tracking-tight">CircularBoostGauge (高频 120Hz · 全参数化圆形推进量表盘)</h2>
           <Badge variant="amber" size="sm" isLight={isLight}>
             120Hz Transient SVG/DOM Ref
           </Badge>
@@ -136,11 +127,8 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
           {/* Left Preview Stage */}
           <div
             className={`lg:col-span-5 p-6 rounded-3xl border flex flex-col items-center justify-between gap-4 transition-all ${
-              isLight
-                ? 'bg-neutral-100/70 border-neutral-200/90 shadow-inner'
-                : 'bg-neutral-950 border-neutral-800/90 shadow-inner'
-            }`}
-          >
+            isLight ? 'bg-neutral-100/70 border-neutral-200/90 shadow-inner'
+            : 'bg-neutral-950 border-neutral-800/90 shadow-inner' }`}>
             <div className="w-full flex items-center justify-between text-[11px] font-mono opacity-80">
               <span>
                 环半径: <strong>{ringInnerPct}%~{ringOuterPct}%</strong>
@@ -182,9 +170,7 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
               </span>
               <span>
                 配色:{' '}
-                <strong className="text-sky-500">
-                  {colorScheme === 'step-12' ? '每12一档(9段)' : '经典4色'}
-                </strong>
+                <strong className="text-sky-500">{colorScheme === 'step-12' ? '每12一档(9段)' : '经典4色'}</strong>
               </span>
             </div>
           </div>
@@ -192,11 +178,8 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
           {/* Right Configuration Panel */}
           <div
             className={`lg:col-span-7 p-6 rounded-3xl border flex flex-col justify-between gap-4 transition-colors shadow-2xs ${
-              isLight
-                ? 'bg-white border-neutral-200/90 text-neutral-800'
-                : 'bg-neutral-900/60 border-neutral-800 text-neutral-200'
-            }`}
-          >
+            isLight ? 'bg-white border-neutral-200/90 text-neutral-800'
+            : 'bg-neutral-900/60 border-neutral-800 text-neutral-200' }`}>
             <div className="flex flex-col gap-3.5">
               {/* Header */}
               <div className="flex items-center justify-between border-b pb-2.5 border-neutral-100 dark:border-neutral-800/70 flex-wrap gap-2">
@@ -212,16 +195,9 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
                       ⚡ 120Hz SVG/Text Ref 直驱中
                     </span>
                   ) : (
-                    <span
-                      className="font-mono text-xs font-bold px-2 py-0.5 rounded-md border"
-                      style={{
-                        color:
-                          !isLight && boostSegment.segmentName === 'black'
-                            ? '#e4e4e7'
-                            : boostSegment.color,
-                        borderColor: `${boostSegment.color}66`,
-                      }}
-                    >
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md border" style={{ color:
+                      !isLight && boostSegment.segmentName === 'black' ? '#e4e4e7' : boostSegment.color,
+                      borderColor: `${boostSegment.color}66`, }}>
                       {isUnlimitedBoost
                         ? '-- (UNLIMITED)'
                         : `${boostAmount}% · ${boostSegment.rangeLabel}`}
@@ -239,11 +215,8 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
                     <Code2 className="h-3 w-3" />
                     <span>{showCode ? '收起代码' : '查看配置代码'}</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyConfig}
-                    className="px-2.5 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-[11px] font-mono cursor-pointer transition-all flex items-center gap-1 shadow-2xs"
-                  >
+                  <button type="button" onClick={handleCopyConfig}
+                    className="px-2.5 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-[11px] font-mono cursor-pointer transition-all flex items-center gap-1 shadow-2xs">
                     {copiedConfig ? (
                       <>
                         <Check className="h-3 w-3" />
@@ -256,11 +229,8 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
                       </>
                     )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleResetBoostGaugeConfig}
-                    className="px-2 py-0.5 rounded-lg border border-neutral-400/40 text-[11px] font-mono cursor-pointer hover:bg-neutral-500/10 flex items-center gap-1"
-                  >
+                  <button type="button" onClick={handleResetBoostGaugeConfig}
+                    className="px-2 py-0.5 rounded-lg border border-neutral-400/40 text-[11px] font-mono cursor-pointer hover:bg-neutral-500/10 flex items-center gap-1">
                     <RotateCcw className="h-3 w-3" />
                     <span>重置默认</span>
                   </button>
@@ -351,39 +321,22 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
 
               {showCode && (
                 <div className="pt-1">
-                  <CodeBlock
-                    title="src/tokens/boostGaugeStore.ts (DEFAULT_BOOST_GAUGE_TOKENS)"
-                    code={exportConfigCode()}
-                    isLight={isLight}
-                  />
+                  <CodeBlock title="src/tokens/boostGaugeStore.ts (DEFAULT_BOOST_GAUGE_TOKENS)"
+                    code={exportConfigCode()} isLight={isLight} />
                 </div>
               )}
 
               {/* 1. Boost Amount Slider & Unlimited Boost + Dark Mode Override */}
               <div className="flex flex-col gap-2">
-                <SliderControl
-                  label="推进量数值 (拖动滑块将暂停 120Hz 流并切至手动检视)"
-                  value={boostAmount}
-                  min={0}
-                  max={100}
-                  step={1}
-                  unit="%"
-                  colorScheme="sky"
-                  isLight={isLight}
-                  onChange={(v) => {
-                    setIs120HzLive(false);
-                    setBoostAmount(v);
-                  }}
-                />
+                <SliderControl label="推进量数值 (拖动滑块将暂停 120Hz 流并切至手动检视)" value={boostAmount} min={0} max={100}
+                  step={1} unit="%" colorScheme="sky" isLight={isLight} onChange={(v) => { setIs120HzLive(false);
+                  setBoostAmount(v); }} />
 
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold">无限推进 (`--`):</span>
-                    <ToggleSwitch
-                      checked={isUnlimitedBoost}
-                      onCheckedChange={setIsUnlimitedBoost}
-                      isLight={isLight}
-                    />
+                    <ToggleSwitch checked={isUnlimitedBoost} onCheckedChange={setIsUnlimitedBoost}
+                      isLight={isLight} />
                   </div>
 
                   {/* Dark Mode Override Selector */}
@@ -482,9 +435,7 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
                             style={{ backgroundColor: item.hex }}
                           />
                           <span className="font-bold leading-tight">{item.range}</span>
-                          <span className="text-[9px] opacity-80 leading-tight">
-                            {item.label.split(' ')[0]}
-                          </span>
+                          <span className="text-[9px] opacity-80 leading-tight">{item.label.split(' ')[0]}</span>
                         </button>
                       );
                     })}
@@ -492,26 +443,14 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      {
-                        val: 15,
-                        label: '0~24 (红)',
-                        cls: 'bg-red-500/10 border-red-500/40 text-red-500 hover:bg-red-500/20',
-                      },
-                      {
-                        val: 45,
-                        label: '25~60 (黄)',
-                        cls: 'bg-amber-500/10 border-amber-500/40 text-amber-500 hover:bg-amber-500/20',
-                      },
-                      {
-                        val: 80,
-                        label: '61~96 (绿)',
-                        cls: 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/20',
-                      },
-                      {
-                        val: 100,
-                        label: '97~100 (浅蓝)',
-                        cls: 'bg-sky-500/10 border-sky-500/40 text-sky-500 hover:bg-sky-500/20',
-                      },
+                      { val: 15, label: '0~24 (红)',
+                        cls: 'bg-red-500/10 border-red-500/40 text-red-500 hover:bg-red-500/20' },
+                      { val: 45, label: '25~60 (黄)',
+                        cls: 'bg-amber-500/10 border-amber-500/40 text-amber-500 hover:bg-amber-500/20' },
+                      { val: 80, label: '61~96 (绿)',
+                        cls: 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/20' },
+                      { val: 100, label: '97~100 (浅蓝)',
+                        cls: 'bg-sky-500/10 border-sky-500/40 text-sky-500 hover:bg-sky-500/20' },
                     ].map((item) => (
                       <button
                         key={item.val}
@@ -534,9 +473,7 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
               {/* 3. Inverted Color Mode & Fixed Number Color */}
               <div className="flex flex-col gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800/60">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-xs font-semibold">
-                    颜色模式 (标准 vs 反转镂空透明环 vs 仅环变色):
-                  </span>
+                  <span className="text-xs font-semibold">颜色模式 (标准 vs 反转镂空透明环 vs 仅环变色):</span>
                   <div className="flex items-center gap-1 font-mono text-xs flex-wrap">
                     {(
                       [
@@ -588,13 +525,9 @@ export const HudBoostGaugeTunerSection: React.FC<HudBoostGaugeTunerSectionProps>
                           <span>{sw.label}</span>
                         </button>
                       ))}
-                      <input
-                        type="color"
-                        value={fixedTextColor}
+                      <input type="color" value={fixedTextColor}
                         onChange={(e) => setFixedTextColor(e.target.value)}
-                        className="w-6 h-6 rounded cursor-pointer border-0 bg-transparent"
-                        title="自定义数字固定颜色"
-                      />
+                        className="w-6 h-6 rounded cursor-pointer border-0 bg-transparent" title="自定义数字固定颜色" />
                     </div>
                   </div>
                 )}

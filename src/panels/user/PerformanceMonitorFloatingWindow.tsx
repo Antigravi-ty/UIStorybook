@@ -1,11 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Cpu, HardDrive } from 'lucide-react';
-import {
-  TelemetrySparklineChart,
-  TelemetryRingBuffer,
-  TelemetryPhaseItem,
-} from '../../charts';
-import { quickNotification } from '../../tokens';
+import { TelemetrySparklineChart, TelemetryPhaseItem } from '../../charts/TelemetrySparklineChart';
+import { TelemetryRingBuffer } from '../../charts/telemetryRingBuffer';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 const INITIAL_FRAME_SAMPLES: number[] = [
   3.18, 3.24, 3.31, 3.22, 3.45, 3.28, 3.19, 3.35, 3.41, 3.26, 3.3, 3.21,

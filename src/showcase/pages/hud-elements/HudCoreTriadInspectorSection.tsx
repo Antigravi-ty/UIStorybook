@@ -1,13 +1,8 @@
 import React from 'react';
 import { Sliders, Gauge } from 'lucide-react';
-import {
-  BallCameraIndicator,
-  VelocityProgressBar,
-  getVelocityBarColor,
-  type HudSpeedListener,
-  type HudBoostListener,
-  type HudBallCamListener,
-} from '../../../hud';
+import { BallCameraIndicator } from '../../../hud/BallCameraIndicator';
+import { VelocityProgressBar, getVelocityBarColor } from '../../../hud/VelocityProgressBar';
+import { type HudSpeedListener, type HudBoostListener, type HudBallCamListener } from '../../../hud/types';
 import { SliderControl } from '../../../primitives/SliderControl';
 import { ToggleSwitch } from '../../../primitives/ToggleSwitch';
 import { Badge } from '../../../primitives/Badge';

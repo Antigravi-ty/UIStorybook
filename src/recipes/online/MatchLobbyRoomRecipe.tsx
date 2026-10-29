@@ -11,25 +11,18 @@ import {
   MatchConfigSummaryCard,
   type SignalingHealthState,
 } from './OnlineRoomTopStatusBar';
-import { MatchLobbyTeamRosterSection } from './MatchLobbyTeamRosterSection';
+import {
+  MatchLobbyTeamRosterSection,
+  type LobbyPlayerSlot,
+  type LobbyTeamAssignment,
+} from './MatchLobbyTeamRosterSection';
 import type {
   HostMatchBotPolicy,
   HostMatchDurationPreset,
   HostMatchTeamFormat,
 } from '../Layer3HostMatchRecipe';
 
-export type LobbyTeamAssignment = 'blue' | 'neutral' | 'orange';
-
-export interface LobbyPlayerSlot {
-  id: string;
-  name: string;
-  pingMs: number;
-  team: LobbyTeamAssignment;
-  isHost?: boolean;
-  isSelf?: boolean;
-  isBot?: boolean;
-  botLabel?: string;
-}
+export type { LobbyPlayerSlot, LobbyTeamAssignment };
 
 export interface MatchLobbyRoomViewProps {
   role: 'host' | 'client';

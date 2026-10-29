@@ -1,19 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:hud-elements');
-import {
-  Crosshair,
-  Sparkles,
-  Zap,
-  Play,
-  Pause,
-} from 'lucide-react';
-import {
-  StepperScoreboardHUD,
-  EdgePlayerHudStrip,
-  createHudTransientChannel,
-} from '../../hud';
+import { Crosshair, Sparkles, Zap, Play, Pause, } from 'lucide-react';
+import { StepperScoreboardHUD } from '../../hud/StepperScoreboardHUD';
+import { EdgePlayerHudStrip } from '../../hud/EdgePlayerHudStrip';
+import { createHudTransientChannel } from '../../hud/hudTransientChannel';
 import { Badge } from '../../primitives/Badge';
 import { SectionErrorBoundary } from '../../primitives/SectionErrorBoundary';
 import { PageJumpDirectory, JumpDirectoryItem } from '../PageJumpDirectory';
@@ -25,72 +17,27 @@ import { HudStageAndFollowupSection, type SlotLayoutPreset } from './hud-element
 export { type SlotLayoutPreset };
 
 const HUD_5A_DIRECTORY_ITEMS: JumpDirectoryItem[] = [
-  {
-    id: 'hud-5a-sandbox',
-    code: '5A.S',
-    name: 'HudSpatialChoreographySandbox',
-    label: '寸土寸金全屏排布与瞬态动画沙盒 (顶贴边 + 防穿帮双下巴)',
-  },
-  {
-    id: 'hud-5a-1-scoreboard',
-    code: '5A.1',
-    name: 'StepperScoreboardHUD',
-    label: '上方紧贴直角·下方圆角计分牌 + 防穿帮单/双下巴',
-  },
-  {
-    id: 'hud-5a-2-edge-strip',
-    code: '5A.2',
-    name: 'EdgePlayerHudStrip',
-    label: '3v3 左右严格轴对称单侧圆角条 (Live/Replay/Spectator)',
-  },
-  {
-    id: 'hud-5a-2-demo-inspector',
-    code: '5A.2+',
-    name: 'EdgeDemoInspectorSection',
-    label: '爆炸状态常驻预览与 Bomb SVG 尺寸/粗细/外发光独立工作台',
-  },
-  {
-    id: 'hud-5a-3-ball-cam',
-    code: '5A.3',
-    name: 'BallCameraIndicator',
-    label: '低频离散球视角指示器 (React.memo + subscribeBallCam)',
-  },
-  {
-    id: 'hud-5a-4-velocity-bar',
-    code: '5A.4',
-    name: 'VelocityProgressBar',
-    label: '120Hz 零圆角超音速进度条 (subscribeSpeed DOM Ref)',
-  },
-  {
-    id: 'hud-5a-5-boost-gauge',
-    code: '5A.5',
-    name: 'CircularBoostGauge',
-    label: '120Hz 全参数化圆形推进量表盘 (subscribeBoost SVG Ref)',
-  },
-  {
-    id: 'hud-5a-5s-triad-stage',
-    code: '5A.5S',
-    name: 'Decoupled 3-Widget Stage',
-    label: '高频 Speed/Boost + 低频 BallCam 零耦合插槽排布实验台',
-  },
-  {
-    id: 'hud-5a-6-telemetry-flip',
-    code: '5A.6 & 5A.7',
-    name: 'CompactTelemetryBarHUD & FlipIndicatorPillHUD',
-    label: '左上角 4 指标微胶囊 + 二段跳倒计时状态灯',
-  },
-  {
-    id: 'hud-5a-8-replay-banner',
-    code: '5A.8',
-    name: 'ReplayControlBannerHUD',
-    label: '进球回放顶栏 + 120Hz 进度条 Scrubber Ref',
-  },
-  {
-    id: 'hud-5a-9-kickoff-rhythm',
-    code: '5A.9',
-    name: 'KickoffRhythmOverlayHUD',
-    label: '120Hz 零分配 Canvas 开球音游轨道 + 9键受击行',
-  },
+  { id: 'hud-5a-sandbox', code: '5A.S',
+    name: 'HudSpatialChoreographySandbox', label: '寸土寸金全屏排布与瞬态动画沙盒 (顶贴边 + 防穿帮双下巴)' },
+  { id: 'hud-5a-1-scoreboard', code: '5A.1', name: 'StepperScoreboardHUD', label: '上方紧贴直角·下方圆角计分牌 + 防穿帮单/双下巴' },
+  { id: 'hud-5a-2-edge-strip', code: '5A.2',
+    name: 'EdgePlayerHudStrip', label: '3v3 左右严格轴对称单侧圆角条 (Live/Replay/Spectator)' },
+  { id: 'hud-5a-2-demo-inspector', code: '5A.2+',
+    name: 'EdgeDemoInspectorSection', label: '爆炸状态常驻预览与 Bomb SVG 尺寸/粗细/外发光独立工作台' },
+  { id: 'hud-5a-3-ball-cam', code: '5A.3',
+    name: 'BallCameraIndicator', label: '低频离散球视角指示器 (React.memo + subscribeBallCam)' },
+  { id: 'hud-5a-4-velocity-bar', code: '5A.4',
+    name: 'VelocityProgressBar', label: '120Hz 零圆角超音速进度条 (subscribeSpeed DOM Ref)' },
+  { id: 'hud-5a-5-boost-gauge', code: '5A.5',
+    name: 'CircularBoostGauge', label: '120Hz 全参数化圆形推进量表盘 (subscribeBoost SVG Ref)' },
+  { id: 'hud-5a-5s-triad-stage', code: '5A.5S',
+    name: 'Decoupled 3-Widget Stage', label: '高频 Speed/Boost + 低频 BallCam 零耦合插槽排布实验台' },
+  { id: 'hud-5a-6-telemetry-flip', code: '5A.6 & 5A.7',
+    name: 'CompactTelemetryBarHUD & FlipIndicatorPillHUD', label: '左上角 4 指标微胶囊 + 二段跳倒计时状态灯' },
+  { id: 'hud-5a-8-replay-banner', code: '5A.8',
+    name: 'ReplayControlBannerHUD', label: '进球回放顶栏 + 120Hz 进度条 Scrubber Ref' },
+  { id: 'hud-5a-9-kickoff-rhythm', code: '5A.9',
+    name: 'KickoffRhythmOverlayHUD', label: '120Hz 零分配 Canvas 开球音游轨道 + 9键受击行' },
 ];
 
 export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = true }) => {
@@ -318,13 +265,9 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
   return (
     <div className="flex flex-col gap-10 max-w-6xl w-full">
       {/* Top Jump Directory */}
-      <PageJumpDirectory
-        layerTag="Layer 5A · High-Frequency Match HUD Elements"
-        title="HUD Elements 独立仪表与空间排布目录"
+      <PageJumpDirectory layerTag="Layer 5A · High-Frequency Match HUD Elements" title="HUD Elements 独立仪表与空间排布目录"
         subtitle="所有 5A 组件均统一接入 hudTransientChannel 120Hz 瞬态通道（0 React Re-render）并完整支持 Light/Dark 模式切换。"
-        items={HUD_5A_DIRECTORY_ITEMS}
-        isLight={isLight}
-      />
+        items={HUD_5A_DIRECTORY_ITEMS} isLight={isLight} />
 
       {/* 顶部标题区 */}
       <div className="flex flex-col gap-2">
@@ -345,13 +288,9 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
         </p>
 
         {/* 顶部 120Hz 瞬态引擎开关 + 情境联动测试栏 */}
-        <div
-          className={`mt-2 p-3.5 rounded-2xl border flex flex-col gap-3 ${
-            isLight
-              ? 'bg-neutral-50/90 border-neutral-200/90 text-neutral-800'
-              : 'bg-neutral-900/70 border-neutral-800 text-neutral-200'
-          }`}
-        >
+        <div className={`mt-2 p-3.5 rounded-2xl border flex flex-col gap-3 ${ isLight
+          ? 'bg-neutral-50/90 border-neutral-200/90 text-neutral-800'
+          : 'bg-neutral-900/70 border-neutral-800 text-neutral-200' }`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-wrap">
               <button
@@ -379,13 +318,9 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
               </button>
 
               {is120HzLive && (
-                <div
-                  className={`flex items-center gap-3 px-3 py-1 rounded-xl border font-mono text-[11px] ${
-                    isLight
-                      ? 'bg-white border-neutral-200 text-neutral-700'
-                      : 'bg-neutral-950/80 border-neutral-800 text-neutral-300'
-                  }`}
-                >
+                <div className={`flex items-center gap-3 px-3 py-1 rounded-xl border font-mono text-[11px] ${
+                  isLight ? 'bg-white border-neutral-200 text-neutral-700'
+                  : 'bg-neutral-950/80 border-neutral-800 text-neutral-300' }`}>
                   <span>
                     Stream: <strong ref={liveHzReadoutRef} className="text-sky-500">120 Hz</strong>
                   </span>
@@ -472,11 +407,8 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
       {/* 5A.S: HUD v2 FULL-VIEWPORT SPATIAL LAYOUT & CHOREOGRAPHY SANDBOX */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div id="hud-5a-sandbox" className="scroll-mt-24">
-        <SectionErrorBoundary
-          title="5A.S HudSpatialChoreographySandbox"
-          scopePrefix="hud-spatial-sandbox"
-          isLight={isLight}
-        >
+        <SectionErrorBoundary title="5A.S HudSpatialChoreographySandbox" scopePrefix="hud-spatial-sandbox"
+          isLight={isLight}>
           <HudSpatialChoreographySandbox isLight={isLight} />
         </SectionErrorBoundary>
       </div>
@@ -486,22 +418,15 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionErrorBoundary title="5A.1 StepperScoreboardHUD" isLight={isLight}>
-          <section
-            id="hud-5a-1-scoreboard"
-            className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${
-              isLight
-                ? 'bg-white border-neutral-200 text-neutral-900 shadow-xs'
-                : 'bg-neutral-900/80 border-neutral-800 text-neutral-100 shadow-lg'
-            }`}
-          >
+          <section id="hud-5a-1-scoreboard" className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${
+            isLight ? 'bg-white border-neutral-200 text-neutral-900 shadow-xs'
+            : 'bg-neutral-900/80 border-neutral-800 text-neutral-100 shadow-lg' }`}>
             <div className="flex items-center justify-between border-b pb-2.5 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <Badge variant="amber" size="sm" isLight={isLight}>
                   5A.1
                 </Badge>
-                <h2 className="text-sm font-bold font-mono">
-                  StepperScoreboardHUD (`top-0` 紧贴上方 · 上直角下圆角)
-                </h2>
+                <h2 className="text-sm font-bold font-mono">StepperScoreboardHUD (`top-0` 紧贴上方 · 上直角下圆角)</h2>
               </div>
               <Badge variant="primary" size="sm" isLight={isLight}>
                 双下巴 `-mt-[6px] pt-[9px]` 防穿帮
@@ -512,9 +437,7 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
             </p>
             <div
               className={`relative h-[156px] rounded-2xl border overflow-hidden flex flex-col items-center justify-start ${
-                isLight ? 'bg-slate-200/80 border-neutral-300' : 'bg-neutral-950 border-neutral-800'
-              }`}
-            >
+              isLight ? 'bg-slate-200/80 border-neutral-300' : 'bg-neutral-950 border-neutral-800' }`}>
               <StepperScoreboardHUD
                 isLight={isLight}
                 leftScore={2}
@@ -531,22 +454,15 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
         </SectionErrorBoundary>
 
         <SectionErrorBoundary title="5A.2 EdgePlayerHudStrip" isLight={isLight}>
-          <section
-            id="hud-5a-2-edge-strip"
-            className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${
-              isLight
-                ? 'bg-white border-neutral-200 text-neutral-900 shadow-xs'
-                : 'bg-neutral-900/80 border-neutral-800 text-neutral-100 shadow-lg'
-            }`}
-          >
+          <section id="hud-5a-2-edge-strip" className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${
+            isLight ? 'bg-white border-neutral-200 text-neutral-900 shadow-xs'
+            : 'bg-neutral-900/80 border-neutral-800 text-neutral-100 shadow-lg' }`}>
             <div className="flex items-center justify-between border-b pb-2.5 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <Badge variant="amber" size="sm" isLight={isLight}>
                   5A.2
                 </Badge>
-                <h2 className="text-sm font-bold font-mono">
-                  EdgePlayerHudStrip (左右轴对称单侧圆角条)
-                </h2>
+                <h2 className="text-sm font-bold font-mono">EdgePlayerHudStrip (左右轴对称单侧圆角条)</h2>
               </div>
               <Badge variant="primary" size="sm" isLight={isLight}>
                 subscribeRoster · 120Hz Ref
@@ -557,9 +473,7 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
             </p>
             <div
               className={`relative h-[156px] rounded-2xl border overflow-hidden flex items-center justify-between ${
-                isLight ? 'bg-slate-200/80 border-neutral-300' : 'bg-neutral-950 border-neutral-800'
-              }`}
-            >
+              isLight ? 'bg-slate-200/80 border-neutral-300' : 'bg-neutral-950 border-neutral-800' }`}>
               <EdgePlayerHudStrip
                 side="left"
                 teamColor="#2563EB"
@@ -584,19 +498,13 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
       </div>
 
       {/* 5A.2+: Dedicated Persistent Demolished Slot & Bomb SVG Size/Style Inspector */}
-      <SectionErrorBoundary
-        title="5A.2+ EdgeDemoInspectorSection"
-        scopePrefix="hud-5a-2-demo-inspector"
-        isLight={isLight}
-      >
+      <SectionErrorBoundary title="5A.2+ EdgeDemoInspectorSection" scopePrefix="hud-5a-2-demo-inspector"
+        isLight={isLight}>
         <EdgeDemoInspectorSection isLight={isLight} />
       </SectionErrorBoundary>
 
-      <SectionErrorBoundary
-        title="5A.3 ~ 5A.5 HudCoreTriadInspectorSection"
-        scopePrefix="hud-5a-5-boost-config"
-        isLight={isLight}
-      >
+      <SectionErrorBoundary title="5A.3 ~ 5A.5 HudCoreTriadInspectorSection" scopePrefix="hud-5a-5-boost-config"
+        isLight={isLight}>
         <HudCoreTriadInspectorSection
           isLight={isLight}
           is120HzLive={is120HzLive}
@@ -626,10 +534,7 @@ export const HudElementsPage: React.FC<{ isLight?: boolean }> = ({ isLight = tru
         />
       </SectionErrorBoundary>
 
-      <SectionErrorBoundary
-        title="5A.6 ~ 5A.9 HudStageAndFollowupSection"
-        isLight={isLight}
-      >
+      <SectionErrorBoundary title="5A.6 ~ 5A.9 HudStageAndFollowupSection" isLight={isLight}>
         <HudStageAndFollowupSection
           isLight={isLight}
           is120HzLive={is120HzLive}

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Play, RotateCcw } from 'lucide-react';
-import { SliderControl, ToggleSwitch, Button } from '../../primitives';
-import { CounterfactualComparisonStrip } from '../../compounds';
-import { quickNotification } from '../../tokens';
+import { SliderControl } from '../../primitives/SliderControl';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { Button } from '../../primitives/Button';
+import { CounterfactualComparisonStrip } from '../../compounds/CounterfactualComparisonStrip';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**
  * 14. [Dev] Dual-Arena Rollback Determinism Harness (`dual-arena-determinism-harness`)

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import { Compass, Play, Car, Settings, Keyboard, ExternalLink, ArrowLeft, Volume2, Gamepad2, Wrench } from 'lucide-react';
 
 const useState = createScopedSyncedState('page:navigation');
@@ -7,7 +7,7 @@ import { MorphingShell } from '../../navigation/MorphingShell';
 import { ContainerTransitionMode } from '../../tokens/easing';
 import { Layer1MainMenuRecipe } from '../../recipes/Layer1MainMenuRecipe';
 import { Layer2PlayRecipe } from '../../recipes/Layer2PlayRecipe';
-import { Layer2SettingsRecipe } from '../../recipes/settings';
+import { Layer2SettingsRecipe } from '../../recipes/Layer2SettingsRecipe';
 import { Layer2GarageRecipe } from '../../recipes/Layer2GarageRecipe';
 import { Layer3AudioEqRecipe } from '../../recipes/Layer3AudioEqRecipe';
 import { Layer3BallTrajectoryRecipe } from '../../recipes/Layer3BallTrajectoryRecipe';

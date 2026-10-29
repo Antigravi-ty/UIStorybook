@@ -1,5 +1,5 @@
 import React from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import { Volume2, Monitor, Gamepad2, Check } from 'lucide-react';
 
 const useState = createScopedSyncedState('page:tabs');
@@ -17,62 +17,20 @@ import { SettingActionRowTuner } from './recipes/SettingActionRowTuner';
 import { UnderlineTabsTuner } from './recipes/UnderlineTabsTuner';
 
 const L1_TABS_JUMP_ITEMS: JumpDirectoryItem[] = [
-  {
-    id: 'l1-setting-action-row',
-    code: 'L1.0',
-    name: 'SettingActionRow',
-    label: '设置导航行 (外框 · Description · Padding · 字号 · SVG 颜色调优)',
-    badge: 'L1 ⇄ L6 ⇄ L7',
-  },
-  {
-    id: 'l1-underline-tabs',
-    code: 'L1.1',
-    name: 'UnderlineTabs',
-    label: '滑动下划线标签栏 (字号 · Icon Size · 间距 · 字重实时调优)',
-    badge: 'L1 ⇄ L6 ⇄ L7',
-  },
-  {
-    id: 'l1-segmented-switch',
-    code: 'L1.2',
-    name: 'SegmentedSwitch',
-    label: '圆角矩形触感分段控制器',
-    badge: 'L1 Primitive',
-  },
-  {
-    id: 'l1-slider-control',
-    code: 'L1.3',
-    name: 'SliderControl',
-    label: '步进滑块与 Centered 中心双向填充变体',
-    badge: 'L1 Primitive',
-  },
-  {
-    id: 'l1-dual-grabber-slider',
-    code: 'L1.4',
-    name: 'DualGrabberSlider',
-    label: '双滑块中心死区与自由区间控制器',
-    badge: 'L1 Primitive',
-  },
-  {
-    id: 'l1-precision-digit-picker',
-    code: 'L1.5',
-    name: 'PrecisionDigitPicker',
-    label: '1.00000 小数位步进精度选择器',
-    badge: 'L1 Primitive',
-  },
-  {
-    id: 'l1-toggle-switch',
-    code: 'L1.6',
-    name: 'ToggleSwitch',
-    label: 'Apple HIG 触觉物理开关',
-    badge: 'L1 Primitive',
-  },
-  {
-    id: 'l1-checkbox',
-    code: 'L1.7',
-    name: 'Checkbox',
-    label: '触觉圆角复选框 (支持色板 · 圆角 · 勾线粗细 · 半选状态)',
-    badge: 'L1 Primitive',
-  },
+  { id: 'l1-setting-action-row', code: 'L1.0', name: 'SettingActionRow',
+    label: '设置导航行 (外框 · Description · Padding · 字号 · SVG 颜色调优)', badge: 'L1 ⇄ L6 ⇄ L7' },
+  { id: 'l1-underline-tabs', code: 'L1.1', name: 'UnderlineTabs',
+    label: '滑动下划线标签栏 (字号 · Icon Size · 间距 · 字重实时调优)', badge: 'L1 ⇄ L6 ⇄ L7' },
+  { id: 'l1-segmented-switch', code: 'L1.2', name: 'SegmentedSwitch', label: '圆角矩形触感分段控制器', badge: 'L1 Primitive' },
+  { id: 'l1-slider-control', code: 'L1.3', name: 'SliderControl',
+    label: '步进滑块与 Centered 中心双向填充变体', badge: 'L1 Primitive' },
+  { id: 'l1-dual-grabber-slider', code: 'L1.4', name: 'DualGrabberSlider',
+    label: '双滑块中心死区与自由区间控制器', badge: 'L1 Primitive' },
+  { id: 'l1-precision-digit-picker', code: 'L1.5', name: 'PrecisionDigitPicker',
+    label: '1.00000 小数位步进精度选择器', badge: 'L1 Primitive' },
+  { id: 'l1-toggle-switch', code: 'L1.6', name: 'ToggleSwitch', label: 'Apple HIG 触觉物理开关', badge: 'L1 Primitive' },
+  { id: 'l1-checkbox', code: 'L1.7', name: 'Checkbox',
+    label: '触觉圆角复选框 (支持色板 · 圆角 · 勾线粗细 · 半选状态)', badge: 'L1 Primitive' },
 ];
 
 export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) => {
@@ -129,12 +87,8 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
         </p>
       </div>
 
-      <PageJumpDirectory
-        title="L1 · Tabs / Switch / Slider / SettingActionRow 快速跳转目录"
-        subtitle="点击卡片平滑定位至对应原子控件或独立调优器，支持一键复制规范化组件代号"
-        items={L1_TABS_JUMP_ITEMS}
-        isLight={isLight}
-      />
+      <PageJumpDirectory title="L1 · Tabs / Switch / Slider / SettingActionRow 快速跳转目录"
+        subtitle="点击卡片平滑定位至对应原子控件或独立调优器，支持一键复制规范化组件代号" items={L1_TABS_JUMP_ITEMS} isLight={isLight} />
 
       {/* 0. SettingActionRow Standalone Primitive & Tuner */}
       <div id="l1-setting-action-row" className="scroll-mt-6 flex flex-col gap-3">
@@ -206,30 +160,16 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-mono text-neutral-400">控制器 1:</span>
-              <SegmentedSwitch
-                value={switch1}
-                onValueChange={setSwitch1}
-                isLight={isLight}
-                options={[
-                  { value: 'quality', label: 'Quality' },
-                  { value: 'balanced', label: 'Balanced' },
-                  { value: 'performance', label: 'Performance' },
-                ]}
-              />
+              <SegmentedSwitch value={switch1} onValueChange={setSwitch1} isLight={isLight} options={[
+                { value: 'quality', label: 'Quality' }, { value: 'balanced', label: 'Balanced' },
+                { value: 'performance', label: 'Performance' }, ]} />
             </div>
 
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-mono text-neutral-400">控制器 2 (独立激活):</span>
-              <SegmentedSwitch
-                value={switch2}
-                onValueChange={setSwitch2}
-                isLight={isLight}
-                options={[
-                  { value: 'low', label: 'Low' },
-                  { value: 'mid', label: 'Medium' },
-                  { value: 'high', label: 'High' },
-                ]}
-              />
+              <SegmentedSwitch value={switch2} onValueChange={setSwitch2} isLight={isLight} options={[
+                { value: 'low', label: 'Low' }, { value: 'mid', label: 'Medium' },
+                { value: 'high', label: 'High' }, ]} />
             </div>
           </div>
         </div>
@@ -245,17 +185,9 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
               </span>
               <span className="text-[11px] text-neutral-400">长文本占用更多比例，短文本占用更少比例</span>
             </div>
-            <SegmentedSwitch
-              value={switch3}
-              onValueChange={setSwitch3}
-              isLight={isLight}
-              distribution="auto"
-              options={[
-                { value: 'short', label: '短' },
-                { value: 'medium-label', label: '中等长度标签' },
-                { value: 'long-label', label: '较长的详细设置选项 (Longer Content)' },
-              ]}
-            />
+            <SegmentedSwitch value={switch3} onValueChange={setSwitch3} isLight={isLight} distribution="auto"
+              options={[ { value: 'short', label: '短' }, { value: 'medium-label', label: '中等长度标签' },
+              { value: 'long-label', label: '较长的详细设置选项 (Longer Content)' }, ]} />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -265,17 +197,9 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
               </span>
               <span className="text-[11px] text-neutral-400">无论内容长短，每个分段均严格平分宽度</span>
             </div>
-            <SegmentedSwitch
-              value={switch3}
-              onValueChange={setSwitch3}
-              isLight={isLight}
-              distribution="equal"
-              options={[
-                { value: 'short', label: '短' },
-                { value: 'medium-label', label: '中等长度标签' },
-                { value: 'long-label', label: '较长选项 (均分对齐)' },
-              ]}
-            />
+            <SegmentedSwitch value={switch3} onValueChange={setSwitch3} isLight={isLight} distribution="equal"
+              options={[ { value: 'short', label: '短' }, { value: 'medium-label', label: '中等长度标签' },
+              { value: 'long-label', label: '较长选项 (均分对齐)' }, ]} />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -285,17 +209,10 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
               </span>
               <span className="text-[11px] text-neutral-400">充满整行宽度，且保持内容权重间距</span>
             </div>
-            <SegmentedSwitch
-              value={switch4}
-              onValueChange={setSwitch4}
-              isLight={isLight}
-              distribution="proportional"
-              options={[
-                { value: 'proportional-1', label: 'Compact' },
-                { value: 'proportional-2', label: 'Balanced Proportion' },
-                { value: 'proportional-3', label: 'Expanded High Priority Segment' },
-              ]}
-            />
+            <SegmentedSwitch value={switch4} onValueChange={setSwitch4} isLight={isLight}
+              distribution="proportional" options={[ { value: 'proportional-1', label: 'Compact' },
+              { value: 'proportional-2', label: 'Balanced Proportion' },
+              { value: 'proportional-3', label: 'Expanded High Priority Segment' }, ]} />
           </div>
         </div>
       </div>
@@ -315,99 +232,42 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
         {/* Neutral Monochrome Default */}
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold text-neutral-400">A. 默认从左至右单向填充 (Neutral Mono Scheme):</span>
-          <SliderControl
-            label="Field of View (FOV)"
-            description="调整三维透视相机的视野广角范围（中性黑白无饱和度轨段）"
-            value={sliderNeutral}
-            min={60}
-            max={120}
-            step={1}
-            unit="°"
-            onChange={setSliderNeutral}
-            colorScheme="neutral"
-            isLight={isLight}
-          />
+          <SliderControl label="Field of View (FOV)" description="调整三维透视相机的视野广角范围（中性黑白无饱和度轨段）"
+            value={sliderNeutral} min={60} max={120} step={1} unit="°" onChange={setSliderNeutral}
+            colorScheme="neutral" isLight={isLight} />
         </div>
 
         {/* Warm Amber Variant */}
         <div className="flex flex-col gap-1.5 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/60">
           <span className="text-xs font-semibold text-neutral-400">B. 暖橙色调方案 (Warm Amber Scheme):</span>
-          <SliderControl
-            label="Master Volume"
-            description="主混音输出增益（柔和暖色轨段）"
-            value={sliderAmber}
-            min={0}
-            max={100}
-            step={5}
-            unit="%"
-            onChange={setSliderAmber}
-            colorScheme="amber"
-            isLight={isLight}
-          />
+          <SliderControl label="Master Volume" description="主混音输出增益（柔和暖色轨段）" value={sliderAmber} min={0} max={100}
+            step={5} unit="%" onChange={setSliderAmber} colorScheme="amber" isLight={isLight} />
         </div>
 
         {/* Centered / Bipolar Variation (Positive & Negative bi-directional fill from origin) */}
         <div className="flex flex-col gap-3 pt-3 border-t border-neutral-200/60 dark:border-neutral-800/60">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className="text-xs font-bold text-amber-500">
-              C. 中心对称 / 锚点双向填充变体 (Centered / Bipolar Variation):
-            </span>
+            <span className="text-xs font-bold text-amber-500">C. 中心对称 / 锚点双向填充变体 (Centered / Bipolar Variation):</span>
             <Badge size="sm" variant="amber" isLight={isLight}>variation="centered" · 正负双向填充</Badge>
           </div>
           <p className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
             当滑块存在正负值（如 <code className="font-mono">-50 ~ +50</code> 或 <code className="font-mono">-180° ~ +180°</code>）或特定单位基准点（如 <code className="font-mono">100%</code> 标准增益）时，不再呆板地从最左端填充，而是以 <code className="font-mono">origin</code> 为中心向左（负偏移）或向右（正偏移）动态填充，双击轨段或点击零位徽章可瞬间归零：
           </p>
 
-          <SliderControl
-            label="Steering Trim (转向平衡微调 · 中心 0 点)"
-            description="以中间 0% 为基准点：正值向右填充，负值向左填充，支持正负异色或同色"
-            value={sliderCentered}
-            min={-50}
-            max={50}
-            step={1}
-            unit="%"
-            onChange={setSliderCentered}
-            variation="centered"
-            origin={0}
-            showSign={true}
-            colorScheme="neutral"
-            isLight={isLight}
-          />
+          <SliderControl label="Steering Trim (转向平衡微调 · 中心 0 点)" description="以中间 0% 为基准点：正值向右填充，负值向左填充，支持正负异色或同色"
+            value={sliderCentered} min={-50} max={50} step={1} unit="%" onChange={setSliderCentered}
+            variation="centered" origin={0} showSign={true} colorScheme="neutral" isLight={isLight} />
 
-          <SliderControl
-            label="Boost Pad Symmetry Rotation (加速垫对称旋转角 · 正负异色对比)"
-            description="负角度由 0° 向左以天蓝色填充，正角度由 0° 向右以暖橙色填充，支持直接输入精确角度"
-            value={sliderTrim}
-            min={-180}
-            max={180}
-            step={1}
-            unit="°"
-            onChange={setSliderTrim}
-            variation="centered"
-            origin={0}
-            showSign={true}
-            colorScheme="amber"
-            negativeColorScheme="sky"
-            editable={true}
-            isLight={isLight}
-          />
+          <SliderControl label="Boost Pad Symmetry Rotation (加速垫对称旋转角 · 正负异色对比)"
+            description="负角度由 0° 向左以天蓝色填充，正角度由 0° 向右以暖橙色填充，支持直接输入精确角度" value={sliderTrim} min={-180} max={180}
+            step={1} unit="°" onChange={setSliderTrim} variation="centered" origin={0} showSign={true}
+            colorScheme="amber" negativeColorScheme="sky" editable={true} isLight={isLight} />
 
-          <SliderControl
-            label="Acoustic Bus Gain (0% ~ 500% 音量矩阵 · 自定义锚点 origin=100%)"
+          <SliderControl label="Acoustic Bus Gain (0% ~ 500% 音量矩阵 · 自定义锚点 origin=100%)"
             description="对标 RLCleanWASM Layer 4 高级音频矩阵：以 100% (Unity Gain) 为非居中基准点，低于 100% 向左衰减，高于 100% 向右放大"
-            value={sliderUnityGain}
-            min={0}
-            max={500}
-            step={5}
-            unit="%"
-            onChange={setSliderUnityGain}
-            variation="centered"
-            origin={100}
-            colorScheme="emerald"
-            negativeColorScheme="amber"
-            editable={true}
-            isLight={isLight}
-          />
+            value={sliderUnityGain} min={0} max={500} step={5} unit="%" onChange={setSliderUnityGain}
+            variation="centered" origin={100} colorScheme="emerald" negativeColorScheme="amber" editable={true}
+            isLight={isLight} />
         </div>
       </div>
 
@@ -502,37 +362,15 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className={`p-3 rounded-xl border ${isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/50 border-neutral-800'}`}>
-              <SliderControl
-                label="Ground UV Scale X"
-                description="聚焦输入框后按 ↑ / ↓ 键体验当前选中数位步进"
-                value={uvScaleX}
-                min={0.5}
-                max={2.0}
-                step={0.0001}
-                origin={1.0}
-                variation="centered"
-                colorScheme="emerald"
-                editable={true}
-                usePrecisionContext={true}
-                onChange={setUvScaleX}
-                isLight={isLight}
-              />
+              <SliderControl label="Ground UV Scale X" description="聚焦输入框后按 ↑ / ↓ 键体验当前选中数位步进" value={uvScaleX}
+                min={0.5} max={2.0} step={0.0001} origin={1.0} variation="centered" colorScheme="emerald"
+                editable={true} usePrecisionContext={true} onChange={setUvScaleX} isLight={isLight} />
             </div>
 
             <div className={`p-3 rounded-xl border ${isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/50 border-neutral-800'}`}>
-              <SliderControl
-                label="Shader Line Smoothness"
-                description="支持高达 5 位小数的零截断浮点精度调节"
-                value={lineSmoothness}
-                min={0.001}
-                max={0.15}
-                step={0.0001}
-                colorScheme="emerald"
-                editable={true}
-                usePrecisionContext={true}
-                onChange={setLineSmoothness}
-                isLight={isLight}
-              />
+              <SliderControl label="Shader Line Smoothness" description="支持高达 5 位小数的零截断浮点精度调节"
+                value={lineSmoothness} min={0.001} max={0.15} step={0.0001} colorScheme="emerald" editable={true}
+                usePrecisionContext={true} onChange={setLineSmoothness} isLight={isLight} />
             </div>
           </div>
         </TunerPrecisionContext.Provider>
@@ -552,47 +390,25 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 rounded-xl border border-neutral-200/80 dark:border-neutral-800/80 flex flex-col justify-between gap-3">
-            <ToggleSwitch
-              label="Apple Green (经典绿)"
-              description="iOS 标准绿色设计"
-              checked={toggleGreen}
-              onCheckedChange={setToggleGreen}
-              variant="green"
-              isLight={isLight}
-            />
+            <ToggleSwitch label="Apple Green (经典绿)" description="iOS 标准绿色设计" checked={toggleGreen}
+              onCheckedChange={setToggleGreen} variant="green" isLight={isLight} />
           </div>
 
           <div className="p-4 rounded-xl border border-neutral-200/80 dark:border-neutral-800/80 flex flex-col justify-between gap-3">
-            <ToggleSwitch
-              label="Apple Black (极简黑)"
-              description="无饱和度中性设计"
-              checked={toggleBlack}
-              onCheckedChange={setToggleBlack}
-              variant="black"
-              isLight={isLight}
-            />
+            <ToggleSwitch label="Apple Black (极简黑)" description="无饱和度中性设计" checked={toggleBlack}
+              onCheckedChange={setToggleBlack} variant="black" isLight={isLight} />
           </div>
 
           <div className="p-4 rounded-xl border border-neutral-200/80 dark:border-neutral-800/80 flex flex-col justify-between gap-3">
-            <ToggleSwitch
-              label="Warm Orange (暖橙)"
-              description="柔和暖色系变体"
-              checked={toggleOrange}
-              onCheckedChange={setToggleOrange}
-              variant="orange"
-              isLight={isLight}
-            />
+            <ToggleSwitch label="Warm Orange (暖橙)" description="柔和暖色系变体" checked={toggleOrange}
+              onCheckedChange={setToggleOrange} variant="orange" isLight={isLight} />
           </div>
         </div>
       </div>
 
       {/* 7. Checkbox (L1.7) */}
-      <div
-        id="l1-checkbox"
-        className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-5 ${
-          isLight ? 'bg-white border-neutral-200/80 shadow-xs' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <div id="l1-checkbox" className={`scroll-mt-6 p-6 rounded-2xl border flex flex-col gap-5 ${
+        isLight ? 'bg-white border-neutral-200/80 shadow-xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -652,13 +468,8 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
         isLight={isLight}
         title="Agent 代码配方 (Tabs, Centered Sliders, Dual-Grabber & Precision Picker)"
         code={`import {
-  UnderlineTabs,
-  SegmentedSwitch,
-  SliderControl,
-  DualGrabberSlider,
-  PrecisionDigitPicker,
-  TunerPrecisionContext,
-  ToggleSwitch,
+  UnderlineTabs, SegmentedSwitch, SliderControl, DualGrabberSlider,
+  PrecisionDigitPicker, TunerPrecisionContext, ToggleSwitch,
 } from '@/primitives';
 
 // 1. 中心对称双向填充滑动条 (支持正负值或自定义 origin 锚点 + 直接输入)
@@ -687,12 +498,8 @@ export const TabsPage: React.FC<{ isLight?: boolean }> = ({ isLight = false }) =
 // 3. 小数点位数步进精度选择器 (1 . 0 0 0 0 0)
 <TunerPrecisionContext.Provider value={{ step, setStep }}>
   <PrecisionDigitPicker step={step} onStepChange={setStep} isLight={isLight} />
-  <SliderControl
-    label="UV Scale X"
-    value={scaleX} min={0.5} max={2.0} step={0.0001}
-    editable={true} usePrecisionContext={true}
-    onChange={setScaleX} isLight={isLight}
-  />
+  <SliderControl label="UV Scale X" value={scaleX} min={0.5} max={2.0} step={0.0001}
+    editable={true} usePrecisionContext={true} onChange={setScaleX} isLight={isLight} />
 </TunerPrecisionContext.Provider>`}
       />
     </div>

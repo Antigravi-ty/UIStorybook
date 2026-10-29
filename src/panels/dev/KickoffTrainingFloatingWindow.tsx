@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { RotateCcw, Gauge, Eye, Keyboard, Sparkles, Play } from 'lucide-react';
-import { SliderControl, SegmentedSwitch, ToggleSwitch, Badge, Button } from '../../primitives';
-import { quickNotification } from '../../tokens';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { Badge } from '../../primitives/Badge';
+import { Button } from '../../primitives/Button';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 const KICKOFF_SPAWNS = [
   { id: 'diag-right', index: 0, key: '1', shortLabel: 'Diag R', label: '1 · Diagonal Right' },

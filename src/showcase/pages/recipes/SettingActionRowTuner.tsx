@@ -1,17 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Sliders,
-  RotateCcw,
-  Copy,
-  Check,
-  Code2,
-  Sparkles,
-  NotebookPen,
-  Video,
-  Crosshair,
-  Volume2,
-  SmilePlus,
-  Palette,
+  Sliders, RotateCcw, Copy, Check,
+  Code2, Sparkles, NotebookPen, Video,
+  Crosshair, Volume2, SmilePlus, Palette,
 } from 'lucide-react';
 import { BounceSolidSvg } from '../../../primitives/packagedSvgIcons';
 import { SliderControl } from '../../../primitives/SliderControl';
@@ -26,7 +17,7 @@ import { SettingPresetCustomRow } from '../../../primitives/SettingPresetCustomR
 import { SettingDeveloperStatusRow } from '../../../primitives/SettingDeveloperStatusRow';
 import { TelemetryConfigCard } from '../../../compounds/TelemetryConfigCard';
 import { CodeBlock } from '../../CodeBlock';
-import { useSettingActionRowStore } from '../../../tokens';
+import { useSettingActionRowStore } from '../../../tokens/settingRowStore';
 import { SettingActionRowArchetypeSections } from './SettingActionRowArchetypeSections';
 
 export interface SettingActionRowTunerProps {
@@ -222,14 +213,9 @@ export const SettingActionRowTuner: React.FC<SettingActionRowTunerProps> = React
   };
 
   return (
-    <div
-      id="setting-action-row-tuner"
-      className={`scroll-mt-6 p-5 md:p-6 rounded-2xl border flex flex-col gap-5 w-full transition-colors ${
-        isLight
-          ? 'bg-white border-neutral-200/90 shadow-2xs'
-          : 'bg-neutral-900/70 border-neutral-800'
-      }`}
-    >
+    <div id="setting-action-row-tuner"
+      className={`scroll-mt-6 p-5 md:p-6 rounded-2xl border flex flex-col gap-5 w-full transition-colors ${ isLight
+      ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800' }`}>
       {/* Top Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-neutral-200/70 dark:border-neutral-800">
         <div className="flex items-center gap-2 flex-wrap">
@@ -243,11 +229,7 @@ export const SettingActionRowTuner: React.FC<SettingActionRowTunerProps> = React
           <Badge variant="amber" size="sm" isLight={isLight}>
             4 子页面全局统一 · L1 ⇄ L6 ⇄ L7 实时联动
           </Badge>
-          <span
-            className={`text-[11px] font-mono ${
-              isLight ? 'text-neutral-500' : 'text-neutral-400'
-            }`}
-          >
+          <span className={`text-[11px] font-mono ${ isLight ? 'text-neutral-500' : 'text-neutral-400' }`}>
             {bordered ? '有外框' : '无外框(Apple Hover)'} · {showDescription ? '含副标题' : '隐藏行内Description(Hover底栏提示)'} · Title {titleFontSize}px · Slider {sliderLayout}({sliderTrackWidth}px) · Pad {paddingX}×{paddingY}px
           </span>
         </div>
@@ -287,13 +269,8 @@ export const SettingActionRowTuner: React.FC<SettingActionRowTunerProps> = React
       </div>
 
       {/* Quick Presets + Structural Toggles */}
-      <div
-        className={`p-3.5 rounded-xl border flex flex-col gap-3 ${
-          isLight
-            ? 'bg-neutral-50/80 border-neutral-200/80'
-            : 'bg-neutral-950/50 border-neutral-800/80'
-        }`}
-      >
+      <div className={`p-3.5 rounded-xl border flex flex-col gap-3 ${ isLight
+        ? 'bg-neutral-50/80 border-neutral-200/80' : 'bg-neutral-950/50 border-neutral-800/80' }`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] text-neutral-400 flex items-center gap-1 font-semibold">
@@ -360,27 +337,12 @@ export const SettingActionRowTuner: React.FC<SettingActionRowTunerProps> = React
 
         <div className="flex flex-wrap items-center justify-between gap-4 pt-2.5 border-t border-neutral-200/60 dark:border-neutral-800/60">
           <div className="flex items-center gap-5 flex-wrap">
-            <ToggleSwitch
-              checked={bordered}
-              onCheckedChange={(v) => setToken('bordered', v)}
-              label="显示常驻外框与底板 (bordered)"
-              variant="neutral"
-              isLight={isLight}
-            />
-            <ToggleSwitch
-              checked={showDescription}
-              onCheckedChange={(v) => setToken('showDescription', v)}
-              label="显示行内 Description (默认关: 悬停在底部 Footer 显示)"
-              variant="neutral"
-              isLight={isLight}
-            />
-            <ToggleSwitch
-              checked={showButtonArrow}
-              onCheckedChange={(v) => setToken('showButtonArrow', v)}
-              label="显示按钮右侧箭头 (showButtonArrow)"
-              variant="neutral"
-              isLight={isLight}
-            />
+            <ToggleSwitch checked={bordered} onCheckedChange={(v) => setToken('bordered', v)}
+              label="显示常驻外框与底板 (bordered)" variant="neutral" isLight={isLight} />
+            <ToggleSwitch checked={showDescription} onCheckedChange={(v) => setToken('showDescription', v)}
+              label="显示行内 Description (默认关: 悬停在底部 Footer 显示)" variant="neutral" isLight={isLight} />
+            <ToggleSwitch checked={showButtonArrow} onCheckedChange={(v) => setToken('showButtonArrow', v)}
+              label="显示按钮右侧箭头 (showButtonArrow)" variant="neutral" isLight={isLight} />
           </div>
 
           {/* Global Default Icon Color Swatch Picker */}
@@ -421,71 +383,21 @@ export const SettingActionRowTuner: React.FC<SettingActionRowTunerProps> = React
           1 · 四页统一字号与图标尺寸 (Gameplay / Audio / Display / Advanced 全局统一 Title 字号)
         </span>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SliderControl
-            label="主标题统一字号 (titleFontSize)"
-            value={titleFontSize}
-            min={11}
-            max={22}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="amber"
-            onChange={(v) => setToken('titleFontSize', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="右侧按钮字号 (buttonFontSize)"
-            value={buttonFontSize}
-            min={10}
-            max={18}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="amber"
-            onChange={(v) => setToken('buttonFontSize', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="副标题字号 (descriptionFontSize)"
-            value={descriptionFontSize}
-            min={9}
-            max={16}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="amber"
-            onChange={(v) => setToken('descriptionFontSize', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="左侧 SVG 图标尺寸 (iconSize)"
-            value={iconSize}
-            min={12}
-            max={36}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="amber"
-            onChange={(v) => setToken('iconSize', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="图标与标题水平间距 (iconGap)"
-            value={iconGap}
-            min={4}
-            max={28}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="amber"
-            onChange={(v) => setToken('iconGap', v)}
-            isLight={isLight}
-          />
+          <SliderControl label="主标题统一字号 (titleFontSize)" value={titleFontSize} min={11} max={22} step={1} unit="px"
+            editable={true} allowOutOfBoundsInput={true} colorScheme="amber"
+            onChange={(v) => setToken('titleFontSize', v)} isLight={isLight} />
+          <SliderControl label="右侧按钮字号 (buttonFontSize)" value={buttonFontSize} min={10} max={18} step={1}
+            unit="px" editable={true} allowOutOfBoundsInput={true} colorScheme="amber"
+            onChange={(v) => setToken('buttonFontSize', v)} isLight={isLight} />
+          <SliderControl label="副标题字号 (descriptionFontSize)" value={descriptionFontSize} min={9} max={16} step={1}
+            unit="px" editable={true} allowOutOfBoundsInput={true} colorScheme="amber"
+            onChange={(v) => setToken('descriptionFontSize', v)} isLight={isLight} />
+          <SliderControl label="左侧 SVG 图标尺寸 (iconSize)" value={iconSize} min={12} max={36} step={1} unit="px"
+            editable={true} allowOutOfBoundsInput={true} colorScheme="amber"
+            onChange={(v) => setToken('iconSize', v)} isLight={isLight} />
+          <SliderControl label="图标与标题水平间距 (iconGap)" value={iconGap} min={4} max={28} step={1} unit="px"
+            editable={true} allowOutOfBoundsInput={true} colorScheme="amber"
+            onChange={(v) => setToken('iconGap', v)} isLight={isLight} />
         </div>
       </div>
 
@@ -500,110 +412,31 @@ export const SettingActionRowTuner: React.FC<SettingActionRowTunerProps> = React
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SliderControl
-            label="行左右内边距 (paddingX · 决定右侧开关对齐)"
-            value={paddingX}
-            min={0}
-            max={28}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="sky"
-            onChange={(v) => setToken('paddingX', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="行上下内边距 (paddingY · 元素自身间距)"
-            value={paddingY}
-            min={-4}
-            max={20}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="emerald"
-            onChange={(v) => setToken('paddingY', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="行与行外部间距 (rowGap · 0=无死区)"
-            value={rowGap}
-            min={0}
-            max={16}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="emerald"
-            onChange={(v) => setToken('rowGap', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="Hover 背景/外框圆角 (borderRadius)"
-            value={borderRadius}
-            min={0}
-            max={20}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="amber"
-            onChange={(v) => setToken('borderRadius', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="Configure 按钮圆角 (buttonRadius)"
-            value={buttonRadius}
-            min={0}
-            max={16}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="amber"
-            onChange={(v) => setToken('buttonRadius', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="Configure 按钮左右内衬 (buttonPaddingX)"
-            value={buttonPaddingX}
-            min={4}
-            max={24}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="sky"
-            onChange={(v) => setToken('buttonPaddingX', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="Configure 按钮上下内衬 (buttonPaddingY)"
-            value={buttonPaddingY}
-            min={1}
-            max={14}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="emerald"
-            onChange={(v) => setToken('buttonPaddingY', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="Under Development 顶部额外间距 (underDevelopmentTopMargin)"
-            value={underDevelopmentTopMargin}
-            min={0}
-            max={24}
-            step={1}
-            unit="px"
-            editable={true}
-            allowOutOfBoundsInput={true}
-            colorScheme="rose"
-            onChange={(v) => setToken('underDevelopmentTopMargin', v)}
-            isLight={isLight}
-          />
+          <SliderControl label="行左右内边距 (paddingX · 决定右侧开关对齐)" value={paddingX} min={0} max={28} step={1} unit="px"
+            editable={true} allowOutOfBoundsInput={true} colorScheme="sky"
+            onChange={(v) => setToken('paddingX', v)} isLight={isLight} />
+          <SliderControl label="行上下内边距 (paddingY · 元素自身间距)" value={paddingY} min={-4} max={20} step={1} unit="px"
+            editable={true} allowOutOfBoundsInput={true} colorScheme="emerald"
+            onChange={(v) => setToken('paddingY', v)} isLight={isLight} />
+          <SliderControl label="行与行外部间距 (rowGap · 0=无死区)" value={rowGap} min={0} max={16} step={1} unit="px"
+            editable={true} allowOutOfBoundsInput={true} colorScheme="emerald"
+            onChange={(v) => setToken('rowGap', v)} isLight={isLight} />
+          <SliderControl label="Hover 背景/外框圆角 (borderRadius)" value={borderRadius} min={0} max={20} step={1}
+            unit="px" editable={true} allowOutOfBoundsInput={true} colorScheme="amber"
+            onChange={(v) => setToken('borderRadius', v)} isLight={isLight} />
+          <SliderControl label="Configure 按钮圆角 (buttonRadius)" value={buttonRadius} min={0} max={16} step={1}
+            unit="px" editable={true} allowOutOfBoundsInput={true} colorScheme="amber"
+            onChange={(v) => setToken('buttonRadius', v)} isLight={isLight} />
+          <SliderControl label="Configure 按钮左右内衬 (buttonPaddingX)" value={buttonPaddingX} min={4} max={24} step={1}
+            unit="px" editable={true} allowOutOfBoundsInput={true} colorScheme="sky"
+            onChange={(v) => setToken('buttonPaddingX', v)} isLight={isLight} />
+          <SliderControl label="Configure 按钮上下内衬 (buttonPaddingY)" value={buttonPaddingY} min={1} max={14} step={1}
+            unit="px" editable={true} allowOutOfBoundsInput={true} colorScheme="emerald"
+            onChange={(v) => setToken('buttonPaddingY', v)} isLight={isLight} />
+          <SliderControl label="Under Development 顶部额外间距 (underDevelopmentTopMargin)"
+            value={underDevelopmentTopMargin} min={0} max={24} step={1} unit="px" editable={true}
+            allowOutOfBoundsInput={true} colorScheme="rose"
+            onChange={(v) => setToken('underDevelopmentTopMargin', v)} isLight={isLight} />
         </div>
       </div>
 

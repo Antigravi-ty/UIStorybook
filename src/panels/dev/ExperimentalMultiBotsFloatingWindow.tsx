@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { Play, Eye, RotateCcw, Zap, Users } from 'lucide-react';
-import { SegmentedSwitch, ToggleSwitch, Badge, Button, KeycapBadge } from '../../primitives';
-import {
-  TeamRosterCard,
-  DEFAULT_BLUE_TEAM_SLOTS,
-  DEFAULT_ORANGE_TEAM_SLOTS,
-  TeamRosterSlotConfig,
-  BotPolicyId,
-  DEFAULT_CAR_COLOR_PALETTE,
-} from '../../compounds';
-import { quickNotification } from '../../tokens';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { Badge } from '../../primitives/Badge';
+import { Button } from '../../primitives/Button';
+import { KeycapBadge } from '../../primitives/KeycapBadge';
+import { TeamRosterCard, DEFAULT_BLUE_TEAM_SLOTS, DEFAULT_ORANGE_TEAM_SLOTS, TeamRosterSlotConfig, BotPolicyId, DEFAULT_CAR_COLOR_PALETTE } from '../../compounds/TeamRosterCard';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**
  * 9. [Dev] Experimental Multi-Bots Roster (`experimental-multi-bots`)

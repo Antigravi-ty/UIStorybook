@@ -1,23 +1,10 @@
 import React from 'react';
-import { createScopedSyncedState } from '../../stores';
+import { createScopedSyncedState } from '../../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:quick-notification-ctrl');
-import {
-  Sliders,
-  Eye,
-  Type,
-  ThumbsDown,
-  MinusCircle,
-  Ban,
-  Hand,
-  Plus,
-  X,
-} from 'lucide-react';
+import { Sliders, Eye, Type, ThumbsDown, MinusCircle, Ban, Hand, Plus, X, } from 'lucide-react';
 import type {
-  QuickNotificationGlowLevel,
-  QuickNotificationType,
-  QuickNotificationButtonConfig,
-  QuickNotificationButtonVariant,
+  QuickNotificationGlowLevel, QuickNotificationType, QuickNotificationButtonConfig, QuickNotificationButtonVariant,
   QuickNotificationButtonFormat,
 } from '../../../primitives/QuickNotification';
 import { SegmentedSwitch } from '../../../primitives/SegmentedSwitch';
@@ -153,11 +140,8 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
     };
 
     return (
-      <div
-        className={`lg:col-span-7 flex flex-col gap-5 p-5 rounded-2xl border ${
-          isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900/60 border-neutral-800'
-        }`}
-      >
+      <div className={`lg:col-span-7 flex flex-col gap-5 p-5 rounded-2xl border ${
+        isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900/60 border-neutral-800' }`}>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
           <div className="flex items-center gap-2">
@@ -167,51 +151,31 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
 
           <div className="flex items-center gap-2 text-[11px]">
             <span className="text-neutral-500">Slot 1 (Right):</span>
-            <input
-              type="checkbox"
-              checked={showStackIcon}
-              onChange={(e) => setShowStackIcon(e.target.checked)}
-              className="rounded cursor-pointer accent-neutral-900 dark:accent-neutral-100"
-            />
+            <input type="checkbox" checked={showStackIcon} onChange={(e) => setShowStackIcon(e.target.checked)}
+              className="rounded cursor-pointer accent-neutral-900 dark:accent-neutral-100" />
           </div>
         </div>
 
         {/* Mode Switch: Live Mode Toggle */}
-        <div
-          className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-            liveMode
-              ? isLight
-                ? 'bg-amber-50/80 border-amber-200 text-amber-950'
-                : 'bg-amber-950/30 border-amber-800/80 text-amber-200'
-              : isLight
-              ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
-              : 'bg-neutral-850 border-neutral-800 text-neutral-300'
-          }`}
-        >
+        <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+          liveMode ? isLight ? 'bg-amber-50/80 border-amber-200 text-amber-950'
+          : 'bg-amber-950/30 border-amber-800/80 text-amber-200' : isLight
+          ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
+          : 'bg-neutral-850 border-neutral-800 text-neutral-300' }`}>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5 font-bold text-xs">
               <Eye className="h-3.5 w-3.5 text-amber-500" />
               <span>Live 实时调试模式 (Live Mode)</span>
             </div>
-            <p className="text-[11px] text-neutral-400 mt-0.5">
-              实时将文本、图标、样式与按钮更改投影至右上角抽屉，方便测试排版与字符极限。
-            </p>
+            <p className="text-[11px] text-neutral-400 mt-0.5">实时将文本、图标、样式与按钮更改投影至右上角抽屉，方便测试排版与字符极限。</p>
           </div>
 
-          <ToggleSwitch
-            checked={liveMode}
-            onCheckedChange={setLiveMode}
-            variant="amber"
-            isLight={isLight}
-          />
+          <ToggleSwitch checked={liveMode} onCheckedChange={setLiveMode} variant="amber" isLight={isLight} />
         </div>
 
         {/* Real-time Character Counter */}
-        <div
-          className={`p-3.5 rounded-xl border flex flex-col gap-2 ${
-            isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-850/60 border-neutral-800'
-          }`}
-        >
+        <div className={`p-3.5 rounded-xl border flex flex-col gap-2 ${
+          isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-850/60 border-neutral-800' }`}>
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-neutral-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Type className="h-3.5 w-3.5" />
@@ -253,17 +217,10 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
             </span>
           </div>
 
-          <SegmentedSwitch
-            value={temporalType}
-            onValueChange={(val) => setTemporalType(val as QuickNotificationType)}
-            options={[
-              { value: 'temporary', label: 'Temporary (临时)' },
-              { value: 'persistent', label: 'Persistent (常驻)' },
-              { value: 'ongoing', label: 'Ongoing (后台任务)' },
-            ]}
-            isLight={isLight}
-            distribution="equal"
-          />
+          <SegmentedSwitch value={temporalType}
+            onValueChange={(val) => setTemporalType(val as QuickNotificationType)} options={[
+            { value: 'temporary', label: 'Temporary (临时)' }, { value: 'persistent', label: 'Persistent (常驻)' },
+            { value: 'ongoing', label: 'Ongoing (后台任务)' }, ]} isLight={isLight} distribution="equal" />
 
           {/* Temporary Duration Controls */}
           {temporalType === 'temporary' && (
@@ -303,15 +260,9 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
               {durationPreset === 'custom' && (
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[11px] text-neutral-400">毫秒值:</span>
-                  <input
-                    type="number"
-                    step={500}
-                    min={500}
-                    max={60000}
-                    value={customDurationMs}
+                  <input type="number" step={500} min={500} max={60000} value={customDurationMs}
                     onChange={(e) => setCustomDurationMs(Number(e.target.value))}
-                    className="w-32 px-2.5 py-1 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs font-mono"
-                  />
+                    className="w-32 px-2.5 py-1 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs font-mono" />
                   <span className="text-[11px] text-neutral-400">ms</span>
                 </div>
               )}
@@ -322,12 +273,8 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
           {temporalType === 'ongoing' && (
             <div className="flex flex-col gap-2.5 mt-1 p-3 rounded-xl border border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-neutral-900/40">
               <div className="flex items-center justify-between text-[11px] text-neutral-500">
-                <span className="font-bold text-neutral-800 dark:text-neutral-200">
-                  进度条参数 (Progress Spec)
-                </span>
-                <span className="text-[10px] text-amber-500 font-bold">
-                  最低优先级 · 用户不可关闭 · 远程驱动
-                </span>
+                <span className="font-bold text-neutral-800 dark:text-neutral-200">进度条参数 (Progress Spec)</span>
+                <span className="text-[10px] text-amber-500 font-bold">最低优先级 · 用户不可关闭 · 远程驱动</span>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
@@ -358,28 +305,17 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
               {ongoingProgressMode === 'determinate' && (
                 <div className="flex items-center gap-3 mt-1">
                   <span className="text-[11px] text-neutral-400 w-16">进度调节:</span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={ongoingProgressPct}
+                  <input type="range" min={0} max={100} value={ongoingProgressPct}
                     onChange={(e) => setOngoingProgressPct(Number(e.target.value))}
-                    className="flex-1 accent-amber-500 cursor-pointer"
-                  />
-                  <span className="text-xs font-mono font-bold w-12 text-right">
-                    {ongoingProgressPct}%
-                  </span>
+                    className="flex-1 accent-amber-500 cursor-pointer" />
+                  <span className="text-xs font-mono font-bold w-12 text-right">{ongoingProgressPct}%</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60 text-[11px]">
                 <span className="text-neutral-400">图标旋转动效 (animate-spin):</span>
-                <ToggleSwitch
-                  checked={isSpinningIcon}
-                  onCheckedChange={setIsSpinningIcon}
-                  variant="amber"
-                  isLight={isLight}
-                />
+                <ToggleSwitch checked={isSpinningIcon} onCheckedChange={setIsSpinningIcon} variant="amber"
+                  isLight={isLight} />
               </div>
             </div>
           )}
@@ -451,13 +387,9 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
 
           <div className="flex items-center gap-2 mt-1">
             <span className="text-[11px] text-neutral-400">自定义图标名:</span>
-            <input
-              type="text"
-              value={iconName}
-              onChange={(e) => setIconName(e.target.value)}
+            <input type="text" value={iconName} onChange={(e) => setIconName(e.target.value)}
               placeholder="e.g. bell, flame, activity"
-              className="flex-1 px-2.5 py-1 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs font-mono"
-            />
+              className="flex-1 px-2.5 py-1 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs font-mono" />
           </div>
         </div>
 
@@ -481,9 +413,7 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
         <div className="flex flex-col gap-3 pt-1 border-t border-neutral-200/60 dark:border-neutral-800/60">
           <div className="flex items-center justify-between text-xs font-bold text-neutral-400 uppercase tracking-wider">
             <span>5. 业务操作按钮 (Business Buttons Slot)</span>
-            <span className="text-[11px] text-neutral-400 lowercase font-normal">
-              {buttons.length} 个配置 · 触发后不计入未读数
-            </span>
+            <span className="text-[11px] text-neutral-400 lowercase font-normal">{buttons.length} 个配置 · 触发后不计入未读数</span>
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -534,10 +464,8 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
           {buttons.length > 0 && (
             <div className="flex flex-col gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/40">
               {buttons.map((b, idx) => (
-                <div
-                  key={b.key || idx}
-                  className="flex items-center justify-between gap-2 p-2 rounded-lg border border-neutral-200 dark:border-neutral-750 bg-white dark:bg-neutral-850"
-                >
+                <div key={b.key || idx}
+                  className="flex items-center justify-between gap-2 p-2 rounded-lg border border-neutral-200 dark:border-neutral-750 bg-white dark:bg-neutral-850">
                   <div className="flex items-center gap-2">
                     <span className={`h-2.5 w-2.5 rounded-full ${BUTTON_COLOR_SWATCHES.find((c) => c.key === b.color)?.dotClass || 'bg-neutral-400'}`} />
                     <span className="font-bold text-xs">{b.label || '(无文本)'}</span>
@@ -567,24 +495,16 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-neutral-400 w-12">文本:</span>
-                <input
-                  type="text"
-                  value={newBtnLabel}
-                  onChange={(e) => setNewBtnLabel(e.target.value)}
+                <input type="text" value={newBtnLabel} onChange={(e) => setNewBtnLabel(e.target.value)}
                   placeholder="按钮标签"
-                  className="flex-1 px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs font-mono"
-                />
+                  className="flex-1 px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs font-mono" />
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-neutral-400 w-12">图标名:</span>
-                <input
-                  type="text"
-                  value={newBtnIcon}
-                  onChange={(e) => setNewBtnIcon(e.target.value)}
+                <input type="text" value={newBtnIcon} onChange={(e) => setNewBtnIcon(e.target.value)}
                   placeholder="check, thumbs-down..."
-                  className="flex-1 px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs font-mono"
-                />
+                  className="flex-1 px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs font-mono" />
               </div>
             </div>
 
@@ -651,11 +571,8 @@ export const QuickNotificationControlPanel: React.FC<QuickNotificationControlPan
             </div>
 
             <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                onClick={handleAddButton}
-                className="flex items-center gap-1 px-3 py-1 rounded-lg bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 text-xs font-bold cursor-pointer"
-              >
+              <button type="button" onClick={handleAddButton}
+                className="flex items-center gap-1 px-3 py-1 rounded-lg bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 text-xs font-bold cursor-pointer">
                 <Plus className="h-3.5 w-3.5" />
                 <span>添加至通知</span>
               </button>

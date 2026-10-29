@@ -1,17 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Sliders,
-  RotateCcw,
-  Copy,
-  Check,
-  Code2,
-  Type,
-  Box,
-  Palette,
-  Layers,
-  LayoutTemplate,
-  Sparkles,
-  Image as ImageIcon,
+  Sliders, RotateCcw, Copy, Check,
+  Code2, Type, Box, Palette,
+  Layers, LayoutTemplate, Sparkles, Image as ImageIcon,
   Eye,
 } from 'lucide-react';
 import { SliderControl } from '../../../primitives/SliderControl';
@@ -20,28 +11,13 @@ import { Badge } from '../../../primitives/Badge';
 import { Button } from '../../../primitives/Button';
 import { CodeBlock } from '../../CodeBlock';
 import {
-  Layer1MainMenuRecipe,
-  Layer1ContextGroupedSelector,
-  resolveLayer1ContextSpec,
-  type Layer1ContextVariation,
+  Layer1MainMenuRecipe, Layer1ContextGroupedSelector, resolveLayer1ContextSpec, type Layer1ContextVariation,
 } from '../../../recipes/Layer1MainMenuRecipe';
 import {
-  useMainMenuStyleStore,
-  MAIN_MENU_STYLE_PRESETS,
-  MAIN_MENU_ITEM_SLOTS,
-  MAIN_MENU_ICON_COLOR_OPTIONS,
-  JETBRAINS_MONO_WEIGHT_OPTIONS,
-  isCustomMainMenuColor,
-  resolveMainMenuIconHex,
-  resolveMainMenuTitleTypography,
-  detectIsAppleDevice,
-  hexToRgbTuple,
-  rgbTupleToHex,
-  type MainMenuStyleVariant,
-  type MainMenuFontFamilyMode,
-  type MainMenuRowAlignMode,
-  type MainMenuResumeHighlightStyle,
-  type MainMenuItemSlotId,
+  useMainMenuStyleStore, MAIN_MENU_STYLE_PRESETS, MAIN_MENU_ITEM_SLOTS, MAIN_MENU_ICON_COLOR_OPTIONS,
+  JETBRAINS_MONO_WEIGHT_OPTIONS, isCustomMainMenuColor, resolveMainMenuIconHex, resolveMainMenuTitleTypography,
+  detectIsAppleDevice, hexToRgbTuple, rgbTupleToHex, type MainMenuStyleVariant,
+  type MainMenuFontFamilyMode, type MainMenuRowAlignMode, type MainMenuResumeHighlightStyle, type MainMenuItemSlotId,
   type MainMenuPlatformPreviewMode,
 } from '../../../tokens/mainMenuStyleStore';
 import { MainMenuStyleGroupsCDE } from './MainMenuStyleGroupsCDE';
@@ -107,14 +83,9 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
   };
 
   return (
-    <div
-      id="main-menu-style-tuner"
-      className={`scroll-mt-6 p-5 rounded-2xl border flex flex-col gap-5 transition-colors ${
-        isLight
-          ? 'bg-white border-neutral-200/90 shadow-2xs'
-          : 'bg-neutral-900/60 border-neutral-800'
-      }`}
-    >
+    <div id="main-menu-style-tuner"
+      className={`scroll-mt-6 p-5 rounded-2xl border flex flex-col gap-5 transition-colors ${ isLight
+      ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/60 border-neutral-800' }`}>
       {/* Top Header & Copy / Export / Reset Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
         <div className="flex items-center gap-2 flex-wrap">
@@ -182,21 +153,14 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
       </div>
 
       {showCode && (
-        <CodeBlock
-          isLight={isLight}
+        <CodeBlock isLight={isLight}
           title="当前 Layer 1 Main Menu 完整导出参数配置 (可直接复制或固化至 src/tokens/mainMenuStyleStore.ts)"
-          code={exportConfigCode()}
-        />
+          code={exportConfigCode()} />
       )}
 
       {/* Quick Core Hypothesis Bar: Concise "Resume", No Description, Bare/Boxed Icon, Font Family */}
-      <div
-        className={`p-3.5 rounded-xl border flex flex-col gap-3 ${
-          isLight
-            ? 'bg-amber-50/40 border-amber-200/80'
-            : 'bg-amber-500/5 border-amber-500/30'
-        }`}
-      >
+      <div className={`p-3.5 rounded-xl border flex flex-col gap-3 ${ isLight
+        ? 'bg-amber-50/40 border-amber-200/80' : 'bg-amber-500/5 border-amber-500/30' }`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-500">
             <Sparkles className="h-4 w-4" />
@@ -231,67 +195,33 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
         </div>
 
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-1">
-          <ToggleSwitch
-            checked={store.conciseResumeLabel}
+          <ToggleSwitch checked={store.conciseResumeLabel}
             onCheckedChange={(v) => setParam('conciseResumeLabel', v)}
-            label="极简 Resume 标题 (Resume 代替 Resume Match)"
-            isLight={isLight}
-          />
-          <ToggleSwitch
-            checked={store.showDescription}
-            onCheckedChange={(v) => setParam('showDescription', v)}
-            label="显示下方 Description 副标题"
-            isLight={isLight}
-          />
-          <ToggleSwitch
-            checked={store.showIconBox}
-            onCheckedChange={(v) => setParam('showIconBox', v)}
-            label="显示图标独立内框 (Icon Box)"
-            isLight={isLight}
-          />
-          <ToggleSwitch
-            checked={store.showIcon}
-            onCheckedChange={(v) => setParam('showIcon', v)}
-            label="显示左侧图标 (Icon)"
-            isLight={isLight}
-          />
-          <ToggleSwitch
-            checked={store.showShortcutBadge}
-            onCheckedChange={(v) => setParam('showShortcutBadge', v)}
-            label="显示 ESC 键帽"
-            isLight={isLight}
-          />
-          <ToggleSwitch
-            checked={store.showRightArrow}
-            onCheckedChange={(v) => setParam('showRightArrow', v)}
-            label="显示右侧箭头 (>)"
-            isLight={isLight}
-          />
-          <ToggleSwitch
-            checked={store.showDividers}
-            onCheckedChange={(v) => setParam('showDividers', v)}
-            label="显示分组分割线"
-            isLight={isLight}
-          />
+            label="极简 Resume 标题 (Resume 代替 Resume Match)" isLight={isLight} />
+          <ToggleSwitch checked={store.showDescription} onCheckedChange={(v) => setParam('showDescription', v)}
+            label="显示下方 Description 副标题" isLight={isLight} />
+          <ToggleSwitch checked={store.showIconBox} onCheckedChange={(v) => setParam('showIconBox', v)}
+            label="显示图标独立内框 (Icon Box)" isLight={isLight} />
+          <ToggleSwitch checked={store.showIcon} onCheckedChange={(v) => setParam('showIcon', v)}
+            label="显示左侧图标 (Icon)" isLight={isLight} />
+          <ToggleSwitch checked={store.showShortcutBadge} onCheckedChange={(v) => setParam('showShortcutBadge', v)}
+            label="显示 ESC 键帽" isLight={isLight} />
+          <ToggleSwitch checked={store.showRightArrow} onCheckedChange={(v) => setParam('showRightArrow', v)}
+            label="显示右侧箭头 (>)" isLight={isLight} />
+          <ToggleSwitch checked={store.showDividers} onCheckedChange={(v) => setParam('showDividers', v)}
+            label="显示分组分割线" isLight={isLight} />
         </div>
       </div>
 
       {/* 6 Curated Quick Presets Bar */}
-      <div
-        className={`p-3.5 rounded-xl border flex flex-col gap-2.5 ${
-          isLight
-            ? 'bg-neutral-50/80 border-neutral-200/80'
-            : 'bg-neutral-950/60 border-neutral-800'
-        }`}
-      >
+      <div className={`p-3.5 rounded-xl border flex flex-col gap-2.5 ${ isLight
+        ? 'bg-neutral-50/80 border-neutral-200/80' : 'bg-neutral-950/60 border-neutral-800' }`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-bold flex items-center gap-1.5">
             <Layers className="h-3.5 w-3.5 text-amber-500" />
             <span>6 组精选 MENU 视觉方案一键加载 (Curated Menu Style Presets)</span>
           </span>
-          <span className="text-[11px] font-mono text-neutral-400">
-            点击任意预设后可在下方 A–E 参数组继续自由微调并一键复制配置
-          </span>
+          <span className="text-[11px] font-mono text-neutral-400">点击任意预设后可在下方 A–E 参数组继续自由微调并一键复制配置</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -307,11 +237,7 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
               }`}
             >
               <span className="text-xs font-bold text-amber-500">{preset.label}</span>
-              <span
-                className={`text-[11px] leading-snug ${
-                  isLight ? 'text-neutral-600' : 'text-neutral-400'
-                }`}
-              >
+              <span className={`text-[11px] leading-snug ${ isLight ? 'text-neutral-600' : 'text-neutral-400' }`}>
                 {preset.subtitle}
               </span>
             </button>
@@ -320,134 +246,44 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
       </div>
 
       {/* Group A: Row Outer Box & List Spacing Geometry */}
-      <div
-        className={`p-4 rounded-xl border flex flex-col gap-3.5 ${
-          isLight
-            ? 'bg-neutral-50/70 border-neutral-200/80'
-            : 'bg-neutral-950/50 border-neutral-800'
-        }`}
-      >
+      <div className={`p-4 rounded-xl border flex flex-col gap-3.5 ${ isLight
+        ? 'bg-neutral-50/70 border-neutral-200/80' : 'bg-neutral-950/50 border-neutral-800' }`}>
         <div className="flex items-center gap-2 text-xs font-bold text-amber-500">
           <Box className="h-4 w-4" />
           <span>A. 每一行外框几何、内衬与列表间距 (Row Outer Frame &amp; List Spacing)</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SliderControl
-            label="行左右内衬 (itemPadX)"
-            value={store.itemPaddingXPx}
-            min={6}
-            max={36}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="amber"
-            onChange={(v) => setParam('itemPaddingXPx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="行上下内衬 (itemPadY)"
-            value={store.itemPaddingYPx}
-            min={4}
-            max={32}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="amber"
-            onChange={(v) => setParam('itemPaddingYPx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="行最小高度 (itemMinH)"
-            value={store.itemMinHeightPx}
-            min={36}
-            max={100}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="amber"
-            onChange={(v) => setParam('itemMinHeightPx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="行外框圆角 (itemRadius)"
-            value={store.itemRadiusPx}
-            min={0}
-            max={28}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="sky"
-            onChange={(v) => setParam('itemRadiusPx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="行与行垂直间距 (itemGap)"
-            value={store.itemGapPx}
-            min={0}
-            max={24}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="emerald"
-            onChange={(v) => setParam('itemGapPx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="分割线上下边距 (dividerMarginY)"
-            value={store.dividerMarginYPx}
-            min={-12}
-            max={16}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="emerald"
-            onChange={(v) => setParam('dividerMarginYPx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="菜单外框缓冲内衬 (containerPad)"
-            value={store.menuContainerPaddingPx}
-            min={0}
-            max={16}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="sky"
-            onChange={(v) => setParam('menuContainerPaddingPx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="行外框线宽 (borderWidth)"
-            value={store.itemBorderWidthPx}
-            min={0}
-            max={3}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="sky"
-            onChange={(v) => setParam('itemBorderWidthPx', v)}
-            isLight={isLight}
-          />
+          <SliderControl label="行左右内衬 (itemPadX)" value={store.itemPaddingXPx} min={6} max={36} step={1} unit="px"
+            editable allowOutOfBoundsInput colorScheme="amber" onChange={(v) => setParam('itemPaddingXPx', v)}
+            isLight={isLight} />
+          <SliderControl label="行上下内衬 (itemPadY)" value={store.itemPaddingYPx} min={4} max={32} step={1} unit="px"
+            editable allowOutOfBoundsInput colorScheme="amber" onChange={(v) => setParam('itemPaddingYPx', v)}
+            isLight={isLight} />
+          <SliderControl label="行最小高度 (itemMinH)" value={store.itemMinHeightPx} min={36} max={100} step={1}
+            unit="px" editable allowOutOfBoundsInput colorScheme="amber"
+            onChange={(v) => setParam('itemMinHeightPx', v)} isLight={isLight} />
+          <SliderControl label="行外框圆角 (itemRadius)" value={store.itemRadiusPx} min={0} max={28} step={1} unit="px"
+            editable allowOutOfBoundsInput colorScheme="sky" onChange={(v) => setParam('itemRadiusPx', v)}
+            isLight={isLight} />
+          <SliderControl label="行与行垂直间距 (itemGap)" value={store.itemGapPx} min={0} max={24} step={1} unit="px"
+            editable allowOutOfBoundsInput colorScheme="emerald" onChange={(v) => setParam('itemGapPx', v)}
+            isLight={isLight} />
+          <SliderControl label="分割线上下边距 (dividerMarginY)" value={store.dividerMarginYPx} min={-12} max={16}
+            step={1} unit="px" editable allowOutOfBoundsInput colorScheme="emerald"
+            onChange={(v) => setParam('dividerMarginYPx', v)} isLight={isLight} />
+          <SliderControl label="菜单外框缓冲内衬 (containerPad)" value={store.menuContainerPaddingPx} min={0} max={16}
+            step={1} unit="px" editable allowOutOfBoundsInput colorScheme="sky"
+            onChange={(v) => setParam('menuContainerPaddingPx', v)} isLight={isLight} />
+          <SliderControl label="行外框线宽 (borderWidth)" value={store.itemBorderWidthPx} min={0} max={3} step={1}
+            unit="px" editable allowOutOfBoundsInput colorScheme="sky"
+            onChange={(v) => setParam('itemBorderWidthPx', v)} isLight={isLight} />
         </div>
       </div>
 
       {/* Group B: Title Typography & 8 Official Font Weights */}
-      <div
-        className={`p-4 rounded-xl border flex flex-col gap-4 ${
-          isLight
-            ? 'bg-neutral-50/70 border-neutral-200/80'
-            : 'bg-neutral-950/50 border-neutral-800'
-        }`}
-      >
+      <div className={`p-4 rounded-xl border flex flex-col gap-4 ${ isLight
+        ? 'bg-neutral-50/70 border-neutral-200/80' : 'bg-neutral-950/50 border-neutral-800' }`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-500">
             <Type className="h-4 w-4" />
@@ -456,9 +292,7 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
 
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-mono text-neutral-500 dark:text-neutral-400">
-                标题字体 (Font Family):
-              </span>
+              <span className="text-xs font-mono text-neutral-500 dark:text-neutral-400">标题字体 (Font Family):</span>
               {(
                 [
                   { id: 'sans', label: 'Apple Sans (非 Apple 自动 Fallback 至 JetBrains Mono)' },
@@ -482,12 +316,8 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
               ))}
             </div>
 
-            <ToggleSwitch
-              checked={store.titleUppercase}
-              onCheckedChange={(v) => setParam('titleUppercase', v)}
-              label="标题全大写 (UPPERCASE)"
-              isLight={isLight}
-            />
+            <ToggleSwitch checked={store.titleUppercase} onCheckedChange={(v) => setParam('titleUppercase', v)}
+              label="标题全大写 (UPPERCASE)" isLight={isLight} />
           </div>
         </div>
 
@@ -495,11 +325,8 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
         {store.titleFontFamily === 'sans' && (
           <div
             className={`px-3 py-2 rounded-lg border flex flex-wrap items-center justify-between gap-2 text-xs font-mono ${
-              isLight
-                ? 'bg-amber-50/50 border-amber-200/80 text-neutral-700'
-                : 'bg-amber-500/5 border-amber-500/25 text-neutral-300'
-            }`}
-          >
+            isLight ? 'bg-amber-50/50 border-amber-200/80 text-neutral-700'
+            : 'bg-amber-500/5 border-amber-500/25 text-neutral-300' }`}>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-amber-500">跨平台字体与字重自动 Fallback 策略:</span>
               <span>
@@ -541,57 +368,18 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SliderControl
-            label="标题大字字号 (titleFontSize)"
-            value={store.titleFontSizePx}
-            min={12}
-            max={34}
-            step={1}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="amber"
-            onChange={(v) => setParam('titleFontSizePx', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="标题字间距 (letterSpacing)"
-            value={store.titleLetterSpacingEm}
-            min={-0.08}
-            max={0.18}
-            step={0.01}
-            unit="em"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="amber"
-            onChange={(v) => setParam('titleLetterSpacingEm', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="标题行高 (lineHeight · 下伸部不裁切)"
-            value={store.titleLineHeight}
-            min={0.95}
-            max={1.6}
-            step={0.05}
-            editable
-            allowOutOfBoundsInput
-            colorScheme="amber"
-            onChange={(v) => setParam('titleLineHeight', v)}
-            isLight={isLight}
-          />
-          <SliderControl
-            label="标题垂直视觉微调 (titleOffsetY)"
-            value={store.titleOffsetYPx}
-            min={-6}
-            max={6}
-            step={0.5}
-            unit="px"
-            editable
-            allowOutOfBoundsInput
-            colorScheme="emerald"
-            onChange={(v) => store.setTitleOffsetYPx(v)}
-            isLight={isLight}
-          />
+          <SliderControl label="标题大字字号 (titleFontSize)" value={store.titleFontSizePx} min={12} max={34} step={1}
+            unit="px" editable allowOutOfBoundsInput colorScheme="amber"
+            onChange={(v) => setParam('titleFontSizePx', v)} isLight={isLight} />
+          <SliderControl label="标题字间距 (letterSpacing)" value={store.titleLetterSpacingEm} min={-0.08} max={0.18}
+            step={0.01} unit="em" editable allowOutOfBoundsInput colorScheme="amber"
+            onChange={(v) => setParam('titleLetterSpacingEm', v)} isLight={isLight} />
+          <SliderControl label="标题行高 (lineHeight · 下伸部不裁切)" value={store.titleLineHeight} min={0.95} max={1.6}
+            step={0.05} editable allowOutOfBoundsInput colorScheme="amber"
+            onChange={(v) => setParam('titleLineHeight', v)} isLight={isLight} />
+          <SliderControl label="标题垂直视觉微调 (titleOffsetY)" value={store.titleOffsetYPx} min={-6} max={6} step={0.5}
+            unit="px" editable allowOutOfBoundsInput colorScheme="emerald"
+            onChange={(v) => store.setTitleOffsetYPx(v)} isLight={isLight} />
         </div>
 
         {/* 8 Font Weights */}
@@ -640,44 +428,15 @@ export const MainMenuStyleTuner: React.FC<MainMenuStyleTunerProps> = React.memo(
         {/* Optional Description Sliders when showDescription is enabled */}
         {store.showDescription && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-neutral-200/60 dark:border-neutral-800/70">
-            <SliderControl
-              label="Description 字号 (descSize)"
-              value={store.descFontSizePx}
-              min={10}
-              max={16}
-              step={1}
-              unit="px"
-              editable
-              allowOutOfBoundsInput
-              colorScheme="sky"
-              onChange={(v) => setParam('descFontSizePx', v)}
-              isLight={isLight}
-            />
-            <SliderControl
-              label="Description 行高 (descLineHeight)"
-              value={store.descLineHeight}
-              min={1.0}
-              max={1.8}
-              step={0.05}
-              editable
-              allowOutOfBoundsInput
-              colorScheme="sky"
-              onChange={(v) => setParam('descLineHeight', v)}
-              isLight={isLight}
-            />
-            <SliderControl
-              label="Title 与 Description 间距"
-              value={store.titleDescGapPx}
-              min={0}
-              max={12}
-              step={1}
-              unit="px"
-              editable
-              allowOutOfBoundsInput
-              colorScheme="sky"
-              onChange={(v) => setParam('titleDescGapPx', v)}
-              isLight={isLight}
-            />
+            <SliderControl label="Description 字号 (descSize)" value={store.descFontSizePx} min={10} max={16}
+              step={1} unit="px" editable allowOutOfBoundsInput colorScheme="sky"
+              onChange={(v) => setParam('descFontSizePx', v)} isLight={isLight} />
+            <SliderControl label="Description 行高 (descLineHeight)" value={store.descLineHeight} min={1.0} max={1.8}
+              step={0.05} editable allowOutOfBoundsInput colorScheme="sky"
+              onChange={(v) => setParam('descLineHeight', v)} isLight={isLight} />
+            <SliderControl label="Title 与 Description 间距" value={store.titleDescGapPx} min={0} max={12} step={1}
+              unit="px" editable allowOutOfBoundsInput colorScheme="sky"
+              onChange={(v) => setParam('titleDescGapPx', v)} isLight={isLight} />
           </div>
         )}
       </div>

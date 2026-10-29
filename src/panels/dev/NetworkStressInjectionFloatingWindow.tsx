@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { WifiOff, Zap } from 'lucide-react';
-import { SliderControl, ToggleSwitch, Button } from '../../primitives';
+import { SliderControl } from '../../primitives/SliderControl';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { Button } from '../../primitives/Button';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
-import { quickNotification } from '../../tokens';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**
  * 16. [Dev] Network Stress & Jitter Injection (`network-stress-injection`)

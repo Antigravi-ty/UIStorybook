@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { SliderControl, SegmentedSwitch, ColorSwatchInput, UVTransformControl, UVTransformState } from '../../primitives';
-import { OklchPerceptualPaletteLinker } from '../../compounds';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ColorSwatchInput, UVTransformControl, UVTransformState } from '../../primitives/TunerControls';
+import { OklchPerceptualPaletteLinker } from '../../compounds/OklchPerceptualPaletteLinker';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

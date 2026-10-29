@@ -1,35 +1,31 @@
 import React from 'react';
-import {
-  Layer1MainMenuRecipe,
-  type Layer1MenuContextMode,
-  Layer2PlayRecipe,
-  Layer2GarageRecipe,
-  Layer2SettingsRecipe,
-  Layer2RoomHostControlRecipe,
-  resolveOnlineSessionContextId,
-  Layer3AudioEqRecipe,
-  Layer3BallTrajectoryRecipe,
-  Layer3OnlineWarmupRecipe,
-  Layer3HostMatchRecipe,
-  Layer3HostTrainingRecipe,
-  Layer3CustomPlayRecipe,
-  Layer3JoinRoomRecipe,
-  Layer3ExhibitionRecipe,
-  Layer3SelfTrainingRecipe,
-  Layer3KickoffTrainingRecipe,
-  Layer3TrainingRecipe,
-  Layer3CameraRecipe,
-  Layer3KeybindingsRecipe,
-  Layer3ExpMultiBotsRecipe,
-  Layer3DevSubsystemIsolationRecipe,
-  Layer3DevActiveTunersRecipe,
-  Layer3DevCalibratedPresetsRecipe,
-  Layer3DevUnderDevelopmentRecipe,
-  Layer4StaticTrainingPackBrowseRecipe,
-  Layer4AdvancedAudioRecipe,
-  Layer4ControllerSettingsRecipe,
-  Layer4EventTriggerRulesRecipe,
-} from '../../../recipes';
+import { Layer1MainMenuRecipe, type Layer1MenuContextMode } from '../../../recipes/Layer1MainMenuRecipe';
+import { Layer2PlayRecipe } from '../../../recipes/Layer2PlayRecipe';
+import { Layer2GarageRecipe } from '../../../recipes/Layer2GarageRecipe';
+import { Layer2SettingsRecipe } from '../../../recipes/Layer2SettingsRecipe';
+import { Layer2RoomHostControlRecipe, resolveOnlineSessionContextId } from '../../../recipes/Layer2RoomHostControlRecipe';
+import { Layer3AudioEqRecipe } from '../../../recipes/Layer3AudioEqRecipe';
+import { Layer3BallTrajectoryRecipe } from '../../../recipes/Layer3BallTrajectoryRecipe';
+import { Layer3OnlineWarmupRecipe } from '../../../recipes/Layer3OnlineWarmupRecipe';
+import { Layer3HostMatchRecipe } from '../../../recipes/Layer3HostMatchRecipe';
+import { Layer3HostTrainingRecipe } from '../../../recipes/Layer3HostTrainingRecipe';
+import { Layer3CustomPlayRecipe } from '../../../recipes/Layer3CustomPlayRecipe';
+import { Layer3JoinRoomRecipe } from '../../../recipes/Layer3JoinRoomRecipe';
+import { Layer3ExhibitionRecipe } from '../../../recipes/Layer3ExhibitionRecipe';
+import { Layer3SelfTrainingRecipe } from '../../../recipes/Layer3SelfTrainingRecipe';
+import { Layer3KickoffTrainingRecipe } from '../../../recipes/Layer3KickoffTrainingRecipe';
+import { Layer3TrainingRecipe } from '../../../recipes/Layer3TrainingRecipe';
+import { Layer3CameraRecipe } from '../../../recipes/Layer3CameraRecipe';
+import { Layer3KeybindingsRecipe } from '../../../recipes/Layer3KeybindingsRecipe';
+import { Layer3ExpMultiBotsRecipe } from '../../../recipes/Layer3ExpMultiBotsRecipe';
+import { Layer3DevSubsystemIsolationRecipe } from '../../../recipes/Layer3DevSubsystemIsolationRecipe';
+import { Layer3DevActiveTunersRecipe } from '../../../recipes/Layer3DevActiveTunersRecipe';
+import { Layer3DevCalibratedPresetsRecipe } from '../../../recipes/Layer3DevCalibratedPresetsRecipe';
+import { Layer3DevUnderDevelopmentRecipe } from '../../../recipes/Layer3DevUnderDevelopmentRecipe';
+import { Layer4StaticTrainingPackBrowseRecipe } from '../../../recipes/Layer4StaticTrainingPackBrowseRecipe';
+import { Layer4AdvancedAudioRecipe } from '../../../recipes/Layer4AdvancedAudioRecipe';
+import { Layer4ControllerSettingsRecipe } from '../../../recipes/Layer4ControllerSettingsRecipe';
+import { Layer4EventTriggerRulesRecipe } from '../../../recipes/Layer4EventTriggerRulesRecipe';
 import { floatingStore, type FloatingWindowItem } from '../../../tokens/floatingStore';
 import { PRESET_WINDOWS, type PresetConfig } from '../../../tokens/floatingPresets';
 import {

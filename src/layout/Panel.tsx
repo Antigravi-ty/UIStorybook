@@ -1,14 +1,9 @@
 import React, { createContext, useContext, useState } from 'react';
 import { ArrowLeft, Info, Minimize2 } from 'lucide-react';
 import { KeycapBadge } from '../primitives/KeycapBadge';
-import {
-  UI_RADIUS,
-  useInMorphContainer,
-  useMenuLayoutStore,
-  resolvePanelHeaderBackBtnGeometry,
-  type PanelSizingConfig,
-  type PanelSizingMode,
-} from '../tokens';
+import { UI_RADIUS } from '../tokens/spacing';
+import { useInMorphContainer } from '../tokens/morphContext';
+import { useMenuLayoutStore, resolvePanelHeaderBackBtnGeometry, type PanelSizingConfig, type PanelSizingMode } from '../tokens/menuLayoutStore';
 
 const PanelSizingModeContext = createContext<PanelSizingMode>('fixed');
 
@@ -83,18 +78,12 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
   const [rightHovered, setRightHovered] = useState(false);
 
   const btnGeom = resolvePanelHeaderBackBtnGeometry({
-    panelHeaderPaddingX: headerPadX,
-    panelHeaderPaddingY: headerPadY,
-    panelHeaderBackBtnWidth: backBtnWidth,
-    panelHeaderBackBtnHeight: backBtnHeight,
-    panelHeaderBackBtnRadiusMode: backBtnRadiusMode,
-    panelHeaderBackBtnRadius: backBtnCustomRadius,
-    panelHeaderBackBtnInnerRadius: backBtnInnerRadius,
-    panelHeaderBackBtnRadiusTL: backBtnRadiusTL,
-    panelHeaderBackBtnRadiusTR: backBtnRadiusTR,
-    panelHeaderBackBtnRadiusBR: backBtnRadiusBR,
-    panelHeaderBackBtnRadiusBL: backBtnRadiusBL,
-    panelOuterRadius,
+    panelHeaderPaddingX: headerPadX, panelHeaderPaddingY: headerPadY,
+    panelHeaderBackBtnWidth: backBtnWidth, panelHeaderBackBtnHeight: backBtnHeight,
+    panelHeaderBackBtnRadiusMode: backBtnRadiusMode, panelHeaderBackBtnRadius: backBtnCustomRadius,
+    panelHeaderBackBtnInnerRadius: backBtnInnerRadius, panelHeaderBackBtnRadiusTL: backBtnRadiusTL,
+    panelHeaderBackBtnRadiusTR: backBtnRadiusTR, panelHeaderBackBtnRadiusBR: backBtnRadiusBR,
+    panelHeaderBackBtnRadiusBL: backBtnRadiusBL, panelOuterRadius,
   });
 
   // Ensure at least one of arrow or label is rendered

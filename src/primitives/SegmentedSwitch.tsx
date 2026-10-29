@@ -1,6 +1,6 @@
 import React, { useId } from 'react';
 import { motion } from 'framer-motion';
-import { UI_EASING } from '../tokens';
+import { UI_EASING } from '../tokens/spacing';
 
 export interface SegmentedSwitchOption {
   value: string;

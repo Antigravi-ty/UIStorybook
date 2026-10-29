@@ -1,19 +1,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { BrickWallShield, Cloudy } from 'lucide-react';
-import {
-  GoalBarrier2DEditor,
-  type GoalBarrierSelectionMode,
-  type GoalBarrierPresetId,
-  type NormalizedBarrierRect,
-  type GoalBarrierDecomposition,
-  decomposeBarrierGrid,
-  buildPresetBarrierGrid,
-} from '../../charts';
-import {
-  SegmentedSwitch,
-  SettingActionRow,
-  SettingSliderRow,
-} from '../../primitives';
+import { GoalBarrier2DEditor, type GoalBarrierSelectionMode, type GoalBarrierPresetId, type NormalizedBarrierRect, type GoalBarrierDecomposition, decomposeBarrierGrid, buildPresetBarrierGrid } from '../../charts/GoalBarrier2DEditor';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { SettingActionRow } from '../../primitives/SettingActionRow';
+import { SettingSliderRow } from '../../primitives/SettingSliderRow';
 
 export type GoalBarrierPlacement = 'none' | 'both' | 'orange' | 'blue';
 

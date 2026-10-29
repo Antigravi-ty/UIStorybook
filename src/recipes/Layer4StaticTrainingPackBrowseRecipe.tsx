@@ -1,28 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { DEFAULT_PANEL_SIZING, useMenuLayoutStore } from '../tokens/menuLayoutStore';
-import { StaticTrainingPackFolderList } from './static-training/StaticTrainingPackFolderList';
+import {
+  StaticTrainingPackFolderList,
+  type StaticPackDownCounterOption,
+  type StaticTrainingPackSummary,
+} from './static-training/StaticTrainingPackFolderList';
 import { StaticTrainingPackToolbar } from './static-training/StaticTrainingPackToolbar';
 import { StaticTrainingPackMetadataInspector } from './static-training/StaticTrainingPackMetadataInspector';
 
-export type StaticPackDownCounterOption = 1 | 2 | 3;
-
-export interface StaticTrainingPackSummary {
-  uuid: string;
-  title: string;
-  description: string;
-  itemCount: number;
-  createdAt?: number;
-  updatedAt?: number | string;
-  /** Legacy compatibility aliases */
-  id?: string;
-  code?: string;
-  name?: string;
-  creator?: string;
-  shotCount?: number;
-  tags?: string[];
-  isBuiltIn?: boolean;
-}
+export type { StaticPackDownCounterOption, StaticTrainingPackSummary };
 
 export interface Layer4StaticTrainingPackBrowseRecipeProps {
   isLight?: boolean;

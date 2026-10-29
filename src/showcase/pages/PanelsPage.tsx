@@ -1,7 +1,7 @@
 import React from 'react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../../layout/Panel';
-import { useMenuLayoutStore } from '../../tokens';
-import { createScopedSyncedState } from '../stores';
+import { useMenuLayoutStore } from '../../tokens/menuLayoutStore';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import { CodeBlock } from '../CodeBlock';
 import { PanelShellTuner } from './recipes/PanelShellTuner';
 

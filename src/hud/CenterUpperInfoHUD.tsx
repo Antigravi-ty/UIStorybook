@@ -112,65 +112,27 @@ export interface CenterUpperInfoHUDProps {
 }
 
 export const DEFAULT_RL_COUNTDOWN_GLOW: CenterUpperGlowConfig = {
-  textColor: '#FFE600',
-  glowColor: '#F59E0B',
-  innerBlurPx: 0,
-  outerBlurPx: 28,
-  ambientBlurPx: 0,
-  intensityPct: 100,
-  topLabelColor: '#FFFFFF',
-  topLabelGlowColor: '#F59E0B',
-  strokeWidthPx: 0,
-  strokeColor: '#FFFBEB',
-  backdropBloomPct: 0,
+  textColor: '#FFE600', glowColor: '#F59E0B', innerBlurPx: 0, outerBlurPx: 28, ambientBlurPx: 0,
+  intensityPct: 100, topLabelColor: '#FFFFFF', topLabelGlowColor: '#F59E0B', strokeWidthPx: 0, strokeColor: '#FFFBEB', backdropBloomPct: 0,
 };
 
 export const DEFAULT_WINNER_BLUE_GLOW: CenterUpperGlowConfig = {
-  textColor: '#38BDF8',
-  glowColor: '#0284C7',
-  innerBlurPx: 0,
-  outerBlurPx: 28,
-  ambientBlurPx: 0,
-  intensityPct: 100,
-  topLabelColor: '#F8FAFC',
-  topLabelGlowColor: '#38BDF8',
-  strokeWidthPx: 0,
-  strokeColor: '#E0F2FE',
-  backdropBloomPct: 0,
+  textColor: '#38BDF8', glowColor: '#0284C7', innerBlurPx: 0, outerBlurPx: 28, ambientBlurPx: 0,
+  intensityPct: 100, topLabelColor: '#F8FAFC', topLabelGlowColor: '#38BDF8', strokeWidthPx: 0, strokeColor: '#E0F2FE', backdropBloomPct: 0,
 };
 
 export const DEFAULT_WINNER_ORANGE_GLOW: CenterUpperGlowConfig = {
-  textColor: '#FB923C',
-  glowColor: '#EA580C',
-  innerBlurPx: 0,
-  outerBlurPx: 28,
-  ambientBlurPx: 0,
-  intensityPct: 100,
-  topLabelColor: '#FFF7ED',
-  topLabelGlowColor: '#FB923C',
-  strokeWidthPx: 0,
-  strokeColor: '#FFEDD5',
-  backdropBloomPct: 0,
+  textColor: '#FB923C', glowColor: '#EA580C', innerBlurPx: 0, outerBlurPx: 28, ambientBlurPx: 0,
+  intensityPct: 100, topLabelColor: '#FFF7ED', topLabelGlowColor: '#FB923C', strokeWidthPx: 0, strokeColor: '#FFEDD5', backdropBloomPct: 0,
 };
 
 export const DEFAULT_CENTER_UPPER_TYPOGRAPHY: CenterUpperTypographyConfig = {
-  mainFontSizePx: 84,
-  mainFontWeight: 100,
-  mainLetterSpacingEm: 0,
-  topFontSizePx: 24,
-  topFontWeight: 400,
-  topLetterSpacingEm: 0,
-  lineGapPx: 6,
-  uppercase: true,
-  italic: false,
+  mainFontSizePx: 84, mainFontWeight: 100, mainLetterSpacingEm: 0,
+  topFontSizePx: 24, topFontWeight: 400, topLetterSpacingEm: 0, lineGapPx: 6, uppercase: true, italic: false,
 };
 
 export const DEFAULT_CENTER_UPPER_TIMING: CenterUpperTimingConfig = {
-  durationMs: 2000,
-  entryScale: 1.5,
-  entryDurationMs: 400,
-  exitDurationMs: 400,
-  persistentInspect: false,
+  durationMs: 2000, entryScale: 1.5, entryDurationMs: 400, exitDurationMs: 400, persistentInspect: false,
 };
 
 /**
@@ -179,18 +141,11 @@ export const DEFAULT_CENTER_UPPER_TIMING: CenterUpperTimingConfig = {
 export function hexToRgba(hex: string, alpha: number): string {
   const clampedAlpha = Math.max(0, Math.min(1, Number(alpha.toFixed(3))));
   const clean = hex.replace('#', '').trim();
-  if (clean.length === 3) {
-    const r = parseInt(clean[0] + clean[0], 16);
-    const g = parseInt(clean[1] + clean[1], 16);
-    const b = parseInt(clean[2] + clean[2], 16);
-    if (!Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) {
-      return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
-    }
-  }
-  if (clean.length === 6) {
-    const r = parseInt(clean.slice(0, 2), 16);
-    const g = parseInt(clean.slice(2, 4), 16);
-    const b = parseInt(clean.slice(4, 6), 16);
+  const full = clean.length === 3 ? clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2] : clean;
+  if (full.length === 6) {
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
     if (!Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) {
       return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
     }
@@ -228,37 +183,9 @@ export function buildOuterGlowTextShadow(
   return layers.length > 0 ? layers.join(', ') : 'none';
 }
 
-/**
- * CenterUpperInfoHUD (L5 Pure Presentational Strong-Reminder Overlay)
- *
- * Designed to sit inside `<HudAnchorStage>` -> `<HudZone anchor="upper-center">`.
- * Zero hardcoded viewport coordinates (`position: absolute` is never used on the root box).
- *
- * Archetypes supported:
- * 1. **Countdown (`3` -> `2` -> `1` -> `GO`)**:
- *    - `JetBrains Mono Thin` (`font-weight: 100`)
- *    - Rocket League Yellow (`#FFE600`) + Outer Glow (`#F59E0B`), 1.5x -> 1.0x entry (400ms),
- *      overwritten by next step on arrival, and 400ms tail fade-out after 2000ms hold.
- * 2. **Winner (`WINNER` + `BLUE TEAM` / `ORANGE TEAM`)**:
- *    - Top line: `JetBrains Mono Regular` (`font-weight: 400`) `WINNER`
- *    - Bottom line: `JetBrains Mono Thin` (`font-weight: 100`) `BLUE TEAM` or `ORANGE TEAM`
- * 3. **Custom Announcement (`MATCH PAUSED`, `WAITING FOR PLAYERS`, etc.)**:
- *    - Configurable single-line `Thin` or dual-line `Regular` + `Thin` strong reminder.
- */
 export const CenterUpperInfoHUD = React.memo(
   forwardRef<CenterUpperInfoHandle, CenterUpperInfoHUDProps>(
-    (
-      {
-        info = null,
-        glowConfig = DEFAULT_RL_COUNTDOWN_GLOW,
-        typographyConfig = DEFAULT_CENTER_UPPER_TYPOGRAPHY,
-        timingConfig = DEFAULT_CENTER_UPPER_TIMING,
-        subscribeCenterInfo,
-        onExpire,
-        className = '',
-      },
-      ref
-    ) => {
+    ({ info = null, glowConfig = DEFAULT_RL_COUNTDOWN_GLOW, typographyConfig = DEFAULT_CENTER_UPPER_TYPOGRAPHY, timingConfig = DEFAULT_CENTER_UPPER_TIMING, subscribeCenterInfo, onExpire, className = '' }, ref) => {
       const containerRef = useRef<HTMLDivElement | null>(null);
       const innerBoxRef = useRef<HTMLDivElement | null>(null);
       const bloomRef = useRef<HTMLDivElement | null>(null);

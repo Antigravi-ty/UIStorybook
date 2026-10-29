@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { SliderControl, SegmentedSwitch, DualGrabberSlider } from '../../primitives';
-import { PacingOscilloscopeChart } from '../../charts';
-import { CounterfactualComparisonStrip } from '../../compounds';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { DualGrabberSlider } from '../../primitives/DualGrabberSlider';
+import { PacingOscilloscopeChart } from '../../charts/PacingOscilloscopeChart';
+import { CounterfactualComparisonStrip } from '../../compounds/CounterfactualComparisonStrip';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

@@ -1,46 +1,20 @@
 import React from 'react';
 import {
-  Gamepad2,
-  Wrench,
-  Settings,
-  Play,
-  Server,
-  ChevronLeft,
-  ChevronRight,
-  User,
-  Terminal,
-  Smartphone,
-  ArrowUpRight,
-  Sliders,
+  Gamepad2, Wrench, Settings, Play,
+  Server, ChevronLeft, ChevronRight, User,
+  Terminal, Smartphone, ArrowUpRight, Sliders,
 } from 'lucide-react';
 import { Badge } from '../../../primitives/Badge';
 import { UnderlineTabs } from '../../../primitives/UnderlineTabs';
-import { useMenuLayoutStore, DEFAULT_PANEL_SIZING, type MenuPanelId } from '../../../tokens';
-import {
-  usePlayCardStyleStore,
-  type PlayCardStyleVariant,
-} from '../../../tokens/playCardStyleStore';
-import {
-  useMainMenuStyleStore,
-  MAIN_MENU_STYLE_PRESETS,
-} from '../../../tokens/mainMenuStyleStore';
-import {
-  Layer1ContextGroupedSelector,
-  ONLINE_SESSION_CONTEXT_SPECS,
-  resolveLayer1ContextSpec,
-  resolveOnlineSessionContextId,
-  type Layer1MenuContextMode,
-} from '../../../recipes';
+import { useMenuLayoutStore, DEFAULT_PANEL_SIZING, type MenuPanelId } from '../../../tokens/menuLayoutStore';
+import { usePlayCardStyleStore, type PlayCardStyleVariant, } from '../../../tokens/playCardStyleStore';
+import { useMainMenuStyleStore, MAIN_MENU_STYLE_PRESETS, } from '../../../tokens/mainMenuStyleStore';
+import { Layer1ContextGroupedSelector, resolveLayer1ContextSpec, type Layer1MenuContextMode } from '../../../recipes/Layer1MainMenuRecipe';
+import { ONLINE_SESSION_CONTEXT_SPECS, resolveOnlineSessionContextId } from '../../../recipes/Layer2RoomHostControlRecipe';
 import type { ShowcaseTab } from '../../Sidebar';
 import {
-  type ActiveMenuRoute,
-  type MenuVisibilityTier,
-  MENU_ROUTE_CONFIG,
-  USER_SETTINGS_QUICK_TABS,
-  DEV_SETTINGS_QUICK_TABS,
-  GARAGE_QUICK_TABS,
-  USER_LINEAR_PLAYLIST,
-  DEV_LINEAR_PLAYLIST,
+  type ActiveMenuRoute, type MenuVisibilityTier, MENU_ROUTE_CONFIG, USER_SETTINGS_QUICK_TABS,
+  DEV_SETTINGS_QUICK_TABS, GARAGE_QUICK_TABS, USER_LINEAR_PLAYLIST, DEV_LINEAR_PLAYLIST,
 } from './menuLayerRouteConfig';
 import { MenuLayerDeepRoutesAndFooter } from './MenuLayerDeepRoutesAndFooter';
 
@@ -139,18 +113,13 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
   };
 
   return (
-    <div
-      className={`p-4 rounded-2xl border flex flex-col gap-3.5 transition-colors ${
-        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800'
-      }`}
-    >
+    <div className={`p-4 rounded-2xl border flex flex-col gap-3.5 transition-colors ${
+      isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800' }`}>
       {/* Top Bar: Strict User Only vs Developer Only Split + < Prev Page | Next Page > Linear Scanner */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-neutral-200/80 dark:border-neutral-800">
         {/* Strict Tier Switcher */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
-            视图隔离 (Strict Tier):
-          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">视图隔离 (Strict Tier):</span>
           <div className="flex items-center gap-1 p-1 rounded-xl border bg-neutral-100/80 dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800">
             <button
               type="button"
@@ -217,16 +186,10 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
             <span>Prev Page</span>
           </button>
 
-          <div
-            className={`px-3 py-1.5 rounded-xl border font-mono text-xs flex items-center gap-2 ${
-              isLight
-                ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
-                : 'bg-neutral-950 border-neutral-800 text-neutral-200'
-            }`}
-          >
-            <span className="font-bold text-amber-500">
-              [{currentPlaylistIndex + 1} / {activePlaylist.length}]
-            </span>
+          <div className={`px-3 py-1.5 rounded-xl border font-mono text-xs flex items-center gap-2 ${ isLight
+            ? 'bg-neutral-50 border-neutral-200 text-neutral-800'
+            : 'bg-neutral-950 border-neutral-800 text-neutral-200' }`}>
+            <span className="font-bold text-amber-500">[{currentPlaylistIndex + 1} / {activePlaylist.length}]</span>
             <span className="truncate max-w-[230px] font-semibold">{currentStep?.label}</span>
           </div>
 
@@ -309,11 +272,8 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
               </span>
               <div className="flex items-center gap-3 flex-wrap">
                 {onToggleInlineTuner && (
-                  <button
-                    type="button"
-                    onClick={onToggleInlineTuner}
-                    className="inline-flex items-center gap-1 text-emerald-500 hover:text-emerald-400 font-bold cursor-pointer"
-                  >
+                  <button type="button" onClick={onToggleInlineTuner}
+                    className="inline-flex items-center gap-1 text-emerald-500 hover:text-emerald-400 font-bold cursor-pointer">
                     <Sliders className="h-3 w-3" />
                     <span>{showInlineTuner ? '收起就地全参数调优台 ▲' : '展开就地全参数调优台 ▼'}</span>
                   </button>
@@ -381,9 +341,7 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
                 >
                   <Gamepad2 className="h-3.5 w-3.5" />
                   <span>Play (6 种玩法网格)</span>
-                  <span className="font-mono text-[10px] opacity-75">
-                    {getPanelWidth('layer2-play')}px
-                  </span>
+                  <span className="font-mono text-[10px] opacity-75">{getPanelWidth('layer2-play')}px</span>
                 </button>
 
                 <button
@@ -399,9 +357,7 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
                 >
                   <Wrench className="h-3.5 w-3.5" />
                   <span>Garage (5 Tabs 含 Materials)</span>
-                  <span className="font-mono text-[10px] opacity-75">
-                    {getPanelWidth('layer2-garage')}px
-                  </span>
+                  <span className="font-mono text-[10px] opacity-75">{getPanelWidth('layer2-garage')}px</span>
                 </button>
 
                 <button
@@ -420,9 +376,7 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
                 >
                   <Settings className="h-3.5 w-3.5" />
                   <span>Settings (User 4 Tabs · 图标+文本)</span>
-                  <span className="font-mono text-[10px] opacity-75">
-                    {getPanelWidth('layer2-settings')}px
-                  </span>
+                  <span className="font-mono text-[10px] opacity-75">{getPanelWidth('layer2-settings')}px</span>
                 </button>
 
                 <button
@@ -438,9 +392,7 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
                 >
                   <Server className="h-3.5 w-3.5" />
                   <span>Room Host Control (房主控制台)</span>
-                  <span className="font-mono text-[10px] opacity-75">
-                    {getPanelWidth('layer2-room-host-control')}px
-                  </span>
+                  <span className="font-mono text-[10px] opacity-75">{getPanelWidth('layer2-room-host-control')}px</span>
                 </button>
               </>
             ) : (
@@ -460,9 +412,7 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
               >
                 <Sliders className="h-3.5 w-3.5" />
                 <span>Settings → Developer Tab (5 大开发者中心入口)</span>
-                <span className="font-mono text-[10px] opacity-75">
-                  {getPanelWidth('layer2-settings')}px
-                </span>
+                <span className="font-mono text-[10px] opacity-75">{getPanelWidth('layer2-settings')}px</span>
               </button>
             )}
           </div>
@@ -474,11 +424,8 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-500 dark:text-neutral-400 font-mono">
               <span>L2 Play 菜单卡片风格切换 (PlayModeCard 3 Archetypes):</span>
               {onNavigateToPlayCards && (
-                <button
-                  type="button"
-                  onClick={onNavigateToPlayCards}
-                  className="inline-flex items-center gap-1 text-amber-500 hover:text-amber-400 font-bold cursor-pointer"
-                >
+                <button type="button" onClick={onNavigateToPlayCards}
+                  className="inline-flex items-center gap-1 text-amber-500 hover:text-amber-400 font-bold cursor-pointer">
                   <span>打开 L2 · 2B PlayCard 三风格参数调优专页</span>
                   <ArrowUpRight className="h-3.5 w-3.5" />
                 </button>
@@ -487,18 +434,9 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
             <div className="flex flex-wrap items-center gap-1.5">
               {(
                 [
-                  {
-                    id: 'icon-badge-top',
-                    label: '风格一: [Icon + Badge] / Title / Desc',
-                  },
-                  {
-                    id: 'icon-title-inline',
-                    label: '风格二: [Icon + Title] (无 Badge) / Desc',
-                  },
-                  {
-                    id: 'mono-giant-watermark',
-                    label: '风格三 (默认): JetBrains Mono 大字 + 30% 超大背景 Icon',
-                  },
+                  { id: 'icon-badge-top', label: '风格一: [Icon + Badge] / Title / Desc' },
+                  { id: 'icon-title-inline', label: '风格二: [Icon + Title] (无 Badge) / Desc' },
+                  { id: 'mono-giant-watermark', label: '风格三 (默认): JetBrains Mono 大字 + 30% 超大背景 Icon' },
                 ] as { id: PlayCardStyleVariant; label: string }[]
               ).map((item) => {
                 const active = playCardVariant === item.id;
@@ -576,9 +514,7 @@ export const MenuLayerRouteSelectorBar = React.memo<MenuLayerRouteSelectorBarPro
         {currentRoute === 'room-host-control' && (
           <div className="w-full pt-2 flex flex-col gap-1.5 border-t border-neutral-100 dark:border-neutral-800/60 mt-1">
             <div className="flex items-center justify-between text-[11px] text-neutral-500 dark:text-neutral-400 font-mono">
-              <span>
-                Online Room Control 6 态上下文联动 (Match Lobby / During Match / Online Warmup · Host & Client):
-              </span>
+              <span>Online Room Control 6 态上下文联动 (Match Lobby / During Match / Online Warmup · Host & Client):</span>
               <span className="text-amber-500 font-semibold">
                 当前: {resolveOnlineSessionContextId(layer1ContextMode).toUpperCase()}
               </span>

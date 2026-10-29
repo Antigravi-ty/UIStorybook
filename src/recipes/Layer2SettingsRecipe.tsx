@@ -7,52 +7,33 @@ import {
   Terminal,
   Volume2,
 } from 'lucide-react';
-import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../../layout/Panel';
-import { UnderlineTabs, TabItem } from '../../primitives/UnderlineTabs';
-import { Badge } from '../../primitives/Badge';
-import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../../tokens/menuLayoutStore';
-import type { PanelSizingConfig } from '../../tokens/menuLayoutStore';
-import type { DiagnosticWindowPayload } from './components/FloatingWindowCard';
-import {
-  GameplayTab,
-  AudioTab,
-  DisplayTab,
-  AdvancedTab,
-  DeveloperTab,
-  type GameplayConfig,
-  type ClockPacingPriority,
-  type AudioConfig,
-  type AudioDebugTelemetryProps,
-  type GraphicsConfig,
-  type MenuPowerSaveOption,
-  type FpsTargetOption,
-  type InputBufferTargetOption,
-  type TelemetryOverlayConfig,
-  type BallOpacityMode,
-} from './tabs';
+import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
+import { UnderlineTabs, TabItem } from '../primitives/UnderlineTabs';
+import { Badge } from '../primitives/Badge';
+import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens/menuLayoutStore';
+import type { PanelSizingConfig } from '../tokens/menuLayoutStore';
+import type { DiagnosticWindowPayload } from './settings/components/FloatingWindowCard';
+import { GameplayTab, type GameplayConfig, type ClockPacingPriority, type BallOpacityMode } from './settings/tabs/GameplayTab';
+import { AudioTab, type AudioConfig } from './settings/tabs/AudioTab';
+import { DisplayTab, type GraphicsConfig, type MenuPowerSaveOption, type FpsTargetOption } from './settings/tabs/DisplayTab';
+import { AdvancedTab, type AudioDebugTelemetryProps, type InputBufferTargetOption, type TelemetryOverlayConfig } from './settings/tabs/AdvancedTab';
+import { DeveloperTab } from './settings/tabs/DeveloperTab';
 import {
   Layer3BallTrajectoryRecipe,
   type TrajectoryConfig,
-} from '../Layer3BallTrajectoryRecipe';
-import { Layer3TrainingRecipe } from '../Layer3TrainingRecipe';
+} from './Layer3BallTrajectoryRecipe';
+import { Layer3TrainingRecipe } from './Layer3TrainingRecipe';
 import {
   Layer3CameraRecipe,
   type CameraConfig,
-} from '../Layer3CameraRecipe';
-import { Layer3KeybindingsRecipe } from '../Layer3KeybindingsRecipe';
+} from './Layer3CameraRecipe';
+import { Layer3KeybindingsRecipe } from './Layer3KeybindingsRecipe';
 
-export type { DiagnosticWindowPayload } from './components/FloatingWindowCard';
+export type { DiagnosticWindowPayload } from './settings/components/FloatingWindowCard';
 export type {
-  GameplayConfig,
-  ClockPacingPriority,
-  AudioConfig,
-  AudioDebugTelemetryProps,
-  GraphicsConfig,
-  MenuPowerSaveOption,
-  FpsTargetOption,
-  InputBufferTargetOption,
-  TelemetryOverlayConfig,
-  BallOpacityMode,
+  GameplayConfig, ClockPacingPriority, AudioConfig, AudioDebugTelemetryProps,
+  GraphicsConfig, MenuPowerSaveOption, FpsTargetOption, InputBufferTargetOption,
+  TelemetryOverlayConfig, BallOpacityMode,
 };
 export type SettingsTabId = 'gameplay' | 'audio' | 'display' | 'advanced' | 'developer';
 
@@ -188,118 +169,36 @@ export interface Layer2SettingsRecipeProps extends AudioDebugTelemetryProps {
  * 5. Developer (`Terminal`) — visible when developerMode is true or activeTab === 'developer'
  */
 export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
-  isLight = false,
-  onBack,
-  onNavigateTrainingDetail,
-  onNavigateAudioDetail,
-  onNavigateKeybindingsDetail,
-  onNavigateTrajectoryDetail,
-  onNavigateTrajectory,
-  onNavigateCameraDetail,
-  onNavigateCameraSettings,
-  onNavigateAdvancedAudio,
+  isLight = false, onBack,
+  onNavigateTrainingDetail, onNavigateKeybindingsDetail, onNavigateTrajectoryDetail, onNavigateTrajectory,
+  onNavigateCameraDetail, onNavigateCameraSettings, onNavigateAudioDetail,
+  onNavigateAdvancedAudio, onNavigateEventAndTriggerer, onNavigateExpMultiBots,
+  onNavigateDevSandboxes, onNavigateDevSubsystemIsolation, onNavigateDevActiveTuners,
+  onNavigateDevCalibratedPresets, onNavigateDevUnderDevelopment, onSpawnDiagnosticWindow,
+  initialTab = 'gameplay', activeTab: controlledTab, onTabChange,
+  developerMode: propDevMode, developerModeEnabled, onDeveloperModeChange, onToggleDeveloperMode,
   onNavigateAdvancedController,
-  onNavigateEventAndTriggerer,
-  onNavigateExpMultiBots,
-  onNavigateDevSandboxes,
-  onNavigateDevSubsystemIsolation,
-  onNavigateDevActiveTuners,
-  onNavigateDevCalibratedPresets,
-  onNavigateDevUnderDevelopment,
-  onSpawnDiagnosticWindow,
-  initialTab = 'gameplay',
-  activeTab: controlledTab,
-  onTabChange,
-  developerMode: propDevMode,
-  developerModeEnabled,
-  onDeveloperModeChange,
-  onToggleDeveloperMode,
-  highlightSetting,
-  onClearHighlight,
-  // Gameplay props
-  gameplayConfig,
-  defaultGameplayConfig,
-  onGameplayConfigChange,
-  ballCamIndicator,
-  onBallCamIndicatorChange,
-  trajectoryEnabled,
-  onTrajectoryEnabledChange,
-  experiencePriority,
-  clockPacingPriority,
-  onExperiencePriorityChange,
-  onClockPacingPriorityChange,
-  // Audio props
-  audioConfig,
-  defaultAudioConfig,
-  onAudioConfigChange,
-  muteWhenUnfocused,
-  onMuteWhenUnfocusedChange,
-  masterVolume,
-  onMasterVolumeChange,
-  engineVolume,
-  onEngineVolumeChange,
-  boostVolume,
-  onBoostVolumeChange,
-  // Display props
-  graphicsConfig,
-  defaultGraphicsConfig,
-  onGraphicsConfigChange,
-  menuPowerSave,
-  onMenuPowerSaveChange,
-  theme,
-  onThemeChange,
-  uiScale,
-  onUiScaleChange,
-  maxSafeScale,
-  safeAreaMargin,
-  onSafeAreaMarginChange,
-  limitFps,
-  onLimitFpsChange,
-  maxFps,
-  onMaxFpsChange,
-  fpsSelection,
-  onFpsSelectionChange,
-  customFps,
-  onCustomFpsChange,
-  renderScale,
-  onRenderScaleChange,
-  // Advanced & AudioDebug props
-  inputBufferTarget,
-  defaultInputBufferTarget,
-  onInputBufferTargetChange,
-  inputBufferThreshold,
-  defaultInputBufferThreshold,
-  onInputBufferThresholdChange,
-  telemetryConfig,
-  defaultTelemetryConfig,
-  onTelemetryConfigChange,
-  audioDebug,
-  audioDebugEnabled,
-  onAudioDebugEnabledChange,
-  masterRmsDb,
-  masterPeakDb,
-  activeVoices,
-  maxVoices,
-  loadedBuffers,
-  totalBuffers,
-  contextState,
-  verdictText,
-  probeStatusText,
-  onPlayTestTone,
-  onDumpConsole,
-  onForceRecovery,
-  // Developer props
-  ballOpacityMode,
-  defaultBallOpacityMode,
-  onBallOpacityModeChange,
-  observeSafeAreaBoundary,
-  defaultObserveSafeAreaBoundary,
-  onObserveSafeAreaBoundaryChange,
-  // Sub-views
-  cameraConfig,
-  onCameraConfigChange,
-  trajectoryConfig,
-  onTrajectoryConfigChange,
+  gameplayConfig, defaultGameplayConfig, onGameplayConfigChange,
+  ballCamIndicator, onBallCamIndicatorChange, trajectoryEnabled, onTrajectoryEnabledChange,
+  experiencePriority, clockPacingPriority, onExperiencePriorityChange, onClockPacingPriorityChange,
+  audioConfig, defaultAudioConfig, onAudioConfigChange,
+  muteWhenUnfocused, onMuteWhenUnfocusedChange, masterVolume, onMasterVolumeChange,
+  engineVolume, onEngineVolumeChange, boostVolume, onBoostVolumeChange,
+  graphicsConfig, defaultGraphicsConfig, onGraphicsConfigChange,
+  theme, onThemeChange, uiScale, onUiScaleChange, maxSafeScale,
+  safeAreaMargin, onSafeAreaMarginChange, limitFps, onLimitFpsChange,
+  maxFps, onMaxFpsChange, fpsSelection, onFpsSelectionChange, customFps, onCustomFpsChange,
+  renderScale, onRenderScaleChange, menuPowerSave, onMenuPowerSaveChange,
+  highlightSetting, onClearHighlight,
+  inputBufferTarget, defaultInputBufferTarget, onInputBufferTargetChange,
+  inputBufferThreshold, defaultInputBufferThreshold, onInputBufferThresholdChange,
+  telemetryConfig, defaultTelemetryConfig, onTelemetryConfigChange,
+  audioDebug, audioDebugEnabled, onAudioDebugEnabledChange,
+  masterRmsDb, masterPeakDb, activeVoices, maxVoices, loadedBuffers, totalBuffers,
+  contextState, verdictText, probeStatusText, onPlayTestTone, onDumpConsole, onForceRecovery,
+  ballOpacityMode, defaultBallOpacityMode, onBallOpacityModeChange,
+  observeSafeAreaBoundary, defaultObserveSafeAreaBoundary, onObserveSafeAreaBoundaryChange,
+  cameraConfig, onCameraConfigChange, trajectoryConfig, onTrajectoryConfigChange,
   sizing: propSizing,
 }) => {
   const resolvedPropDevMode = propDevMode ?? developerModeEnabled;
@@ -437,26 +336,10 @@ export const Layer2SettingsRecipe: React.FC<Layer2SettingsRecipeProps> = ({
   }
 
   const tabs: TabItem[] = [
-    {
-      id: 'gameplay',
-      label: 'Gameplay',
-      icon: <Gamepad2 className="h-3.5 w-3.5" />,
-    },
-    {
-      id: 'audio',
-      label: 'Audio',
-      icon: <Volume2 className="h-3.5 w-3.5" />,
-    },
-    {
-      id: 'display',
-      label: 'Display',
-      icon: <Monitor className="h-3.5 w-3.5" />,
-    },
-    {
-      id: 'advanced',
-      label: 'Advanced',
-      icon: <Sliders className="h-3.5 w-3.5" />,
-    },
+    { id: 'gameplay', label: 'Gameplay', icon: <Gamepad2 className="h-3.5 w-3.5" /> },
+    { id: 'audio', label: 'Audio', icon: <Volume2 className="h-3.5 w-3.5" /> },
+    { id: 'display', label: 'Display', icon: <Monitor className="h-3.5 w-3.5" /> },
+    { id: 'advanced', label: 'Advanced', icon: <Sliders className="h-3.5 w-3.5" /> },
   ];
 
   if (developerMode || currentTab === 'developer') {

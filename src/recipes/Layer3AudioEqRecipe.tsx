@@ -14,7 +14,7 @@ import { InlineErrorNotice } from '../primitives/InlineErrorNotice';
 import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
 import { SettingSliderRow } from '../primitives/SettingSliderRow';
 import { SettingToggleRow } from '../primitives/SettingToggleRow';
-import { useMenuLayoutStore } from '../tokens';
+import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 
 export interface Layer3AudioEqRecipeProps {

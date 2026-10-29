@@ -11,7 +11,7 @@ import {
   ChevronDown,
   Sparkles,
 } from 'lucide-react';
-import { crossClientSync } from './stores';
+import { crossClientSync } from './stores/crossClientSync';
 
 export interface JumpDirectoryCategory {
   id: string;

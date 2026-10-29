@@ -1,5 +1,5 @@
 import React from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:menus');
 import { 
@@ -18,10 +18,8 @@ import { ContainerTransitionMode } from '../../tokens/easing';
 import { Button } from '../../primitives/Button';
 import { Badge } from '../../primitives/Badge';
 import { CodeBlock } from '../CodeBlock';
-import { 
-  Layer1MatchPostRecipe, 
-  Layer2MatchStatsRecipe
-} from '../../recipes';
+import { Layer1MatchPostRecipe } from '../../recipes/Layer1MatchPostRecipe';
+import { Layer2MatchStatsRecipe } from '../../recipes/Layer2MatchStatsRecipe';
 
 export type ReservedMenuRouteId = 'match-post' | 'match-stats';
 

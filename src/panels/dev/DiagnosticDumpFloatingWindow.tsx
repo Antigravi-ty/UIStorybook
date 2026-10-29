@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Download, Trash2 } from 'lucide-react';
-import { Button } from '../../primitives';
-import { RingBufferCapacityGaugeCard } from '../../compounds';
-import { quickNotification } from '../../tokens';
+import { Button } from '../../primitives/Button';
+import { RingBufferCapacityGaugeCard } from '../../compounds/RingBufferCapacityGaugeCard';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**
  * 1. [Dev] Diagnostic Dump Exporter (`diagnostic-dump-exporter`)

@@ -11,10 +11,13 @@ import type {
 } from '../../../hud/types';
 import { DEFAULT_DEMO_INDICATOR_CONFIG, resolveDemoIndicatorConfig } from '../../../hud/hudTransientChannel';
 import type { HudLayoutStrategy } from '../../../layout/HudAnchorStage';
-import { HudChoreographySlotAndTopBandColumns } from './HudChoreographySlotAndTopBandColumns';
+import {
+  HudChoreographySlotAndTopBandColumns,
+  type FlipSimMode,
+  type JumpPlacementOption,
+} from './HudChoreographySlotAndTopBandColumns';
 
-export type FlipSimMode = 'auto-drain' | 'grounded' | 'multi-flip' | 'unlimited' | 'expired';
-export type JumpPlacementOption = 'top-left' | 'center-bottom-right' | 'center-bottom-left';
+export type { FlipSimMode, JumpPlacementOption };
 
 export interface HudChoreographyControlDeckProps {
   isLight: boolean;

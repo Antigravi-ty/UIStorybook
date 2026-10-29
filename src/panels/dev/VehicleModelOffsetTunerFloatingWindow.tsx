@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Car } from 'lucide-react';
-import { SliderControl, SegmentedSwitch, ToggleSwitch } from '../../primitives';
-import { CameraSwivelSimulatorCard, ReferenceImageOverlayController } from '../../compounds';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { CameraSwivelSimulatorCard } from '../../compounds/CameraSwivelSimulatorCard';
+import { ReferenceImageOverlayController } from '../../compounds/ReferenceImageOverlayController';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

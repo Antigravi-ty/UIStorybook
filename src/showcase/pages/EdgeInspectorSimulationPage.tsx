@@ -1,32 +1,20 @@
 import React, { useEffect } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:edge-inspector');
-import {
-  PanelRightClose,
-  PanelLeftClose,
-  RotateCcw,
-  Check,
-  Maximize2,
-  Compass,
-  Ruler,
-  LogOut,
-} from 'lucide-react';
+import { PanelRightClose, PanelLeftClose, RotateCcw, Check, Maximize2, Compass, Ruler, LogOut, } from 'lucide-react';
 import { EdgeInspectorDrawer, type EdgeDrawerSide } from '../../navigation/EdgeInspectorDrawer';
 import { MenuDivider } from '../../layout/MenuContainer';
-import { MenuItem } from '../../navigation/MenuItem';
+import { MenuItem } from '../../compounds/MenuItem';
 import {
-  Layer5StaticTrainingPackEditRecipe,
-  openStaticTrainingExitConfirmDialogue,
+  Layer5StaticTrainingPackEditRecipe, openStaticTrainingExitConfirmDialogue,
 } from '../../recipes/Layer5StaticTrainingPackEditRecipe';
 import { Layer1MainMenuRecipe } from '../../recipes/Layer1MainMenuRecipe';
 import { Layer2PlayRecipe } from '../../recipes/Layer2PlayRecipe';
 import { Layer2GarageRecipe } from '../../recipes/Layer2GarageRecipe';
-import { Layer2SettingsRecipe } from '../../recipes/settings';
+import { Layer2SettingsRecipe } from '../../recipes/Layer2SettingsRecipe';
 import {
-  INITIAL_TRAINING_SHOTS,
-  type EditSubMode,
-  type StaticTrainingShotItem,
+  INITIAL_TRAINING_SHOTS, type EditSubMode, type StaticTrainingShotItem,
 } from '../../recipes/static-training/staticTrainingTypes';
 import { StaticTrainingPackHUD } from '../../hud/StaticTrainingPackHUD';
 import { CircularBoostGauge } from '../../hud/CircularBoostGauge';
@@ -311,9 +299,7 @@ export const EdgeInspectorSimulationPage: React.FC<EdgeInspectorSimulationPagePr
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight">
-                6E · Edge Inspector 侧边悬停检视抽屉
-              </h1>
+              <h1 className="text-2xl font-bold tracking-tight">6E · Edge Inspector 侧边悬停检视抽屉</h1>
               <Badge variant="amber" size="sm" isLight={isLight}>
                 Zero-Backdrop · Right/Left Offset
               </Badge>
@@ -321,11 +307,7 @@ export const EdgeInspectorSimulationPage: React.FC<EdgeInspectorSimulationPagePr
                 TAB 独立管理 Drawer · ESC 独立管理 Menu
               </Badge>
             </div>
-            <p
-              className={`text-xs mt-0.5 ${
-                isLight ? 'text-neutral-500' : 'text-neutral-400'
-              }`}
-            >
+            <p className={`text-xs mt-0.5 ${ isLight ? 'text-neutral-500' : 'text-neutral-400' }`}>
               专为 <strong>Static Training Pack Edit Mode</strong> 等实时 3D 场景打造。与常规居中的{' '}
               <code className="font-mono">LivePreviewDock</code>（隶属于 Settings）不同，<strong>Edge Inspector 是与主菜单完全正交的独立套件</strong>：
               右上角仅保留 <code className="font-mono">Collapse [TAB]</code>，按 <code className="font-mono">TAB</code> 独立控制侧边检视抽屉，按 <code className="font-mono">ESC</code> 独立呼出主菜单（通过主菜单执行退出）。
@@ -334,211 +316,79 @@ export const EdgeInspectorSimulationPage: React.FC<EdgeInspectorSimulationPagePr
         </div>
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <button
-            type="button"
-            onClick={handleExportLayoutSnapshot}
+          <button type="button" onClick={handleExportLayoutSnapshot}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-medium transition-all active:scale-95 cursor-pointer bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 border-neutral-300 dark:border-neutral-700 shadow-2xs"
-            title="打印并复制当前 Edge Inspector 抽屉与左侧编号轨道的尺寸、内边距、四边对称度数据"
-          >
+            title="打印并复制当前 Edge Inspector 抽屉与左侧编号轨道的尺寸、内边距、四边对称度数据">
             <Ruler className="h-3.5 w-3.5 text-amber-500" />
             <span>导出当前预览布局数据</span>
           </button>
-          <Button
-            size="sm"
-            variant={isInspectingShot ? 'secondary' : 'primary'}
-            isLight={isLight}
-            onClick={() => setIsInspectingShot((v) => !v)}
-          >
-            {isInspectingShot ? '切换至完整列表态 (Shot List)' : '切换至检视轨道态 (Edit Shot)'}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            isLight={isLight}
-            onClick={() => setIsDrawerExpanded((v) => !v)}
-          >
-            {isDrawerExpanded ? '收纳至边缘药丸 [TAB]' : '展开侧边检视面板 [TAB]'}
-          </Button>
-          <Button
-            size="sm"
-            variant={isEscMenuOpen ? 'primary' : 'outline'}
-            isLight={isLight}
-            onClick={() =>
-              setEscMenuRoute((prev) => (prev === 'none' ? 'main-menu' : 'none'))
-            }
-          >
-            {isEscMenuOpen ? '关闭主菜单 [ESC]' : '呼出主菜单 [ESC]'}
-          </Button>
-        </div>
-      </div>
-
-      {/* 2. Co-located EdgeInspectorDrawer Geometry & Offset Tuner */}
-      <div
-        className={`p-4 rounded-2xl border flex flex-col gap-3.5 transition-colors ${
-          isLight
-            ? 'bg-white border-neutral-200/90 shadow-2xs'
-            : 'bg-neutral-900/70 border-neutral-800'
-        }`}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-neutral-200/70 dark:border-neutral-800">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Maximize2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-            <span className="text-xs font-bold">
-              EdgeInspectorDrawer 几何与 HUD 避让参数调优器
-            </span>
+          <Button size="sm" variant={isInspectingShot ? 'secondary' : 'primary'} isLight={isLight}
+            onClick={() => setIsInspectingShot((v) => !v)} >
+            {isInspectingShot ? '切换至完整列表态 (Shot List)' : '切换至检视轨道态 (Edit Shot)'} </Button> <Button size="sm"
+            variant="outline" isLight={isLight} onClick={() => setIsDrawerExpanded((v) => !v)} >
+            {isDrawerExpanded ? '收纳至边缘药丸 [TAB]' : '展开侧边检视面板 [TAB]'} </Button> <Button size="sm"
+            variant={isEscMenuOpen ? 'primary' : 'outline'} isLight={isLight} onClick={() =>
+            setEscMenuRoute((prev) => (prev === 'none' ? 'main-menu' : 'none')) } >
+            {isEscMenuOpen ? '关闭主菜单 [ESC]' : '呼出主菜单 [ESC]'} </Button> </div> </div>
+            {/* 2. Co-located EdgeInspectorDrawer Geometry & Offset Tuner */} <div
+            className={`p-4 rounded-2xl border flex flex-col gap-3.5 transition-colors ${ isLight
+            ? 'bg-white border-neutral-200/90 shadow-2xs' : 'bg-neutral-900/70 border-neutral-800' }`} >
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-neutral-200/70 dark:border-neutral-800">
+            <div className="flex items-center gap-2 flex-wrap">
+            <Maximize2 className="h-3.5 w-3.5 text-amber-500 shrink-0" /> <span className="text-xs font-bold">
+            EdgeInspectorDrawer 几何与 HUD 避让参数调优器 </span>
             <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400">
-              右下角 CircularBoostGauge 固定尺寸 148×148px (bottom: 20px, right: 24px) → 默认 bottomOffset = 184px
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {feedbackToast && (
-              <span className="text-xs font-mono font-bold text-emerald-500 flex items-center gap-1">
-                <Check className="h-3.5 w-3.5" />
-                {feedbackToast}
-              </span>
-            )}
-            <Button
-              size="sm"
-              variant="ghost"
-              isLight={isLight}
-              icon={<RotateCcw className="h-3 w-3" />}
-              onClick={handleResetParams}
-            >
-              重置默认参数
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
-          {/* Dock Side Switcher */}
-          <div className="flex flex-col gap-1">
-            <span
-              className={`text-[11px] font-semibold ${
-                isLight ? 'text-neutral-600' : 'text-neutral-400'
-              }`}
-            >
-              停靠边缘 (side)
-            </span>
-            <SegmentedSwitch
-              value={drawerSide}
-              onValueChange={(v) => setDrawerSide(v as EdgeDrawerSide)}
-              isLight={isLight}
-              options={[
-                { value: 'right', label: 'Right (右侧默认)' },
-                { value: 'left', label: 'Left (左侧)' },
-              ]}
-            />
-          </div>
-
-          <SliderControl
-            label="展开宽度 (expandedW)"
-            value={expandedWidth}
-            min={440}
-            max={620}
-            step={10}
-            unit="px"
-            colorScheme="amber"
-            onChange={setExpandedWidth}
-            isLight={isLight}
-          />
-
-          <SliderControl
-            label="收纳宽度 (collapsedW)"
-            value={collapsedWidth}
-            min={72}
-            max={130}
-            step={4}
-            unit="px"
-            colorScheme="amber"
-            onChange={setCollapsedWidth}
-            isLight={isLight}
-          />
-
-          <SliderControl
-            label="顶部偏移 (topOffset)"
-            value={topOffset}
-            min={16}
-            max={140}
-            step={4}
-            unit="px"
-            colorScheme="sky"
-            onChange={setTopOffset}
-            isLight={isLight}
-          />
-
-          <SliderControl
-            label="底部偏移 (bottomOffset)"
-            value={bottomOffset}
-            min={24}
-            max={240}
-            step={4}
-            unit="px"
-            colorScheme="emerald"
-            onChange={setBottomOffset}
-            isLight={isLight}
-          />
-        </div>
-      </div>
-
-      {/* 3. Interactive 3D Arena + HUD + EdgeInspectorDrawer + Independent ESC Main Menu Stage */}
-      <div
-        id="edge-inspector-simulation-stage"
-        className="relative w-full h-[680px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl bg-black select-none"
-      >
-        {/* Live 3D Arena Backdrop (100% un-darkened even when EdgeInspectorDrawer is expanded!) */}
-        <ArenaBackdrop preset={isLight ? 'daylight' : 'night'} brightness={isLight ? 82 : 38} />
-
-        {/* Simulated 3D Car & Ball Aiming Gizmo Indicator in Center-Left of Arena */}
-        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center pr-0 lg:pr-48">
-          <div
+            右下角 CircularBoostGauge 固定尺寸 148×148px (bottom: 20px, right: 24px) → 默认 bottomOffset = 184px </span>
+            </div> <div className="flex items-center gap-2"> {feedbackToast && (
+            <span className="text-xs font-mono font-bold text-emerald-500 flex items-center gap-1">
+            <Check className="h-3.5 w-3.5" /> {feedbackToast} </span> )} <Button size="sm" variant="ghost"
+            isLight={isLight} icon={<RotateCcw className="h-3 w-3" />} onClick={handleResetParams} > 重置默认参数
+            </Button> </div> </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
+            {/* Dock Side Switcher */} <div className="flex flex-col gap-1"> <span
+            className={`text-[11px] font-semibold ${ isLight ? 'text-neutral-600' : 'text-neutral-400' }`} >
+            停靠边缘 (side) </span>
+            <SegmentedSwitch value={drawerSide} onValueChange={(v) => setDrawerSide(v as EdgeDrawerSide)}
+            isLight={isLight} options={[ { value: 'right', label: 'Right (右侧默认)' },
+            { value: 'left', label: 'Left (左侧)' }, ]} /> </div>
+            <SliderControl label="展开宽度 (expandedW)" value={expandedWidth} min={440} max={620} step={10} unit="px"
+            colorScheme="amber" onChange={setExpandedWidth} isLight={isLight} />
+            <SliderControl label="收纳宽度 (collapsedW)" value={collapsedWidth} min={72} max={130} step={4} unit="px"
+            colorScheme="amber" onChange={setCollapsedWidth} isLight={isLight} />
+            <SliderControl label="顶部偏移 (topOffset)" value={topOffset} min={16} max={140} step={4} unit="px"
+            colorScheme="sky" onChange={setTopOffset} isLight={isLight} />
+            <SliderControl label="底部偏移 (bottomOffset)" value={bottomOffset} min={24} max={240} step={4} unit="px"
+            colorScheme="emerald" onChange={setBottomOffset} isLight={isLight} /> </div> </div>
+            {/* 3. Interactive 3D Arena + HUD + EdgeInspectorDrawer + Independent ESC Main Menu Stage */} <div
+            id="edge-inspector-simulation-stage"
+            className="relative w-full h-[680px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl bg-black select-none"
+            > {/* Live 3D Arena Backdrop (100% un-darkened even when EdgeInspectorDrawer is expanded!) */}
+            <ArenaBackdrop preset={isLight ? 'daylight' : 'night'} brightness={isLight ? 82 : 38} />
+            {/* Simulated 3D Car & Ball Aiming Gizmo Indicator in Center-Left of Arena */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center pr-0 lg:pr-48">
+            <div
             className={`px-4 py-3 rounded-2xl border backdrop-blur-md flex flex-col items-center gap-1.5 transition-all ${
-              isLight
-                ? 'bg-white/80 border-neutral-300 text-neutral-900 shadow-lg'
-                : 'bg-neutral-950/75 border-neutral-800 text-neutral-100 shadow-xl'
-            }`}
-          >
+            isLight ? 'bg-white/80 border-neutral-300 text-neutral-900 shadow-lg'
+            : 'bg-neutral-950/75 border-neutral-800 text-neutral-100 shadow-xl' }`} >
             <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-500">
-              <Compass className="h-4 w-4 animate-spin" style={{ animationDuration: '9s' }} />
-              <span>
-                [3D Arena Live Scene · Sub-Mode: {editSubMode.toUpperCase()}]
-              </span>
-            </div>
+            <Compass className="h-4 w-4 animate-spin" style={{ animationDuration: '9s' }} /> <span>
+            [3D Arena Live Scene · Sub-Mode: {editSubMode.toUpperCase()}] </span> </div>
             <div className="text-xs font-bold">
-              Active Shot #{String(safeIndex + 1).padStart(2, '0')}: {activeShot.name}
-            </div>
+            Active Shot #{String(safeIndex + 1).padStart(2, '0')}: {activeShot.name} </div>
             <div className="text-[11px] font-mono opacity-75">
-              Car Pos: [{Math.round(activeShot.car.location[0])}, {Math.round(activeShot.car.location[1])}, {Math.round(activeShot.car.location[2])}] • Speed: {Math.round(activeShot.car.speed)} UU/s • Ball: {activeShot.ball.kickoffState ? 'FREEZE' : `${Math.round(activeShot.ball.speed)} UU/s`}
-            </div>
-            <div className="text-[10px] text-emerald-500 font-mono mt-0.5">
-              ✨ [TAB] 独立控制 Edge Inspector 抽屉 · [ESC] 独立呼出中央主菜单 (Menu 与 Inspector 两套系统互不冲突)
-            </div>
-          </div>
-        </div>
-
-        {/* Top-Center StaticTrainingPackHUD */}
-        <StaticTrainingPackHUD
-          isLight={isLight}
-          shotIndex={safeIndex}
-          shot={activeShot}
-          editSubMode={editSubMode}
-          onSelectSubMode={setEditSubMode}
-        />
-
-        {/* Bottom-Center VelocityProgressBar (5A.4) */}
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-          <VelocityProgressBar
-            speed={activeShot.car.speed}
-            width={280}
-            height={20}
-          />
+            Car Pos: [{Math.round(activeShot.car.location[0])}, {Math.round(activeShot.car.location[1])}, {Math.round(activeShot.car.location[2])}] • Speed: {Math.round(activeShot.car.speed)} UU/s • Ball: {activeShot.ball.kickoffState ? 'FREEZE' : `${Math.round(activeShot.ball.speed)} UU/s`}
+            </div> <div className="text-[10px] text-emerald-500 font-mono mt-0.5">
+            ✨ [TAB] 独立控制 Edge Inspector 抽屉 · [ESC] 独立呼出中央主菜单 (Menu 与 Inspector 两套系统互不冲突) </div> </div> </div>
+            {/* Top-Center StaticTrainingPackHUD */} <StaticTrainingPackHUD isLight={isLight} shotIndex={safeIndex}
+            shot={activeShot} editSubMode={editSubMode} onSelectSubMode={setEditSubMode} />
+            {/* Bottom-Center VelocityProgressBar (5A.4) */}
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+            <VelocityProgressBar speed={activeShot.car.speed} width={280} height={20} />
         </div>
 
         {/* Bottom-Right Fixed 148×148px Circular Boost Gauge (at right: 24px, bottom: 20px — cleared by bottomOffset: 184px) */}
-        <div
-          className="absolute z-10 pointer-events-none flex flex-col items-end gap-1"
-          style={{ right: 24, bottom: 20 }}
-        >
+        <div className="absolute z-10 pointer-events-none flex flex-col items-end gap-1"
+          style={{ right: 24, bottom: 20 }}>
           <CircularBoostGauge
             amount={activeShot.car.unlimitedBoost ? 100 : activeShot.car.initialBoost}
             size={148}
@@ -547,20 +397,10 @@ export const EdgeInspectorSimulationPage: React.FC<EdgeInspectorSimulationPagePr
         </div>
 
         {/* System A (Independent Edge Inspector Suite, z-30): Controlled exclusively by [TAB] */}
-        <EdgeInspectorDrawer
-          isExpanded={isDrawerExpanded}
-          onExpandedChange={setIsDrawerExpanded}
-          side={drawerSide}
-          expandedWidth={expandedWidth}
-          collapsedWidth={collapsedWidth}
-          topOffset={topOffset}
-          bottomOffset={bottomOffset}
-          edgeMargin={16}
-          shortcutKey="TAB"
-          enableHotkey={true}
-          positionMode="absolute"
-          isLight={isLight}
-        >
+        <EdgeInspectorDrawer isExpanded={isDrawerExpanded} onExpandedChange={setIsDrawerExpanded} side={drawerSide}
+          expandedWidth={expandedWidth} collapsedWidth={collapsedWidth} topOffset={topOffset}
+          bottomOffset={bottomOffset} edgeMargin={16} shortcutKey="TAB" enableHotkey={true} positionMode="absolute"
+          isLight={isLight}>
           <Layer5StaticTrainingPackEditRecipe
             isLight={isLight}
             transparent={true}

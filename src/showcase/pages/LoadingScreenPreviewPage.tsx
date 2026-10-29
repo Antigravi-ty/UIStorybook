@@ -1,33 +1,16 @@
 import React, { useEffect } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:loading-screen');
 import {
-  Loader2,
-  Play,
-  Pause,
-  RotateCcw,
-  CheckCircle2,
-  DownloadCloud,
-  Cpu,
-  Layers,
-  Ruler,
-  Check,
-  ShieldAlert,
-  Sun,
-  Moon,
-  Sparkles,
-  Sliders
+  Loader2, Play, Pause, RotateCcw,
+  CheckCircle2, DownloadCloud, Cpu, Layers,
+  Ruler, Check, ShieldAlert, Sun,
+  Moon, Sparkles, Sliders,
 } from 'lucide-react';
-import {
-  LoadingStep,
-  LoadingError,
-  DualProgressBar,
-  LoadingScreen,
-  calculateOverallProgress,
-  formatBytes,
-  formatSpeed
-} from '../../loading';
+import { LoadingStep, LoadingError } from '../../loading/types';
+import { DualProgressBar, calculateOverallProgress, formatBytes, formatSpeed } from '../../loading/DualProgressBar';
+import { LoadingScreen } from '../../loading/LoadingScreen';
 import { GameViewport } from '../../viewport/GameViewport';
 import { SliderControl } from '../../primitives/SliderControl';
 
@@ -358,11 +341,9 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
       </div>
 
       {/* 2. Interactive Pipeline Control Simulator (外部模拟控制器) */}
-      <div
-        className={`p-4 rounded-2xl border flex flex-col gap-3 transition-colors shadow-2xs ${
-          isLight ? 'bg-white border-neutral-200/90 text-neutral-800' : 'bg-neutral-900/70 border-neutral-800 text-neutral-200'
-        }`}
-      >
+      <div className={`p-4 rounded-2xl border flex flex-col gap-3 transition-colors shadow-2xs ${
+        isLight ? 'bg-white border-neutral-200/90 text-neutral-800' : 'bg-neutral-900/70 border-neutral-800 text-neutral-200'
+        }`}>
         <div className="flex items-center justify-between text-xs font-semibold">
           <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
             <Sparkles className="h-4 w-4 text-sky-500" />
@@ -403,11 +384,8 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
           </button>
 
           {/* Reset */}
-          <button
-            type="button"
-            onClick={handleReset}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-medium transition-colors cursor-pointer bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200 dark:border-neutral-700"
-          >
+          <button type="button" onClick={handleReset}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-medium transition-colors cursor-pointer bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-200 dark:border-neutral-700">
             <RotateCcw className="h-3.5 w-3.5" />
             <span>重置流程 (Reset)</span>
           </button>
@@ -415,27 +393,18 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
           <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-700 mx-1" />
 
           {/* Simulate Throw Error Button */}
-          <button
-            type="button"
-            onClick={triggerSimulatedError}
-            disabled={!!error}
+          <button type="button" onClick={triggerSimulatedError} disabled={!!error}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer shadow-xs ${
-              error
-                ? 'bg-red-950/40 text-red-400 border border-red-800/40 opacity-50 cursor-not-allowed'
-                : 'bg-red-600 hover:bg-red-500 text-white active:scale-95 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
-            }`}
-          >
+            error ? 'bg-red-950/40 text-red-400 border border-red-800/40 opacity-50 cursor-not-allowed'
+            : 'bg-red-600 hover:bg-red-500 text-white active:scale-95 shadow-[0_0_12px_rgba(239,68,68,0.3)]' }`}>
             <ShieldAlert className="h-3.5 w-3.5" />
             <span>🚨 抛出异常 (Throw Error)</span>
           </button>
 
           {/* Clear & Recover Error Button */}
           {error && (
-            <button
-              type="button"
-              onClick={handleRecoverError}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs active:scale-95 transition-all cursor-pointer"
-            >
+            <button type="button" onClick={handleRecoverError}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs active:scale-95 transition-all cursor-pointer">
               <CheckCircle2 className="h-3.5 w-3.5" />
               <span>恢复并继续 (Recover & Resume)</span>
             </button>
@@ -486,17 +455,9 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
                 {Math.round(currentStep.progressPct || 0)}%
               </span>
             </div>
-            <SliderControl
-              label={`当前步骤: ${currentStep.title}`}
-              value={Math.round(currentStep.progressPct || 0)}
-              min={0}
-              max={100}
-              step={1}
-              unit="%"
-              colorScheme="amber"
-              isLight={isLight}
-              onChange={(val) => handleStepProgressChange(currentStepIndex, val)}
-            />
+            <SliderControl label={`当前步骤: ${currentStep.title}`} value={Math.round(currentStep.progressPct || 0)}
+              min={0} max={100} step={1} unit="%" colorScheme="amber" isLight={isLight}
+              onChange={(val) => handleStepProgressChange(currentStepIndex, val)} />
           </div>
         )}
 
@@ -533,10 +494,8 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
       </div>
 
       {/* 3. Live 18:9 Canvas Simulation Stage (加载视口舞台) */}
-      <div
-        id="loading-viewport-stage"
-        className="relative w-full h-[520px] md:h-[580px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl flex items-center justify-center transition-all duration-300"
-      >
+      <div id="loading-viewport-stage"
+        className="relative w-full h-[520px] md:h-[580px] rounded-3xl border border-neutral-300 dark:border-neutral-800 overflow-hidden shadow-2xl flex items-center justify-center transition-all duration-300">
         <GameViewport isLight={stageIsLight} className="w-full h-full">
           <LoadingScreen
             steps={steps}
@@ -566,25 +525,16 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
             const isErr = st.status === 'error';
 
             return (
-              <div
-                key={st.id}
+              <div key={st.id}
                 className={`p-4 rounded-2xl border transition-all shadow-2xs flex flex-col justify-between gap-3 ${
-                  isErr
-                    ? 'bg-red-500/10 border-red-500/50 text-red-400'
-                    : isActive
-                    ? isLight
-                      ? 'bg-sky-50/80 border-sky-400 ring-2 ring-sky-500/20'
-                      : 'bg-sky-950/30 border-sky-500/60 ring-2 ring-sky-500/20'
-                    : isLight
-                    ? 'bg-white border-neutral-200/90 hover:border-neutral-300'
-                    : 'bg-neutral-900/60 border-neutral-800 hover:border-neutral-700'
-                }`}
-              >
+                isErr ? 'bg-red-500/10 border-red-500/50 text-red-400' : isActive ? isLight
+                ? 'bg-sky-50/80 border-sky-400 ring-2 ring-sky-500/20'
+                : 'bg-sky-950/30 border-sky-500/60 ring-2 ring-sky-500/20' : isLight
+                ? 'bg-white border-neutral-200/90 hover:border-neutral-300'
+                : 'bg-neutral-900/60 border-neutral-800 hover:border-neutral-700' }`}>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="font-bold text-neutral-500 dark:text-neutral-400">
-                      STAGE 0{idx + 1}
-                    </span>
+                    <span className="font-bold text-neutral-500 dark:text-neutral-400">STAGE 0{idx + 1}</span>
                     <button
                       type="button"
                       onClick={() => jumpToStep(idx)}
@@ -602,29 +552,17 @@ export const LoadingScreenPreviewPage: React.FC<LoadingScreenPreviewPageProps> =
                     </button>
                   </div>
 
-                  <h4 className="text-sm font-bold tracking-tight text-neutral-900 dark:text-white mt-1">
-                    {st.title}
-                  </h4>
+                  <h4 className="text-sm font-bold tracking-tight text-neutral-900 dark:text-white mt-1">{st.title}</h4>
 
-                  <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400">
-                    {st.category}
-                  </span>
+                  <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400">{st.category}</span>
                 </div>
 
                 {/* Step Slider for Determinate steps */}
                 {st.type === 'determinate' ? (
                   <div className="pt-2 border-t border-neutral-200/60 dark:border-neutral-800 flex flex-col gap-1">
-                    <SliderControl
-                      label={`进度调节 (0% ~ 100%)`}
-                      value={Math.round(st.progressPct || 0)}
-                      min={0}
-                      max={100}
-                      step={1}
-                      unit="%"
-                      colorScheme="amber"
-                      isLight={isLight}
-                      onChange={(val) => handleStepProgressChange(idx, val)}
-                    />
+                    <SliderControl label={`进度调节 (0% ~ 100%)`} value={Math.round(st.progressPct || 0)} min={0}
+                      max={100} step={1} unit="%" colorScheme="amber" isLight={isLight}
+                      onChange={(val) => handleStepProgressChange(idx, val)} />
                     <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 mt-0.5">
                       <span>已下载: {formatBytes(st.bytesLoaded)}</span>
                       <span>总量: {formatBytes(st.bytesTotal)}</span>

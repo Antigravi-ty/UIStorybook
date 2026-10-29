@@ -21,11 +21,7 @@ import { Badge } from '../../../primitives/Badge';
 import { Button } from '../../../primitives/Button';
 import { UnderlineTabs, TabItem } from '../../../primitives/UnderlineTabs';
 import { CodeBlock } from '../../CodeBlock';
-import {
-  useUnderlineTabsStore,
-  type UnderlineTabsFontFamily,
-  type UnderlineTabsFontWeight,
-} from '../../../tokens';
+import { useUnderlineTabsStore, type UnderlineTabsFontFamily, type UnderlineTabsFontWeight } from '../../../tokens/underlineTabsStore';
 
 export interface UnderlineTabsTunerProps {
   isLight?: boolean;

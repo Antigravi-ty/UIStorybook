@@ -296,18 +296,9 @@ export function resolveNodePathInspectorLinks(
     return {
       pageRecipeTarget,
       elementTargets: [
-        {
-          code: '6D',
-          componentName: 'FloatingWindowManager',
-          label: 'Floating Window 悬浮窗与 Stack 托盘',
-          tab: 'floating-windows',
-        },
-        {
-          code: '5C',
-          componentName: 'SafeAreaHud',
-          label: 'Viewport & Safe Area 视口安全区',
-          tab: 'viewport-safe-area',
-        },
+        { code: '6D', componentName: 'FloatingWindowManager',
+          label: 'Floating Window 悬浮窗与 Stack 托盘', tab: 'floating-windows' },
+        { code: '5C', componentName: 'SafeAreaHud', label: 'Viewport & Safe Area 视口安全区', tab: 'viewport-safe-area' },
       ],
       usesSettingActionRow: false,
     };
@@ -317,25 +308,11 @@ export function resolveNodePathInspectorLinks(
     return {
       pageRecipeTarget,
       elementTargets: [
-        {
-          code: '6A.1M',
-          componentName: 'MainMenuStyleTuner',
-          label: '6A.1M MENU 极简大字行与字体外框调优工作台',
-          tab: 'recipes',
-          targetId: 'main-menu-style-tuner',
-        },
-        {
-          code: 'L4.Nav',
-          componentName: 'MenuContainer & MainMenuRow',
-          label: 'MainMenuRow 列表项与快捷键徽章',
-          tab: 'navigation',
-        },
-        {
-          code: 'L1.Badge',
-          componentName: 'KeycapBadge',
-          label: 'KeycapBadge 键帽原语',
-          tab: 'badges',
-        },
+        { code: '6A.1M', componentName: 'MainMenuStyleTuner', label: '6A.1M MENU 极简大字行与字体外框调优工作台',
+          tab: 'recipes', targetId: 'main-menu-style-tuner' },
+        { code: 'L4.Nav', componentName: 'MenuContainer & MainMenuRow',
+          label: 'MainMenuRow 列表项与快捷键徽章', tab: 'navigation' },
+        { code: 'L1.Badge', componentName: 'KeycapBadge', label: 'KeycapBadge 键帽原语', tab: 'badges' },
       ],
       usesSettingActionRow: false,
     };
@@ -382,12 +359,7 @@ export function resolveNodePathInspectorLinks(
           SEGMENTED_SWITCH_TARGET,
           SLIDER_CONTROL_TARGET,
           PANEL_SHELL_TARGET,
-          {
-            code: '5C',
-            componentName: 'ViewportSafeArea',
-            label: '5C 视口缩放与安全区',
-            tab: 'viewport-safe-area',
-          },
+          { code: '5C', componentName: 'ViewportSafeArea', label: '5C 视口缩放与安全区', tab: 'viewport-safe-area' },
         ],
         usesSettingActionRow: true,
       };
@@ -403,13 +375,8 @@ export function resolveNodePathInspectorLinks(
             tab: 'recipes',
             targetId: 'setting-telemetry-summary-tuner',
           },
-          {
-            code: 'L3.8',
-            componentName: 'TelemetryConfigCard',
-            label: 'L3.8 TelemetryConfigCard (Level 1 嵌套遥测矩阵专页)',
-            tab: 'composable-tuner',
-            targetId: 'l3-telemetry-matrix',
-          },
+          { code: 'L3.8', componentName: 'TelemetryConfigCard', label: 'L3.8 TelemetryConfigCard (Level 1 嵌套遥测矩阵专页)',
+            tab: 'composable-tuner', targetId: 'l3-telemetry-matrix' },
           {
             code: '6A.4S-F',
             componentName: 'SettingDeveloperStatusRow',
@@ -427,12 +394,8 @@ export function resolveNodePathInspectorLinks(
           },
           DUAL_GRABBER_TARGET,
           SEGMENTED_SWITCH_TARGET,
-          {
-            code: '6D',
-            componentName: 'FloatingWindowCard',
-            label: 'Floating Window 悬浮窗启动器',
-            tab: 'floating-windows',
-          },
+          { code: '6D', componentName: 'FloatingWindowCard',
+            label: 'Floating Window 悬浮窗启动器', tab: 'floating-windows' },
           PANEL_SHELL_TARGET,
         ],
         usesSettingActionRow: true,
@@ -446,12 +409,7 @@ export function resolveNodePathInspectorLinks(
         SEGMENTED_SWITCH_TARGET,
         TOGGLE_SWITCH_TARGET,
         PANEL_SHELL_TARGET,
-        {
-          code: '6D',
-          componentName: 'FloatingWindowManager',
-          label: '6D 开发者调参悬浮窗',
-          tab: 'floating-windows',
-        },
+        { code: '6D', componentName: 'FloatingWindowManager', label: '6D 开发者调参悬浮窗', tab: 'floating-windows' },
       ],
       usesSettingActionRow: true,
     };
@@ -496,20 +454,11 @@ export function resolveNodePathInspectorLinks(
       elementTargets: [
         ...(currentRoute === 'play'
           ? [
-              {
-                code: 'L2.2B',
-                componentName: 'PlayModeCard',
-                label: 'PlayModeCard (三风格/水印/图标色专页)',
-                tab: 'play-cards' as ShowcaseTab,
-              },
+              { code: 'L2.2B', componentName: 'PlayModeCard',
+                label: 'PlayModeCard (三风格/水印/图标色专页)', tab: 'play-cards' as ShowcaseTab },
             ]
           : []),
-        {
-          code: 'L2.Card',
-          componentName: 'Card & SelectableCard',
-          label: 'Card 网格模式卡片容器',
-          tab: 'cards',
-        },
+        { code: 'L2.Card', componentName: 'Card & SelectableCard', label: 'Card 网格模式卡片容器', tab: 'cards' },
         PANEL_SHELL_TARGET,
       ],
       usesSettingActionRow: false,
@@ -529,27 +478,13 @@ export function resolveNodePathInspectorLinks(
                 tab: 'recipes' as ShowcaseTab,
                 targetId: 'camera-settings-style-tuner',
               },
-              {
-                code: 'L1.7',
-                componentName: 'Checkbox',
-                label: 'L1.7 Checkbox 复选框原子原语',
-                tab: 'tabs' as ShowcaseTab,
-                targetId: 'l1-checkbox',
-              },
-              {
-                code: 'L3.2',
-                componentName: 'Dialogue',
-                label: 'L3.2 Dialogue 红色二次确认弹窗',
-                tab: 'dialogue' as ShowcaseTab,
-              },
+              { code: 'L1.7', componentName: 'Checkbox', label: 'L1.7 Checkbox 复选框原子原语',
+                tab: 'tabs' as ShowcaseTab, targetId: 'l1-checkbox' },
+              { code: 'L3.2', componentName: 'Dialogue',
+                label: 'L3.2 Dialogue 红色二次确认弹窗', tab: 'dialogue' as ShowcaseTab },
             ]
           : []),
-        {
-          code: '6C',
-          componentName: 'LivePreviewDock',
-          label: '6C Live Preview 侧边药丸收纳机',
-          tab: 'live-preview',
-        },
+        { code: '6C', componentName: 'LivePreviewDock', label: '6C Live Preview 侧边药丸收纳机', tab: 'live-preview' },
         SLIDER_CONTROL_TARGET,
         PANEL_SHELL_TARGET,
       ],
@@ -579,12 +514,7 @@ export function resolveNodePathInspectorLinks(
     return {
       pageRecipeTarget,
       elementTargets: [
-        {
-          code: 'L1.Keycap',
-          componentName: 'KeycapBadge & Button',
-          label: 'KeycapBadge 键帽与按钮原语',
-          tab: 'badges',
-        },
+        { code: 'L1.Keycap', componentName: 'KeycapBadge & Button', label: 'KeycapBadge 键帽与按钮原语', tab: 'badges' },
         PANEL_SHELL_TARGET,
       ],
       usesSettingActionRow: false,
@@ -595,19 +525,9 @@ export function resolveNodePathInspectorLinks(
     return {
       pageRecipeTarget,
       elementTargets: [
-        {
-          code: '5B',
-          componentName: 'CubicBezierCurveEditor',
-          label: '5B 贝塞尔摇杆传递曲线编辑器',
-          tab: 'charts-curves',
-        },
-        {
-          code: 'L3.11',
-          componentName: 'CameraSwivelSimulatorCard',
-          label: 'L3.11 视角旋转模拟器',
-          tab: 'composable-tuner',
-          targetId: 'l3-11-swivel-kickoff-duel',
-        },
+        { code: '5B', componentName: 'CubicBezierCurveEditor', label: '5B 贝塞尔摇杆传递曲线编辑器', tab: 'charts-curves' },
+        { code: 'L3.11', componentName: 'CameraSwivelSimulatorCard', label: 'L3.11 视角旋转模拟器',
+          tab: 'composable-tuner', targetId: 'l3-11-swivel-kickoff-duel' },
         PANEL_SHELL_TARGET,
       ],
       usesSettingActionRow: false,

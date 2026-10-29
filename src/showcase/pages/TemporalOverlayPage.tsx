@@ -1,18 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:temporal-overlay');
-import {
-  Clock,
-  Compass,
-  Flame,
-  Gauge,
-  Hash,
-  Hourglass,
-  Play,
-  RotateCcw,
-  Zap,
-} from 'lucide-react';
+import { Clock, Compass, Flame, Gauge, Hash, Hourglass, Play, RotateCcw, Zap, } from 'lucide-react';
 import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';
 import { SliderControl } from '../../primitives/SliderControl';
@@ -28,42 +18,14 @@ import { ArenaBackdrop } from '../../hud/ArenaBackdrop';
 import { PageJumpDirectory, JumpDirectoryItem } from '../PageJumpDirectory';
 
 const T5A_DIRECTORY_ITEMS: JumpDirectoryItem[] = [
-  {
-    id: 't5a-1-replay-footer',
-    code: 'T5A.1',
-    name: 'TemporalReplayFooterHUD',
-    label: '斜面切角玻璃回放底栏 + 动态SVG发光顶边',
-  },
-  {
-    id: 't5a-2-respawn-hourglass',
-    code: 'T5A.2',
-    name: 'DemolishHourglassTimerHUD',
-    label: '3阶段变色沙漏复活倒计时 (3s→0s 双侧内缩)',
-  },
-  {
-    id: 't5a-3-pitch-minimap',
-    code: 'T5A.3',
-    name: 'PitchMiniMapHUD',
-    label: '34垫位八角球场小地图 + 球速外环 + 180°翻转',
-  },
-  {
-    id: 't5a-4-boost-pie',
-    code: 'T5A.4',
-    name: 'DualLayerBoostPieHUD',
-    label: '双层扇形幽灵残影饼图 (120Hz SVG Path Ref)',
-  },
-  {
-    id: 't5a-5-digit-slot-reel',
-    code: 'T5A.5',
-    name: 'DigitSlotReelHUD',
-    label: '三列老虎机滚轮数字计数器 (0重排 translate3d)',
-  },
-  {
-    id: 't5a-6-countdown-flash',
-    code: 'T5A.6',
-    name: 'KickoffCountdownFlashHUD',
-    label: '开球倒计时双层描边缩放闪字 (4-3-2-1-GO!)',
-  },
+  { id: 't5a-1-replay-footer', code: 'T5A.1', name: 'TemporalReplayFooterHUD', label: '斜面切角玻璃回放底栏 + 动态SVG发光顶边' },
+  { id: 't5a-2-respawn-hourglass', code: 'T5A.2',
+    name: 'DemolishHourglassTimerHUD', label: '3阶段变色沙漏复活倒计时 (3s→0s 双侧内缩)' },
+  { id: 't5a-3-pitch-minimap', code: 'T5A.3', name: 'PitchMiniMapHUD', label: '34垫位八角球场小地图 + 球速外环 + 180°翻转' },
+  { id: 't5a-4-boost-pie', code: 'T5A.4', name: 'DualLayerBoostPieHUD', label: '双层扇形幽灵残影饼图 (120Hz SVG Path Ref)' },
+  { id: 't5a-5-digit-slot-reel', code: 'T5A.5', name: 'DigitSlotReelHUD', label: '三列老虎机滚轮数字计数器 (0重排 translate3d)' },
+  { id: 't5a-6-countdown-flash', code: 'T5A.6',
+    name: 'KickoffCountdownFlashHUD', label: '开球倒计时双层描边缩放闪字 (4-3-2-1-GO!)' },
 ];
 
 export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight = true }) => {
@@ -198,13 +160,10 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
   return (
       <div className="flex flex-col gap-8 pb-16">
         {/* Top Jump Directory */}
-        <PageJumpDirectory
-          layerTag="Layer T5A · High-Frequency Temporal HUD Widgets"
+        <PageJumpDirectory layerTag="Layer T5A · High-Frequency Temporal HUD Widgets"
           title="Temporal Overlay HUD Catalog (0-React-Rerender Transient Architecture)"
           subtitle="已移除冗余 Integrated Panels；全部 6 个核心小组件均已解耦为 src/hud/ 独立组件，接入 hudTransientChannel 120Hz DOM/SVG Ref 直写并完整适配 Light/Dark 模式。"
-          items={T5A_DIRECTORY_ITEMS}
-          isLight={isLight}
-        />
+          items={T5A_DIRECTORY_ITEMS} isLight={isLight} />
 
         {/* Global 120Hz Transient Stream Switch */}
         <div
@@ -232,10 +191,8 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         {/* =====================================================================
             T5A.1: TemporalReplayFooterHUD
            ===================================================================== */}
-        <section
-          id="t5a-1-replay-footer"
-          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}
-        >
+        <section id="t5a-1-replay-footer"
+          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}>
           <div className="flex items-center justify-between border-b pb-3 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="amber" size="sm" isLight={isLight}>
@@ -249,73 +206,35 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant={replayVisible ? 'primary' : 'secondary'}
-                size="sm"
-                isLight={isLight}
-                onClick={() => {
-                  const next = !replayVisible;
-                  setReplayVisible(next);
-                  channelRef.current.setReplayFooter({ visible: next });
-                }}
-              >
+              <Button variant={replayVisible ? 'primary' : 'secondary'} size="sm" isLight={isLight}
+                onClick={() => { const next = !replayVisible; setReplayVisible(next);
+                channelRef.current.setReplayFooter({ visible: next }); }} >
                 <Play className="h-3.5 w-3.5 mr-1 inline" />
-                {replayVisible ? '收起底栏 (Slide Out 0.65s)' : '弹出底栏 (Slide In 0.75s)'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Interactive Controls */}
-          <div className={`p-3.5 rounded-2xl border grid grid-cols-1 md:grid-cols-4 gap-3 ${subPanelClass}`}>
-            <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-mono opacity-75">进球球员 (Scorer)</label>
-              <input
-                type="text"
-                value={scorerName}
-                onChange={(e) => {
-                  setScorerName(e.target.value);
-                  channelRef.current.setReplayFooter({ scorerName: e.target.value });
-                }}
-                className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono ${
-                  isLight
-                    ? 'bg-white border-neutral-300 text-neutral-900'
-                    : 'bg-neutral-900 border-neutral-700 text-white'
-                }`}
-              />
+                {replayVisible ? '收起底栏 (Slide Out 0.65s)' : '弹出底栏 (Slide In 0.75s)'} </Button> </div> </div>
+                {/* Interactive Controls */}
+                <div className={`p-3.5 rounded-2xl border grid grid-cols-1 md:grid-cols-4 gap-3 ${subPanelClass}`}>
+                <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-mono opacity-75">进球球员 (Scorer)</label> <input type="text"
+                value={scorerName} onChange={(e) => { setScorerName(e.target.value);
+                channelRef.current.setReplayFooter({ scorerName: e.target.value }); }}
+                className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono ${ isLight
+                ? 'bg-white border-neutral-300 text-neutral-900' : 'bg-neutral-900 border-neutral-700 text-white'
+                }`} />
             </div>
 
             <div className="flex flex-col gap-1">
               <label className="text-[11px] font-mono opacity-75">助攻球员 (Assister · 留空隐藏)</label>
-              <input
-                type="text"
-                value={assisterName}
-                onChange={(e) => {
-                  setAssisterName(e.target.value);
-                  channelRef.current.setReplayFooter({ assisterName: e.target.value });
-                }}
-                placeholder="留空自动隐藏助攻图标"
-                className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono ${
-                  isLight
-                    ? 'bg-white border-neutral-300 text-neutral-900'
-                    : 'bg-neutral-900 border-neutral-700 text-white'
-                }`}
-              />
+              <input type="text" value={assisterName} onChange={(e) => { setAssisterName(e.target.value);
+                channelRef.current.setReplayFooter({ assisterName: e.target.value }); }} placeholder="留空自动隐藏助攻图标"
+                className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono ${ isLight
+                ? 'bg-white border-neutral-300 text-neutral-900' : 'bg-neutral-900 border-neutral-700 text-white'
+                }`} />
             </div>
 
             <div>
-              <SliderControl
-                label="Goal Speed"
-                value={goalSpeed}
-                min={40}
-                max={216}
-                step={1}
-                unit=" KPH"
-                isLight={isLight}
-                onChange={(v) => {
-                  setGoalSpeed(v);
-                  channelRef.current.setReplayFooter({ goalSpeed: `${v}KPH` });
-                }}
-              />
+              <SliderControl label="Goal Speed" value={goalSpeed} min={40} max={216} step={1} unit=" KPH"
+                isLight={isLight} onChange={(v) => { setGoalSpeed(v);
+                channelRef.current.setReplayFooter({ goalSpeed: `${v}KPH` }); }} />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -363,10 +282,8 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         {/* =====================================================================
             T5A.2: DemolishHourglassTimerHUD
            ===================================================================== */}
-        <section
-          id="t5a-2-respawn-hourglass"
-          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}
-        >
+        <section id="t5a-2-respawn-hourglass"
+          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}>
           <div className="flex items-center justify-between border-b pb-3 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="amber" size="sm" isLight={isLight}>
@@ -398,24 +315,10 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
                   {respawnRemSec.toFixed(2)}s / 3.00s
                 </span>
               </div>
-              <SliderControl
-                label="Remaining Respawn Seconds (3.0s → 0.0s)"
-                value={respawnRemSec}
-                min={0}
-                max={3.0}
-                step={0.05}
-                unit="s"
-                isLight={isLight}
-                onChange={(v) => {
-                  setRespawnAutoLoop(false);
-                  setRespawnRemSec(v);
-                  channelRef.current.setRespawnTimer({
-                    remainingSeconds: v,
-                    totalSeconds: 3.0,
-                    active: true,
-                  });
-                }}
-              />
+              <SliderControl label="Remaining Respawn Seconds (3.0s → 0.0s)" value={respawnRemSec} min={0}
+                max={3.0} step={0.05} unit="s" isLight={isLight} onChange={(v) => { setRespawnAutoLoop(false);
+                setRespawnRemSec(v); channelRef.current.setRespawnTimer({ remainingSeconds: v, totalSeconds: 3.0,
+                active: true, }); }} />
             </div>
 
             <div
@@ -440,10 +343,8 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         {/* =====================================================================
             T5A.3: PitchMiniMapHUD
            ===================================================================== */}
-        <section
-          id="t5a-3-pitch-minimap"
-          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}
-        >
+        <section id="t5a-3-pitch-minimap"
+          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}>
           <div className="flex items-center justify-between border-b pb-3 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="amber" size="sm" isLight={isLight}>
@@ -473,49 +374,16 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
             <div className={`p-4 rounded-2xl border flex flex-col gap-3 ${subPanelClass}`}>
-              <SliderControl
-                label="Ball Hit Speed Ring (HSL 60° Yellow → 0° Red)"
-                value={ballHitKph}
-                min={0}
-                max={180}
-                step={1}
-                unit=" KPH"
-                isLight={isLight}
-                onChange={(v) => {
-                  setAutoStream120Hz(false);
-                  setBallHitKph(v);
-                  channelRef.current.setMiniMap({ ballHitKph: v });
-                }}
-              />
+              <SliderControl label="Ball Hit Speed Ring (HSL 60° Yellow → 0° Red)" value={ballHitKph} min={0}
+                max={180} step={1} unit=" KPH" isLight={isLight} onChange={(v) => { setAutoStream120Hz(false);
+                setBallHitKph(v); channelRef.current.setMiniMap({ ballHitKph: v }); }} />
               <div className="grid grid-cols-2 gap-3">
-                <SliderControl
-                  label="Ball X (%)"
-                  value={ballX}
-                  min={10}
-                  max={90}
-                  step={1}
-                  unit="%"
-                  isLight={isLight}
-                  onChange={(v) => {
-                    setAutoStream120Hz(false);
-                    setBallX(v);
-                    channelRef.current.setMiniMap({ ballX: v });
-                  }}
-                />
-                <SliderControl
-                  label="Ball Y (%)"
-                  value={ballY}
-                  min={10}
-                  max={90}
-                  step={1}
-                  unit="%"
-                  isLight={isLight}
-                  onChange={(v) => {
-                    setAutoStream120Hz(false);
-                    setBallY(v);
-                    channelRef.current.setMiniMap({ ballY: v });
-                  }}
-                />
+                <SliderControl label="Ball X (%)" value={ballX} min={10} max={90} step={1} unit="%"
+                  isLight={isLight} onChange={(v) => { setAutoStream120Hz(false); setBallX(v);
+                  channelRef.current.setMiniMap({ ballX: v }); }} />
+                <SliderControl label="Ball Y (%)" value={ballY} min={10} max={90} step={1} unit="%"
+                  isLight={isLight} onChange={(v) => { setAutoStream120Hz(false); setBallY(v);
+                  channelRef.current.setMiniMap({ ballY: v }); }} />
               </div>
             </div>
 
@@ -537,10 +405,8 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
            ===================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* T5A.4: DualLayerBoostPieHUD */}
-          <section
-            id="t5a-4-boost-pie"
-            className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}
-          >
+          <section id="t5a-4-boost-pie"
+            className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}>
             <div className="flex items-center justify-between border-b pb-3 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="amber" size="sm" isLight={isLight}>
@@ -551,29 +417,15 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
                   <span>DualLayerBoostPieHUD (每 12 一档 · 9 段七色+红闪)</span>
                 </h2>
               </div>
-              <span
-                ref={boostReadoutRef}
-                className="text-xs font-mono font-bold text-emerald-500 tabular-nums"
-              >
+              <span ref={boostReadoutRef} className="text-xs font-mono font-bold text-emerald-500 tabular-nums">
                 {boostVal}%
               </span>
             </div>
 
             <div className={`p-3.5 rounded-2xl border flex flex-col gap-2.5 ${subPanelClass}`}>
-              <SliderControl
-                label="Boost Amount (拖动快速下调可观察 Ghost Sector 残影追赶)"
-                value={boostVal}
-                min={0}
-                max={100}
-                step={1}
-                unit="%"
-                isLight={isLight}
-                onChange={(v) => {
-                  setAutoStream120Hz(false);
-                  setBoostVal(v);
-                  channelRef.current.setBoost(v, false);
-                }}
-              />
+              <SliderControl label="Boost Amount (拖动快速下调可观察 Ghost Sector 残影追赶)" value={boostVal} min={0} max={100}
+                step={1} unit="%" isLight={isLight} onChange={(v) => { setAutoStream120Hz(false); setBoostVal(v);
+                channelRef.current.setBoost(v, false); }} />
               <div className="flex items-center gap-1 flex-wrap font-mono text-[10px]">
                 <span className="opacity-70 mr-1">每12一档:</span>
                 {STEP_12_TIER_PRESETS.map((tier) => (
@@ -611,10 +463,8 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
           </section>
 
           {/* T5A.5: DigitSlotReelHUD */}
-          <section
-            id="t5a-5-digit-slot-reel"
-            className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}
-          >
+          <section id="t5a-5-digit-slot-reel"
+            className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}>
             <div className="flex items-center justify-between border-b pb-3 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="amber" size="sm" isLight={isLight}>
@@ -667,10 +517,8 @@ export const TemporalOverlayPage: React.FC<{ isLight?: boolean }> = ({ isLight =
         {/* =====================================================================
             T5A.6: KickoffCountdownFlashHUD
            ===================================================================== */}
-        <section
-          id="t5a-6-countdown-flash"
-          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}
-        >
+        <section id="t5a-6-countdown-flash"
+          className={`p-5 rounded-3xl border flex flex-col gap-4 scroll-mt-24 ${cardClass}`}>
           <div className="flex items-center justify-between border-b pb-3 border-neutral-200 dark:border-neutral-800 flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="amber" size="sm" isLight={isLight}>

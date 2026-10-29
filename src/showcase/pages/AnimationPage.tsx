@@ -1,5 +1,5 @@
 import React from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const useState = createScopedSyncedState('page:animation');

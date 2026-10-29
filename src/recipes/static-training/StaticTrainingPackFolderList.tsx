@@ -2,7 +2,24 @@ import React from 'react';
 import { FolderOpen, Target } from 'lucide-react';
 import { Badge } from '../../primitives/Badge';
 import { UI_RADIUS } from '../../tokens/radius';
-import type { StaticTrainingPackSummary } from '../Layer4StaticTrainingPackBrowseRecipe';
+
+export type StaticPackDownCounterOption = 1 | 2 | 3;
+
+export interface StaticTrainingPackSummary {
+  uuid: string;
+  title: string;
+  description: string;
+  itemCount: number;
+  createdAt?: number;
+  updatedAt?: number | string;
+  id?: string;
+  code?: string;
+  name?: string;
+  creator?: string;
+  shotCount?: number;
+  tags?: string[];
+  isBuiltIn?: boolean;
+}
 
 export interface StaticTrainingPackFolderListProps {
   isLight: boolean;

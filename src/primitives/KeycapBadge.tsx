@@ -1,5 +1,5 @@
 import React from 'react';
-import { UI_SPACING, UI_RADIUS } from '../tokens';
+import { UI_SPACING, UI_RADIUS } from '../tokens/spacing';
 
 export type KeycapSize = 'sm' | 'md' | 'lg';
 export type KeycapKind = 'keyboard' | 'gamepad';

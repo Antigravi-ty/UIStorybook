@@ -6,15 +6,16 @@ import {
   Download,
   Snail,
 } from 'lucide-react';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { SettingActionRow } from '../../primitives/SettingActionRow';
+import { SettingSliderRow } from '../../primitives/SettingSliderRow';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 import {
-  SegmentedSwitch,
-  SettingActionRow,
-  SettingSliderRow,
-} from '../../primitives';
-import { quickNotification } from '../../tokens';
-import { RewinderTransportProgressSection } from './rewinder/RewinderTransportProgressSection';
+  RewinderTransportProgressSection,
+  type RewinderBadgeState,
+} from './rewinder/RewinderTransportProgressSection';
 
-export type RewinderBadgeState = 'idle' | 'recording' | 'stopped' | 'error';
+export type { RewinderBadgeState };
 export type RewinderDownCounterOption = '3' | '2' | '1' | '0';
 export type ShuttleSpeedPreset = '100' | '75' | '50' | '25' | 'custom';
 

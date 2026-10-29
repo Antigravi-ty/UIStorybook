@@ -1,5 +1,5 @@
 import React from 'react';
-import { UI_RADIUS } from '../tokens';
+import { UI_RADIUS } from '../tokens/spacing';
 import { KeycapBadge } from './KeycapBadge';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';

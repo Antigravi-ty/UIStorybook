@@ -1,4 +1,4 @@
-import type { MenuPanelId } from '../../../tokens';
+import type { MenuPanelId } from '../../../tokens/menuLayoutStore';
 import type { TabItem } from '../../../primitives/UnderlineTabs';
 import type { JumpDirectoryItem } from '../../PageJumpDirectory';
 import {

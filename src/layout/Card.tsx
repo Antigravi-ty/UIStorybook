@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
-import { UI_RADIUS, UI_SPACING } from '../tokens';
+import { UI_RADIUS, UI_SPACING } from '../tokens/spacing';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;

@@ -1,33 +1,16 @@
 import React from 'react';
-import {
-  Activity,
-  Sparkles,
-  Play,
-  Layers,
-  Sliders,
-  Plus,
-} from 'lucide-react';
-import { createScopedSyncedState } from '../stores';
+import { Activity, Sparkles, Play, Layers, Sliders, Plus, } from 'lucide-react';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 import { Badge } from '../../primitives/Badge';
+import { PackagedSvgIcon, PackagedSvgId, PACKAGED_SVG_CATALOG, } from '../../primitives/packagedSvgIcons';
 import {
-  PackagedSvgIcon,
-  PackagedSvgId,
-  PACKAGED_SVG_CATALOG,
-} from '../../primitives/packagedSvgIcons';
-import {
-  StatsEventSvgPackagerSection,
-  ACCENT_SWATCHES,
-  STAT_EVENT_PRESETS,
-  type StatPresetDefinition,
+  StatsEventSvgPackagerSection, ACCENT_SWATCHES, STAT_EVENT_PRESETS, type StatPresetDefinition,
 } from './stats-event-feed/StatsEventSvgPackagerSection';
 import { HudAnchorStage, HudZone } from '../../layout/HudAnchorStage';
 import { ArenaBackdrop } from '../../hud/ArenaBackdrop';
 import { StepperScoreboardHUD } from '../../hud/StepperScoreboardHUD';
 import {
-  StatsEventFeedHUD,
-  StatsEventFeedItem,
-  StatsEventLayoutVariant,
-  StatsEventCapsuleStyle,
+  StatsEventFeedHUD, StatsEventFeedItem, StatsEventLayoutVariant, StatsEventCapsuleStyle,
 } from '../../hud/StatsEventFeedHUD';
 
 const useState = createScopedSyncedState('hud-5f-stats-event-page');
@@ -237,13 +220,8 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
         </div>
 
         {/* Preset Selector Bar */}
-        <div
-          className={`p-3 rounded-2xl border flex flex-col gap-2.5 ${
-            isLight
-              ? 'bg-neutral-50/90 border-neutral-200'
-              : 'bg-neutral-900/70 border-neutral-800'
-          }`}
-        >
+        <div className={`p-3 rounded-2xl border flex flex-col gap-2.5 ${ isLight
+          ? 'bg-neutral-50/90 border-neutral-200' : 'bg-neutral-900/70 border-neutral-800' }`}>
           <div className="flex items-center justify-between text-xs font-mono">
             <span className="font-bold flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
@@ -267,36 +245,16 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
-                      style={{
-                        backgroundColor: `${preset.accentColor}18`,
-                        borderColor: `${preset.accentColor}45`,
-                      }}
-                    >
-                      <PackagedSvgIcon
-                        icon={preset.iconName as PackagedSvgId}
-                        size={22}
-                        color={preset.accentColor}
-                        glowColor={preset.accentColor}
-                        glowBlurPx={4}
-                        glowIntensityPct={70}
-                        strokeWidth={bombStrokeWidth}
-                        highFiveOptions={{
-                          showSparks: highFiveShowSparks,
-                          fillLeftHand: highFiveFillLeft,
-                          fillRightHand: highFiveFillRight,
-                        }}
-                        strategyOptions={{
-                          topLeftCircle: strategyTopLeftCircle,
-                          bottomRightCircle: strategyBottomRightCircle,
-                        }}
-                      />
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border" style={{
+                      backgroundColor: `${preset.accentColor}18`, borderColor: `${preset.accentColor}45`, }}>
+                      <PackagedSvgIcon icon={preset.iconName as PackagedSvgId} size={22} color={preset.accentColor}
+                        glowColor={preset.accentColor} glowBlurPx={4} glowIntensityPct={70}
+                        strokeWidth={bombStrokeWidth} highFiveOptions={{ showSparks: highFiveShowSparks,
+                        fillLeftHand: highFiveFillLeft, fillRightHand: highFiveFillRight, }} strategyOptions={{
+                        topLeftCircle: strategyTopLeftCircle, bottomRightCircle: strategyBottomRightCircle, }} />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-mono font-bold truncate">
-                        {preset.badgeLabel}
-                      </span>
+                      <span className="text-xs font-mono font-bold truncate">{preset.badgeLabel}</span>
                       <span className="text-[10px] opacity-70 truncate">{preset.titleText}</span>
                     </div>
                   </div>
@@ -328,38 +286,20 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
           <HudAnchorStage>
             {/* Top-Center: 5A Scorebug Landmark */}
             <HudZone anchor="top-center" flush zIndexClassName="z-30">
-              <StepperScoreboardHUD
-                isLight={hudLightMode}
-                leftScore={3}
-                rightScore={2}
-                seconds={118}
-                bestOf={5}
-                leftSeriesWins={2}
-                rightSeriesWins={1}
-              />
+              <StepperScoreboardHUD isLight={hudLightMode} leftScore={3} rightScore={2} seconds={118} bestOf={5}
+                leftSeriesWins={2} rightSeriesWins={1} />
             </HudZone>
 
             {/* Upper-Center: 5F Stats Event / Status Feed */}
             <HudZone anchor="upper-center" zIndexClassName="z-40">
               <div className="mt-4">
-                <StatsEventFeedHUD
-                  item={activeSingleItem}
-                  feedItems={feedMode === 'stacked' ? stackedFeedItems : undefined}
-                  showIcon={showIcon}
-                  showIconBox={showIconBox}
-                  iconSizePx={iconSizePx}
-                  showKicker={showKicker}
-                  showCapsule={showCapsule}
-                  capsuleStyle={capsuleStyle}
-                  showFootnote={showFootnote}
-                  layoutVariant={layoutVariant}
-                  glowBlurPx={glowBlurPx}
-                  glowIntensityPct={glowIntensityPct}
-                  titleFontSizePx={titleFontSizePx}
-                  triggerKey={triggerKey}
-                  autoLifecycle={autoLifecycle}
-                  isLight={hudLightMode}
-                />
+                <StatsEventFeedHUD item={activeSingleItem}
+                  feedItems={feedMode === 'stacked' ? stackedFeedItems : undefined} showIcon={showIcon}
+                  showIconBox={showIconBox} iconSizePx={iconSizePx} showKicker={showKicker}
+                  showCapsule={showCapsule} capsuleStyle={capsuleStyle} showFootnote={showFootnote}
+                  layoutVariant={layoutVariant} glowBlurPx={glowBlurPx} glowIntensityPct={glowIntensityPct}
+                  titleFontSizePx={titleFontSizePx} triggerKey={triggerKey} autoLifecycle={autoLifecycle}
+                  isLight={hudLightMode} />
               </div>
             </HudZone>
           </HudAnchorStage>
@@ -381,13 +321,8 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Column 1: Icon & Layout Variant */}
-          <div
-            className={`p-4 rounded-2xl border flex flex-col gap-3 text-xs font-mono ${
-              isLight
-                ? 'bg-neutral-50/90 border-neutral-200'
-                : 'bg-neutral-900/70 border-neutral-800'
-            }`}
-          >
+          <div className={`p-4 rounded-2xl border flex flex-col gap-3 text-xs font-mono ${ isLight
+            ? 'bg-neutral-50/90 border-neutral-200' : 'bg-neutral-900/70 border-neutral-800' }`}>
             <span className="font-bold text-sky-500 flex items-center gap-1.5">
               <Layers className="h-3.5 w-3.5" />
               <span>1. 图标 (Icon) & 容器形态 (`layoutVariant`)</span>
@@ -436,21 +371,13 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
 
             <div className="flex items-center justify-between gap-2">
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showIcon}
-                  onChange={(e) => setShowIcon(e.target.checked)}
-                  className="accent-sky-500"
-                />
+                <input type="checkbox" checked={showIcon} onChange={(e) => setShowIcon(e.target.checked)}
+                  className="accent-sky-500" />
                 <span>显示图标 (`showIcon`)</span>
               </label>
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showIconBox}
-                  onChange={(e) => setShowIconBox(e.target.checked)}
-                  className="accent-sky-500"
-                />
+                <input type="checkbox" checked={showIconBox} onChange={(e) => setShowIconBox(e.target.checked)}
+                  className="accent-sky-500" />
                 <span>图标外框 (`showIconBox`)</span>
               </label>
             </div>
@@ -458,14 +385,8 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
             <label className="flex items-center justify-between gap-2">
               <span className="opacity-75">图标尺寸 (`iconSizePx`):</span>
               <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={16}
-                  max={44}
-                  value={iconSizePx}
-                  onChange={(e) => setIconSizePx(Number(e.target.value))}
-                  className="w-28 accent-sky-500"
-                />
+                <input type="range" min={16} max={44} value={iconSizePx}
+                  onChange={(e) => setIconSizePx(Number(e.target.value))} className="w-28 accent-sky-500" />
                 <span className="w-9 text-right font-bold">{iconSizePx}px</span>
               </div>
             </label>
@@ -473,14 +394,8 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
             <label className="flex items-center justify-between gap-2">
               <span className="opacity-75">外发光半径 (`glowBlurPx`):</span>
               <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={0}
-                  max={20}
-                  value={glowBlurPx}
-                  onChange={(e) => setGlowBlurPx(Number(e.target.value))}
-                  className="w-28 accent-sky-500"
-                />
+                <input type="range" min={0} max={20} value={glowBlurPx}
+                  onChange={(e) => setGlowBlurPx(Number(e.target.value))} className="w-28 accent-sky-500" />
                 <span className="w-9 text-right font-bold">{glowBlurPx}px</span>
               </div>
             </label>
@@ -507,13 +422,8 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
           </div>
 
           {/* Column 2: Text (Kicker + Title) & Capsule (Pill) */}
-          <div
-            className={`p-4 rounded-2xl border flex flex-col gap-3 text-xs font-mono ${
-              isLight
-                ? 'bg-neutral-50/90 border-neutral-200'
-                : 'bg-neutral-900/70 border-neutral-800'
-            }`}
-          >
+          <div className={`p-4 rounded-2xl border flex flex-col gap-3 text-xs font-mono ${ isLight
+            ? 'bg-neutral-50/90 border-neutral-200' : 'bg-neutral-900/70 border-neutral-800' }`}>
             <span className="font-bold text-amber-500 flex items-center gap-1.5">
               <Sliders className="h-3.5 w-3.5" />
               <span>2. 文本 (Text) & 胶囊 (Capsule / Pill)</span>
@@ -521,63 +431,37 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
 
             <div className="flex items-center justify-between gap-2">
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showKicker}
-                  onChange={(e) => setShowKicker(e.target.checked)}
-                  className="accent-amber-500"
-                />
+                <input type="checkbox" checked={showKicker} onChange={(e) => setShowKicker(e.target.checked)}
+                  className="accent-amber-500" />
                 <span>上标导语 (`showKicker`)</span>
               </label>
-              <input
-                type="text"
-                value={kickerText}
-                onChange={(e) => setKickerText(e.target.value)}
-                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] w-44"
-              />
+              <input type="text" value={kickerText} onChange={(e) => setKickerText(e.target.value)}
+                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] w-44" />
             </div>
 
             <div className="flex items-center justify-between gap-2">
               <span className="opacity-75">主文本 (`titleText`):</span>
-              <input
-                type="text"
-                value={titleText}
-                onChange={(e) => setTitleText(e.target.value)}
-                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] font-bold w-44"
-              />
+              <input type="text" value={titleText} onChange={(e) => setTitleText(e.target.value)}
+                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] font-bold w-44" />
             </div>
 
             <label className="flex items-center justify-between gap-2">
               <span className="opacity-75">主字号 (`titleFontSizePx`):</span>
               <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={12}
-                  max={22}
-                  value={titleFontSizePx}
-                  onChange={(e) => setTitleFontSizePx(Number(e.target.value))}
-                  className="w-28 accent-amber-500"
-                />
+                <input type="range" min={12} max={22} value={titleFontSizePx}
+                  onChange={(e) => setTitleFontSizePx(Number(e.target.value))} className="w-28 accent-amber-500" />
                 <span className="w-9 text-right font-bold">{titleFontSizePx}px</span>
               </div>
             </label>
 
             <div className="flex items-center justify-between gap-2 pt-1 border-t border-neutral-200 dark:border-neutral-800">
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showCapsule}
-                  onChange={(e) => setShowCapsule(e.target.checked)}
-                  className="accent-amber-500"
-                />
+                <input type="checkbox" checked={showCapsule} onChange={(e) => setShowCapsule(e.target.checked)}
+                  className="accent-amber-500" />
                 <span>右侧胶囊 (`showCapsule`)</span>
               </label>
-              <input
-                type="text"
-                value={capsuleText}
-                onChange={(e) => setCapsuleText(e.target.value)}
-                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] font-bold w-32"
-              />
+              <input type="text" value={capsuleText} onChange={(e) => setCapsuleText(e.target.value)}
+                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] font-bold w-32" />
             </div>
 
             <div className="flex items-center justify-between gap-2">
@@ -608,13 +492,8 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
           </div>
 
           {/* Column 3: Footnote & Status Feed Queue Management */}
-          <div
-            className={`p-4 rounded-2xl border flex flex-col gap-3 text-xs font-mono ${
-              isLight
-                ? 'bg-neutral-50/90 border-neutral-200'
-                : 'bg-neutral-900/70 border-neutral-800'
-            }`}
-          >
+          <div className={`p-4 rounded-2xl border flex flex-col gap-3 text-xs font-mono ${ isLight
+            ? 'bg-neutral-50/90 border-neutral-200' : 'bg-neutral-900/70 border-neutral-800' }`}>
             <span className="font-bold text-emerald-500 flex items-center gap-1.5">
               <Activity className="h-3.5 w-3.5" />
               <span>3. 注脚 (Footnote) & 舞台背景/周期</span>
@@ -622,95 +501,56 @@ export const StatsEventFeedPage: React.FC<{ isLight?: boolean }> = ({ isLight = 
 
             <div className="flex items-center justify-between gap-2">
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showFootnote}
-                  onChange={(e) => setShowFootnote(e.target.checked)}
-                  className="accent-emerald-500"
-                />
+                <input type="checkbox" checked={showFootnote} onChange={(e) => setShowFootnote(e.target.checked)}
+                  className="accent-emerald-500" />
                 <span>显示底部注脚 (`showFootnote`)</span>
               </label>
             </div>
 
             <div className="flex flex-col gap-1">
               <span className="opacity-75 text-[11px]">注脚正文 (`footnoteText`):</span>
-              <input
-                type="text"
-                value={footnoteText}
-                onChange={(e) => setFootnoteText(e.target.value)}
-                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] w-full"
-              />
+              <input type="text" value={footnoteText} onChange={(e) => setFootnoteText(e.target.value)}
+                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] w-full" />
             </div>
 
             <div className="flex items-center justify-between gap-2">
               <span className="opacity-75">注脚尾标 (`footnoteTag`):</span>
-              <input
-                type="text"
-                value={footnoteTag}
-                onChange={(e) => setFootnoteTag(e.target.value)}
-                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] font-bold w-36"
-              />
+              <input type="text" value={footnoteTag} onChange={(e) => setFootnoteTag(e.target.value)}
+                className="px-2 py-1 rounded border border-neutral-400/40 bg-transparent text-[11px] font-bold w-36" />
             </div>
 
             <div className="flex items-center justify-between gap-2 pt-1 border-t border-neutral-200 dark:border-neutral-800">
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={autoLifecycle}
-                  onChange={(e) => {
-                    setAutoLifecycle(e.target.checked);
-                    setTriggerKey((k) => k + 1);
-                  }}
-                  className="accent-emerald-500"
-                />
+                <input type="checkbox" checked={autoLifecycle} onChange={(e) => {
+                  setAutoLifecycle(e.target.checked); setTriggerKey((k) => k + 1); }}
+                  className="accent-emerald-500" />
                 <span>自动入场/停留/退场消失</span>
               </label>
 
               <label className="flex items-center gap-1.5">
                 <span className="opacity-75">球场亮度:</span>
-                <input
-                  type="range"
-                  min={15}
-                  max={85}
-                  value={backdropBright}
-                  onChange={(e) => setBackdropBright(Number(e.target.value))}
-                  className="w-20 accent-emerald-500"
-                />
+                <input type="range" min={15} max={85} value={backdropBright}
+                  onChange={(e) => setBackdropBright(Number(e.target.value))} className="w-20 accent-emerald-500" />
               </label>
             </div>
           </div>
         </div>
       </section>
 
-      <StatsEventSvgPackagerSection
-        isLight={isLight}
-        previewSizePx={previewSizePx}
-        setPreviewSizePx={setPreviewSizePx}
-        previewGlowBlur={previewGlowBlur}
-        setPreviewGlowBlur={setPreviewGlowBlur}
-        previewGlowIntensity={previewGlowIntensity}
-        previewColor={previewColor}
-        setPreviewColor={setPreviewColor}
-        highFiveShowSparks={highFiveShowSparks}
-        setHighFiveShowSparks={setHighFiveShowSparks}
-        highFiveFillLeft={highFiveFillLeft}
-        setHighFiveFillLeft={setHighFiveFillLeft}
-        highFiveFillRight={highFiveFillRight}
-        setHighFiveFillRight={setHighFiveFillRight}
-        highFiveBitCode={highFiveBitCode}
-        strategyTopLeftCircle={strategyTopLeftCircle}
-        setStrategyTopLeftCircle={setStrategyTopLeftCircle}
+      <StatsEventSvgPackagerSection isLight={isLight} previewSizePx={previewSizePx}
+        setPreviewSizePx={setPreviewSizePx} previewGlowBlur={previewGlowBlur}
+        setPreviewGlowBlur={setPreviewGlowBlur} previewGlowIntensity={previewGlowIntensity}
+        previewColor={previewColor} setPreviewColor={setPreviewColor} highFiveShowSparks={highFiveShowSparks}
+        setHighFiveShowSparks={setHighFiveShowSparks} highFiveFillLeft={highFiveFillLeft}
+        setHighFiveFillLeft={setHighFiveFillLeft} highFiveFillRight={highFiveFillRight}
+        setHighFiveFillRight={setHighFiveFillRight} highFiveBitCode={highFiveBitCode}
+        strategyTopLeftCircle={strategyTopLeftCircle} setStrategyTopLeftCircle={setStrategyTopLeftCircle}
         strategyBottomRightCircle={strategyBottomRightCircle}
-        setStrategyBottomRightCircle={setStrategyBottomRightCircle}
-        strategyBitCode={strategyBitCode}
-        setBounceSolidLine={setBounceSolidLine}
-        setTacticsSquareMode={setTacticsSquareMode}
-        setCrossbarSolidMode={setCrossbarSolidMode}
-        bombStrokeWidth={bombStrokeWidth}
-        setBombStrokeWidth={setBombStrokeWidth}
-        customIconName={customIconName}
-        setCustomIconName={setCustomIconName}
-      />
+        setStrategyBottomRightCircle={setStrategyBottomRightCircle} strategyBitCode={strategyBitCode}
+        setBounceSolidLine={setBounceSolidLine} setTacticsSquareMode={setTacticsSquareMode}
+        setCrossbarSolidMode={setCrossbarSolidMode} bombStrokeWidth={bombStrokeWidth}
+        setBombStrokeWidth={setBombStrokeWidth} customIconName={customIconName}
+        setCustomIconName={setCustomIconName} />
     </div>
   );
 };

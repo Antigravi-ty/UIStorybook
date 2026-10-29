@@ -1,42 +1,29 @@
 import React, { useEffect, useRef } from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:composable-nesting');
-import {
-  Button,
-  Badge,
-  KeycapBadge,
-  SliderControl,
-  DualGrabberSlider,
-  PrecisionDigitPicker,
-  TunerPrecisionContext,
-  DropdownMenu,
-  ToggleSwitch,
-  SegmentedSwitch,
-  ColorSwatchInput,
-  UVTransformControl,
-  UVTransformState,
-  PriorityQueueList,
-  PriorityQueueItem,
-  EventFilterMatrix,
-  EventCatalogEntry,
-} from '../../primitives';
-import {
-  TeamRosterCard,
-  PeerRosterCard,
-  PhaseVariationMatrix,
-  TelemetryConfigCard,
-  TelemetryConfigState,
-  CameraSwivelSimulatorCard,
-  KickoffDuelMatrixCard,
-} from '../../compounds';
-import {
-  TelemetryRingBuffer,
-  TelemetrySparklineChart,
-  CubicBezierCurveEditor,
-  CubicBezierValue,
-} from '../../charts';
-import { VStack, HStack, GridStack } from '../../layout';
+import { Button } from '../../primitives/Button';
+import { Badge } from '../../primitives/Badge';
+import { KeycapBadge } from '../../primitives/KeycapBadge';
+import { SliderControl } from '../../primitives/SliderControl';
+import { DualGrabberSlider } from '../../primitives/DualGrabberSlider';
+import { PrecisionDigitPicker, TunerPrecisionContext } from '../../primitives/PrecisionDigitPicker';
+import { DropdownMenu } from '../../primitives/DropdownMenu';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ColorSwatchInput, UVTransformControl, UVTransformState, PriorityQueueList, PriorityQueueItem, EventFilterMatrix, EventCatalogEntry } from '../../primitives/TunerControls';
+import { TeamRosterCard } from '../../compounds/TeamRosterCard';
+import { PeerRosterCard } from '../../compounds/PeerRosterCard';
+import { PhaseVariationMatrix } from '../../compounds/PhaseVariationMatrix';
+import { TelemetryConfigCard, TelemetryConfigState } from '../../compounds/TelemetryConfigCard';
+import { CameraSwivelSimulatorCard } from '../../compounds/CameraSwivelSimulatorCard';
+import { KickoffDuelMatrixCard } from '../../compounds/KickoffDuelMatrixCard';
+import { TelemetryRingBuffer } from '../../charts/telemetryRingBuffer';
+import { TelemetrySparklineChart } from '../../charts/TelemetrySparklineChart';
+import { CubicBezierCurveEditor, CubicBezierValue } from '../../charts/CubicBezierCurveEditor';
+import { VStack } from '../../layout/VStack';
+import { HStack } from '../../layout/HStack';
+import { GridStack } from '../../layout/GridStack';
 import { Layers, Sparkles, Sliders, Palette, Filter, MousePointerClick } from 'lucide-react';
 import { PageJumpDirectory, JumpDirectoryItem } from '../PageJumpDirectory';
 
@@ -45,48 +32,23 @@ export interface ComposableNestingPageProps {
 }
 
 const L3_DIRECTORY_ITEMS: JumpDirectoryItem[] = [
-  {
-    id: 'l3-1-composable-dropdown',
-    code: 'L3.1',
-    name: 'DropdownMenu (Composable)',
-    label: '下拉菜单内嵌双向滑块 + 120Hz TelemetrySparklineChart',
-  },
-  {
-    id: 'l3-2-composable-button',
-    code: 'L3.2',
-    name: 'Button (composable)',
-    label: '巨型可嵌套按钮容器 (内嵌死区滑块 + 贝塞尔曲线编辑器)',
-  },
-  {
-    id: 'l3-3-uv-color-tuner',
-    code: 'L3.3 & L3.4',
-    name: 'UVTransformControl & ColorSwatchInput',
-    label: '贴花 UV 缩放偏移矩阵 + 着色器 Hex 色板输入行',
-  },
-  {
-    id: 'l3-5-priority-event-matrix',
-    code: 'L3.5 & L3.6',
-    name: 'PriorityQueueList & EventFilterMatrix',
-    label: '车库涂装优先级队列 + 0x01..0x08 十六进制事件过滤矩阵',
-  },
-  {
-    id: 'l3-7-phase-telemetry',
-    code: 'L3.7 & L3.8',
-    name: 'PhaseVariationMatrix & TelemetryConfigCard',
-    label: '音频 3 阶段混音矩阵 + 5 指标遥测策略卡',
-  },
+  { id: 'l3-1-composable-dropdown', code: 'L3.1',
+    name: 'DropdownMenu (Composable)', label: '下拉菜单内嵌双向滑块 + 120Hz TelemetrySparklineChart' },
+  { id: 'l3-2-composable-button', code: 'L3.2', name: 'Button (composable)', label: '巨型可嵌套按钮容器 (内嵌死区滑块 + 贝塞尔曲线编辑器)' },
+  { id: 'l3-3-uv-color-tuner', code: 'L3.3 & L3.4',
+    name: 'UVTransformControl & ColorSwatchInput', label: '贴花 UV 缩放偏移矩阵 + 着色器 Hex 色板输入行' },
+  { id: 'l3-5-priority-event-matrix', code: 'L3.5 & L3.6',
+    name: 'PriorityQueueList & EventFilterMatrix', label: '车库涂装优先级队列 + 0x01..0x08 十六进制事件过滤矩阵' },
+  { id: 'l3-7-phase-telemetry', code: 'L3.7 & L3.8',
+    name: 'PhaseVariationMatrix & TelemetryConfigCard', label: '音频 3 阶段混音矩阵 + 5 指标遥测策略卡' },
   {
     id: 'l3-9-roster-cards',
     code: 'L3.9 & L3.10',
     name: 'TeamRosterCard & PeerRosterCard',
     label: '多 Bot 队伍花名册 (`compounds/TeamRosterCard`) + 房间联机花名册 (`compounds/PeerRosterCard`)',
   },
-  {
-    id: 'l3-11-swivel-kickoff-duel',
-    code: 'L3.11 & L3.12',
-    name: 'CameraSwivelSimulatorCard & KickoffDuelMatrixCard',
-    label: '视角旋转模拟器 + 开球 AI 对决 5 出生点基准矩阵',
-  },
+  { id: 'l3-11-swivel-kickoff-duel', code: 'L3.11 & L3.12',
+    name: 'CameraSwivelSimulatorCard & KickoffDuelMatrixCard', label: '视角旋转模拟器 + 开球 AI 对决 5 出生点基准矩阵' },
 ];
 
 const DEFAULT_EVENT_CATALOG: EventCatalogEntry[] = [
@@ -229,13 +191,9 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
   return (
     <div className="max-w-5xl space-y-10 pb-16">
       {/* Top Jump Directory */}
-      <PageJumpDirectory
-        layerTag="Layer 3 · Domain-Agnostic Composable Compounds"
-        title="L3 万物可嵌套容器与解耦复合组件目录"
-        subtitle="所有 L3 复合卡片均已实现零 Store 耦合、React.memo 隔离，并完整响应 Light/Dark 模式切换。"
-        items={L3_DIRECTORY_ITEMS}
-        isLight={isLight}
-      />
+      <PageJumpDirectory layerTag="Layer 3 · Domain-Agnostic Composable Compounds" title="L3 万物可嵌套容器与解耦复合组件目录"
+        subtitle="所有 L3 复合卡片均已实现零 Store 耦合、React.memo 隔离，并完整响应 Light/Dark 模式切换。" items={L3_DIRECTORY_ITEMS}
+        isLight={isLight} />
 
       {/* Header */}
       <div className="space-y-2 border-b pb-6 border-neutral-200 dark:border-neutral-800">
@@ -247,9 +205,7 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
             Zero Coupling · 指哪儿打哪儿
           </Badge>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          万物皆可嵌套 (Universal Composable Nesting) & RLCleanWASM 模块化调优器
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight">万物皆可嵌套 (Universal Composable Nesting) & RLCleanWASM 模块化调优器</h1>
         <p className={`text-xs leading-relaxed ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
           本页展示两大核心设计支柱：① <strong>万物皆可嵌套哲学</strong>——无论是 <code>&lt;DropdownMenu&gt;</code> 还是开启了 <code>composable</code> 的 <code>&lt;Button&gt;</code>，内部均可任意嵌套滑块、步进器、甚至实时 Canvas 遥测图表与完整子页面，且事件冒泡严格隔离、布局零截断；② <strong>RLCleanWASM &amp; RocketCompanion 业务控件的标准化解耦</strong>——全部提炼为纯表现层复合组件并支持亮暗主题切换。
         </p>
@@ -272,11 +228,8 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
           </Badge>
         </div>
 
-        <div
-          className={`p-6 rounded-xl border ${
-            isLight ? 'bg-neutral-100/70 border-neutral-200/80' : 'bg-neutral-900/40 border-neutral-800/80'
-          }`}
-        >
+        <div className={`p-6 rounded-xl border ${
+          isLight ? 'bg-neutral-100/70 border-neutral-200/80' : 'bg-neutral-900/40 border-neutral-800/80' }`}>
           <HStack gap="md" wrap className="items-center justify-between">
             <div className="flex flex-wrap items-center gap-3">
               {/* Mode A: Standard Options Dropdown */}
@@ -320,32 +273,15 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
                       />
                     </div>
 
-                    <SliderControl
-                      label="Instant Pitch Bias (Centered)"
-                      value={dropdownBias}
-                      min={-45}
-                      max={45}
-                      step={dropdownPrecision}
-                      variation="centered"
-                      origin={0}
-                      showSign
-                      editable
-                      usePrecisionContext
-                      unit="°"
-                      colorScheme="amber"
-                      negativeColorScheme="sky"
-                      onChange={setDropdownBias}
-                      isLight={isLight}
-                    />
+                    <SliderControl label="Instant Pitch Bias (Centered)" value={dropdownBias} min={-45} max={45}
+                      step={dropdownPrecision} variation="centered" origin={0} showSign editable
+                      usePrecisionContext unit="°" colorScheme="amber" negativeColorScheme="sky"
+                      onChange={setDropdownBias} isLight={isLight} />
 
                     <div className="flex items-center justify-between pt-1">
                       <span className="text-xs font-medium">Embed Live 120Hz Sparkline</span>
-                      <ToggleSwitch
-                        checked={dropdownLiveHud}
-                        onCheckedChange={setDropdownLiveHud}
-                        variant="orange"
-                        isLight={isLight}
-                      />
+                      <ToggleSwitch checked={dropdownLiveHud} onCheckedChange={setDropdownLiveHud} variant="orange"
+                        isLight={isLight} />
                     </div>
 
                     {dropdownLiveHud && (
@@ -405,25 +341,16 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
                     <span>I Am A Single Composable &lt;Button composable&gt; Instance</span>
                     <KeycapBadge shortcut="Click Frame to Trigger" isLight={isLight} />
                   </div>
-                  <div className="text-[11px] text-neutral-500">
-                    内部嵌套了双向零点滑块、中心死区双游标滑块、分段开关与可拖拽三次贝塞尔曲线编辑器
-                  </div>
+                  <div className="text-[11px] text-neutral-500">内部嵌套了双向零点滑块、中心死区双游标滑块、分段开关与可拖拽三次贝塞尔曲线编辑器</div>
                 </div>
               </div>
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 <Badge variant="success" dot isLight={isLight}>
                   Triggered {buttonClicks}x
                 </Badge>
-                <SegmentedSwitch
-                  options={[
-                    { value: 'agile', label: 'Agile' },
-                    { value: 'balanced', label: 'Balanced' },
-                    { value: 'heavy', label: 'Heavy' },
-                  ]}
-                  value={nestedMode}
-                  onValueChange={setNestedMode}
-                  isLight={isLight}
-                />
+                <SegmentedSwitch options={[ { value: 'agile', label: 'Agile' },
+                  { value: 'balanced', label: 'Balanced' }, { value: 'heavy', label: 'Heavy' }, ]}
+                  value={nestedMode} onValueChange={setNestedMode} isLight={isLight} />
               </div>
             </div>
 
@@ -432,27 +359,11 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
               className="grid grid-cols-1 lg:grid-cols-2 gap-5"
               onClick={(e) => e.stopPropagation()}
             >
-              <div
-                className={`p-4 rounded-xl border space-y-4 ${
-                  isLight ? 'bg-white/90 border-neutral-200/80' : 'bg-neutral-950/80 border-neutral-800'
-                }`}
-              >
-                <SliderControl
-                  label="Nested Bipolar Pitch Torque"
-                  value={nestedPitchBias}
-                  min={-50}
-                  max={50}
-                  step={0.5}
-                  variation="centered"
-                  origin={0}
-                  showSign
-                  editable
-                  unit=" Nm"
-                  colorScheme="amber"
-                  negativeColorScheme="sky"
-                  onChange={setNestedPitchBias}
-                  isLight={isLight}
-                />
+              <div className={`p-4 rounded-xl border space-y-4 ${
+                isLight ? 'bg-white/90 border-neutral-200/80' : 'bg-neutral-950/80 border-neutral-800' }`}>
+                <SliderControl label="Nested Bipolar Pitch Torque" value={nestedPitchBias} min={-50} max={50}
+                  step={0.5} variation="centered" origin={0} showSign editable unit=" Nm" colorScheme="amber"
+                  negativeColorScheme="sky" onChange={setNestedPitchBias} isLight={isLight} />
 
                 <DualGrabberSlider
                   label="Nested Dual-Grabber Steering Deadband"
@@ -520,11 +431,8 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
             />
 
             {/* ColorSwatchInput Group */}
-            <div
-              className={`p-4 rounded-xl border space-y-3 ${
-                isLight ? 'bg-neutral-100/70 border-neutral-200/80' : 'bg-neutral-900/50 border-neutral-800/80'
-              }`}
-            >
+            <div className={`p-4 rounded-xl border space-y-3 ${
+              isLight ? 'bg-neutral-100/70 border-neutral-200/80' : 'bg-neutral-900/50 border-neutral-800/80' }`}>
               <div className="flex items-center justify-between border-b pb-2 border-neutral-200/70 dark:border-neutral-800">
                 <div className="flex items-center gap-2">
                   <Palette className="h-4 w-4 text-amber-500" />
@@ -538,27 +446,15 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
               </div>
 
               <div className="space-y-2">
-                <ColorSwatchInput
-                  label="Chassis Primary Paint"
-                  value={primaryPaint}
-                  presets={['#F59E0B', '#EF4444', '#3B82F6', '#10B981']}
-                  onChange={setPrimaryPaint}
-                  isLight={isLight}
-                />
-                <ColorSwatchInput
-                  label="Anodized Accent Trim"
-                  value={accentFinish}
-                  presets={['#10B981', '#8B5CF6', '#EC4899', '#F97316']}
-                  onChange={setAccentFinish}
-                  isLight={isLight}
-                />
-                <ColorSwatchInput
-                  label="Boost Core Emissive"
-                  value={emissiveGlow}
-                  presets={['#38BDF8', '#FACC15', '#A855F7', '#F43F5E']}
-                  onChange={setEmissiveGlow}
-                  isLight={isLight}
-                />
+                <ColorSwatchInput label="Chassis Primary Paint" value={primaryPaint}
+                  presets={['#F59E0B', '#EF4444', '#3B82F6', '#10B981']} onChange={setPrimaryPaint}
+                  isLight={isLight} />
+                <ColorSwatchInput label="Anodized Accent Trim" value={accentFinish}
+                  presets={['#10B981', '#8B5CF6', '#EC4899', '#F97316']} onChange={setAccentFinish}
+                  isLight={isLight} />
+                <ColorSwatchInput label="Boost Core Emissive" value={emissiveGlow}
+                  presets={['#38BDF8', '#FACC15', '#A855F7', '#F43F5E']} onChange={setEmissiveGlow}
+                  isLight={isLight} />
               </div>
 
               {/* Live preview strip */}
@@ -597,11 +493,8 @@ export const ComposableNestingPage: React.FC<ComposableNestingPageProps> = ({ is
           </GridStack>
 
           {/* EventFilterMatrix */}
-          <div
-            className={`p-5 rounded-xl border space-y-3 ${
-              isLight ? 'bg-neutral-100/70 border-neutral-200/80' : 'bg-neutral-900/50 border-neutral-800/80'
-            }`}
-          >
+          <div className={`p-5 rounded-xl border space-y-3 ${
+            isLight ? 'bg-neutral-100/70 border-neutral-200/80' : 'bg-neutral-900/50 border-neutral-800/80' }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-amber-500" />

@@ -13,7 +13,7 @@ import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layou
 import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
 import { SliderControl } from '../primitives/SliderControl';
 import { InlineErrorNotice } from '../primitives/InlineErrorNotice';
-import { useMenuLayoutStore } from '../tokens';
+import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 import { dispatchOnlineRoomErrorNotification } from './Layer3OnlineWarmupRecipe';
 import { OnlineRoomIdentityFields } from './online/OnlineRoomIdentityFields';
@@ -113,23 +113,11 @@ export const formatMatchDurationLabel = (seconds: number): string => {
  * 4. 5-step creation progress bar on "Create & Host" (Stage Name left, X/5 right, Description below, Progress Bar at bottom, with Error Simulation)
  */
 export const Layer3HostMatchRecipe: React.FC<Layer3HostMatchRecipeProps> = React.memo(({
-  isLight = false,
-  config: controlledConfigProp,
-  settings: controlledSettingsProp,
-  defaultConfig,
-  onChange,
-  onConfigChange,
-  onStartHost,
-  progressStatus: controlledProgressStatus,
-  currentStep: controlledCurrentStep,
-  steps,
-  onProgressStatusChange,
-  onCurrentStepChange,
-  onRetryHost,
-  onCancelHost,
-  onNavigateGarageSync,
-  onNavigateAdvancedSettings,
-  onBack = () => {},
+  isLight = false, config: controlledConfigProp, settings: controlledSettingsProp,
+  defaultConfig, onChange, onConfigChange, onBack = () => {}, onNavigateGarageSync,
+  onNavigateAdvancedSettings, onStartHost, onCancelHost, onRetryHost,
+  progressStatus: controlledProgressStatus, currentStep: controlledCurrentStep,
+  onProgressStatusChange, onCurrentStepChange, steps,
 }) => {
   const { panels, simulateLayer3Error, setToken } = useMenuLayoutStore();
   const sizing = panels['layer3-host-match'];
@@ -158,15 +146,7 @@ export const Layer3HostMatchRecipe: React.FC<Layer3HostMatchRecipeProps> = React
     onConfigChange?.(next, patch);
   };
 
-  const {
-    playerName,
-    roomCode,
-    roomKey,
-    teamFormat,
-    botPolicy,
-    durationPreset,
-    customDurationSeconds,
-  } = resolvedConfig;
+  const { playerName, roomCode, roomKey, teamFormat, botPolicy, durationPreset, customDurationSeconds } = resolvedConfig;
 
   const setPlayerName = (val: string) => updateConfig({ playerName: val });
   const setRoomCode = (val: string) => updateConfig({ roomCode: val });
@@ -269,11 +249,7 @@ export const Layer3HostMatchRecipe: React.FC<Layer3HostMatchRecipeProps> = React
           setProgressStatus('completed');
           onStartHost?.({
             playerName: playerName.trim() || DEFAULT_HOST_MATCH_CONFIG.playerName,
-            roomCode: cleanCode,
-            roomKey,
-            teamFormat,
-            botPolicy,
-            durationPreset,
+            roomCode: cleanCode, roomKey, teamFormat, botPolicy, durationPreset,
             customDurationSeconds: resolvedDurationSeconds,
           });
           return 5;
@@ -382,62 +358,29 @@ export const Layer3HostMatchRecipe: React.FC<Layer3HostMatchRecipeProps> = React
 
             {/* 3-Column Summary Strip: Format | Bot Policy | Duration */}
             <div className="grid grid-cols-3 gap-2 px-3.5 pb-3">
-              <div
-                className={`flex flex-col gap-0.5 px-2.5 py-2 rounded-lg border ${
-                  isLight
-                    ? 'bg-white/80 border-neutral-200/90'
-                    : 'bg-neutral-950/60 border-neutral-800/90'
-                }`}
-              >
-                <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
-                  Format
-                </span>
-                <span
-                  className={`text-xs font-semibold truncate ${
-                    isLight ? 'text-neutral-800' : 'text-neutral-100'
+              {[
+                { label: 'Format', val: FORMAT_LABELS[teamFormat], mono: false },
+                { label: 'Bot Policy', val: BOT_POLICY_LABELS[botPolicy], mono: false },
+                { label: 'Duration', val: durationSummaryText, mono: true },
+              ].map((cell) => (
+                <div
+                  key={cell.label}
+                  className={`flex flex-col gap-0.5 px-2.5 py-2 rounded-lg border ${
+                    isLight ? 'bg-white/80 border-neutral-200/90' : 'bg-neutral-950/60 border-neutral-800/90'
                   }`}
                 >
-                  {FORMAT_LABELS[teamFormat]}
-                </span>
-              </div>
-
-              <div
-                className={`flex flex-col gap-0.5 px-2.5 py-2 rounded-lg border ${
-                  isLight
-                    ? 'bg-white/80 border-neutral-200/90'
-                    : 'bg-neutral-950/60 border-neutral-800/90'
-                }`}
-              >
-                <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
-                  Bot Policy
-                </span>
-                <span
-                  className={`text-xs font-semibold truncate ${
-                    isLight ? 'text-neutral-800' : 'text-neutral-100'
-                  }`}
-                >
-                  {BOT_POLICY_LABELS[botPolicy]}
-                </span>
-              </div>
-
-              <div
-                className={`flex flex-col gap-0.5 px-2.5 py-2 rounded-lg border ${
-                  isLight
-                    ? 'bg-white/80 border-neutral-200/90'
-                    : 'bg-neutral-950/60 border-neutral-800/90'
-                }`}
-              >
-                <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
-                  Duration
-                </span>
-                <span
-                  className={`text-xs font-mono font-semibold truncate ${
-                    isLight ? 'text-neutral-800' : 'text-neutral-100'
-                  }`}
-                >
-                  {durationSummaryText}
-                </span>
-              </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                    {cell.label}
+                  </span>
+                  <span
+                    className={`text-xs ${cell.mono ? 'font-mono ' : ''}font-semibold truncate ${
+                      isLight ? 'text-neutral-800' : 'text-neutral-100'
+                    }`}
+                  >
+                    {cell.val}
+                  </span>
+                </div>
+              ))}
             </div>
 
             {/* Expanded Editable Controls */}
@@ -458,11 +401,7 @@ export const Layer3HostMatchRecipe: React.FC<Layer3HostMatchRecipeProps> = React
                   layout="inline"
                   bordered={false}
                   showDescription={false}
-                  options={[
-                    { value: 'standard', label: 'Standard' },
-                    { value: 'doubles', label: 'Doubles' },
-                    { value: 'duel', label: 'Duel' },
-                  ]}
+                  options={[{ value: 'standard', label: 'Standard' }, { value: 'doubles', label: 'Doubles' }, { value: 'duel', label: 'Duel' }]}
                   hoverDescription="Team Format: Standard (3v3), Doubles (2v2), or Duel (1v1) team slot allocation."
                   onHover={(desc) => desc && setHoveredDesc(desc)}
                   onLeave={() => setHoveredDesc(null)}
@@ -479,12 +418,7 @@ export const Layer3HostMatchRecipe: React.FC<Layer3HostMatchRecipeProps> = React
                   layout="inline"
                   bordered={false}
                   showDescription={false}
-                  options={[
-                    { value: 'none', label: 'No Bots' },
-                    { value: 'auto-fill', label: 'Auto-Fill' },
-                    { value: 'vs-ai', label: 'Vs AI' },
-                    { value: 'custom', label: 'Custom' },
-                  ]}
+                  options={[{ value: 'none', label: 'No Bots' }, { value: 'auto-fill', label: 'Auto-Fill' }, { value: 'vs-ai', label: 'Vs AI' }, { value: 'custom', label: 'Custom' }]}
                   hoverDescription="Bot Fill Policy: Control whether empty slots stay open, auto-fill with bots, or pit human party vs AI."
                   onHover={(desc) => desc && setHoveredDesc(desc)}
                   onLeave={() => setHoveredDesc(null)}
@@ -501,12 +435,7 @@ export const Layer3HostMatchRecipe: React.FC<Layer3HostMatchRecipeProps> = React
                   layout="inline"
                   bordered={false}
                   showDescription={false}
-                  options={[
-                    { value: '90', label: '1:30' },
-                    { value: '180', label: '3:00' },
-                    { value: '300', label: '5:00' },
-                    { value: 'custom', label: 'Custom' },
-                  ]}
+                  options={[{ value: '90', label: '1:30' }, { value: '180', label: '3:00' }, { value: '300', label: '5:00' }, { value: 'custom', label: 'Custom' }]}
                   hoverDescription="Match Duration: Regulation clock length. Select Custom to set any duration from 0s (instant Overtime) up to 5:00."
                   onHover={(desc) => desc && setHoveredDesc(desc)}
                   onLeave={() => setHoveredDesc(null)}

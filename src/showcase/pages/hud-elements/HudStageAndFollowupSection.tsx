@@ -1,19 +1,15 @@
 import React from 'react';
 import { LayoutGrid, Zap, Layers } from 'lucide-react';
-import {
-  BallCameraIndicator,
-  VelocityProgressBar,
-  CircularBoostGauge,
-  CompactTelemetryBarHUD,
-  FlipIndicatorPillHUD,
-  ReplayControlBannerHUD,
-  KickoffRhythmOverlayHUD,
-  ArenaBackdrop,
-  type HudTransientChannel,
-  type HudSpeedListener,
-  type HudBoostListener,
-  type HudBallCamListener,
-} from '../../../hud';
+import { BallCameraIndicator } from '../../../hud/BallCameraIndicator';
+import { VelocityProgressBar } from '../../../hud/VelocityProgressBar';
+import { CircularBoostGauge } from '../../../hud/CircularBoostGauge';
+import { CompactTelemetryBarHUD } from '../../../hud/CompactTelemetryBarHUD';
+import { FlipIndicatorPillHUD } from '../../../hud/FlipIndicatorPillHUD';
+import { ReplayControlBannerHUD } from '../../../hud/ReplayControlBannerHUD';
+import { KickoffRhythmOverlayHUD } from '../../../hud/KickoffRhythmOverlayHUD';
+import { ArenaBackdrop } from '../../../hud/ArenaBackdrop';
+import { type HudTransientChannel } from '../../../hud/hudTransientChannel';
+import { type HudSpeedListener, type HudBoostListener, type HudBallCamListener } from '../../../hud/types';
 import { GameViewport } from '../../../viewport/GameViewport';
 import { Badge } from '../../../primitives/Badge';
 import { SectionErrorBoundary } from '../../../primitives/SectionErrorBoundary';

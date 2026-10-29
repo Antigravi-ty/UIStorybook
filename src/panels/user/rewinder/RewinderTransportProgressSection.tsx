@@ -1,7 +1,8 @@
 import React from 'react';
 import { FastForward, Play, Rewind, Square } from 'lucide-react';
-import { KeycapBadge } from '../../../primitives';
-import type { RewinderBadgeState } from '../RewinderConfiguratorFloatingWindow';
+import { KeycapBadge } from '../../../primitives/KeycapBadge';
+
+export type RewinderBadgeState = 'idle' | 'recording' | 'stopped' | 'error';
 
 export interface RewinderTransportProgressSectionProps {
   isLight: boolean;

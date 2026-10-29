@@ -2,7 +2,7 @@ import React from 'react';
 import { Play, Trophy, Car, Settings, Keyboard, LogOut, RotateCcw } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { MenuContainer, MenuDivider, MenuSectionTitle } from '../layout/MenuContainer';
-import { MenuItem } from '../navigation/MenuItem';
+import { MenuItem } from '../compounds/MenuItem';
 import { Badge } from '../primitives/Badge';
 
 export interface Layer1MatchPostRecipeProps {

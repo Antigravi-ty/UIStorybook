@@ -4,7 +4,7 @@ import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layou
 import { SegmentedSwitch } from '../primitives/SegmentedSwitch';
 import { InlineErrorNotice } from '../primitives/InlineErrorNotice';
 import { Card } from '../layout/Card';
-import { useMenuLayoutStore } from '../tokens';
+import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import {
   pushQuickNotification,
   useQuickNotificationStore,

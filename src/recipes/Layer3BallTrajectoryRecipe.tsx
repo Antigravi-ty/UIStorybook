@@ -7,7 +7,7 @@ import { SettingSegmentedRow } from '../primitives/SettingSegmentedRow';
 import { SettingSliderRow } from '../primitives/SettingSliderRow';
 import { SettingToggleRow } from '../primitives/SettingToggleRow';
 import { BounceSolidSvg } from '../primitives/packagedSvgIcons';
-import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens';
+import { useMenuLayoutStore, DEFAULT_PANEL_SIZING } from '../tokens/menuLayoutStore';
 import { useSettingActionRowStore } from '../tokens/settingRowStore';
 
 export interface TrajectoryConfig {

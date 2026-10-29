@@ -13,10 +13,8 @@ import {
 import { CodeBlock } from '../CodeBlock';
 import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';
-import {
-  useMenuLayoutStore,
-} from '../../tokens';
-import { readUrlParams, updateUrlParams } from '../stores';
+import { useMenuLayoutStore } from '../../tokens/menuLayoutStore';
+import { readUrlParams, updateUrlParams } from '../stores/urlSync';
 import { useQuickNotificationStore } from '../../tokens/quickNotificationStore';
 import { dispatchOnlineRoomErrorNotification } from '../../recipes/Layer3OnlineWarmupRecipe';
 import { PageJumpDirectory, type JumpDirectoryItem } from '../PageJumpDirectory';

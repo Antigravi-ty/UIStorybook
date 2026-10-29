@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Target, Eye, Play, RotateCcw } from 'lucide-react';
-import { SliderControl, ToggleSwitch, SegmentedSwitch, Button } from '../../primitives';
+import { SliderControl } from '../../primitives/SliderControl';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { Button } from '../../primitives/Button';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
-import { quickNotification } from '../../tokens';
+import { quickNotification } from '../../tokens/quickNotificationStore';
 
 /**
  * 4. [Dev] Goal Volume & Blast Impulse Tuner (`goal-volume-tuner`)

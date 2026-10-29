@@ -1,23 +1,15 @@
 import React from 'react';
 import {
-  Tv,
-  UserCheck,
-  Play,
-  Video,
-  EyeOff,
-  ShieldAlert,
-  LayoutGrid,
-  ArrowLeftRight,
-  CheckSquare,
-  Square,
+  Tv, UserCheck, Play, Video,
+  EyeOff, ShieldAlert, LayoutGrid, ArrowLeftRight,
+  CheckSquare, Square,
 } from 'lucide-react';
-import type {
-  EdgeDemoIndicatorConfig,
-  HudRosterViewMode,
-} from '../../../hud/types';
+import type { EdgeDemoIndicatorConfig, HudRosterViewMode, } from '../../../hud/types';
 import { BombEmojiSvg } from '../../../primitives/packagedSvgIcons';
 import type { HudLayoutStrategy } from '../../../layout/HudAnchorStage';
-import type { FlipSimMode, JumpPlacementOption } from './HudChoreographyControlDeck';
+
+export type FlipSimMode = 'auto-drain' | 'grounded' | 'multi-flip' | 'unlimited' | 'expired';
+export type JumpPlacementOption = 'top-left' | 'center-bottom-right' | 'center-bottom-left';
 
 export interface HudChoreographySlotAndTopBandColumnsProps {
   isMyTeamOrange: boolean;
@@ -101,20 +93,12 @@ export const HudChoreographySlotAndTopBandColumns: React.FC<
           </span>
 
           {/* Switch Side Button */}
-          <button
-            type="button"
-            onClick={handleToggleTeamSide}
+          <button type="button" onClick={handleToggleTeamSide}
             className={`px-2 py-0.5 rounded-lg text-[11px] font-mono font-bold cursor-pointer flex items-center gap-1 transition-all shadow-2xs ${
-              isMyTeamOrange
-                ? 'bg-orange-500 text-white'
-                : 'bg-blue-600 text-white'
-            }`}
-            title="切换我方队伍颜色 (Switch Side): 我方始终在左侧使用 1-2-3，对方始终在右侧使用 4-5-6"
-          >
+            isMyTeamOrange ? 'bg-orange-500 text-white' : 'bg-blue-600 text-white' }`}
+            title="切换我方队伍颜色 (Switch Side): 我方始终在左侧使用 1-2-3，对方始终在右侧使用 4-5-6">
             <ArrowLeftRight className="h-3 w-3" />
-            <span>
-              Switch Side: 我方{isMyTeamOrange ? '橙队(1-3)' : '蓝队(1-3)'}
-            </span>
+            <span>Switch Side: 我方{isMyTeamOrange ? '橙队(1-3)' : '蓝队(1-3)'}</span>
           </button>
         </div>
 
@@ -161,9 +145,7 @@ export const HudChoreographySlotAndTopBandColumns: React.FC<
         {/* 6 Checkboxes for Player Exist (My Team 1-2-3 & Opponent Team 4-5-6) + Quick Format Presets */}
         <div className="flex flex-col gap-1.5 p-2 rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/40 text-xs font-mono">
           <div className="flex items-center justify-between gap-1 flex-wrap">
-            <span className="text-[10px] opacity-75">
-              Player Exist (我方左 1-3 · 对方右 4-6):
-            </span>
+            <span className="text-[10px] opacity-75">Player Exist (我方左 1-3 · 对方右 4-6):</span>
             <div className="flex items-center gap-1">
               {(
                 [
@@ -190,11 +172,8 @@ export const HudChoreographySlotAndTopBandColumns: React.FC<
           <div className="flex items-center justify-between gap-2 flex-wrap">
             {/* My Team 1-3 Checkboxes */}
             <div className="flex items-center gap-1">
-              <span
-                className={`text-[10px] font-bold px-1 rounded ${
-                  isMyTeamOrange ? 'text-orange-500' : 'text-blue-500'
-                }`}
-              >
+              <span className={`text-[10px] font-bold px-1 rounded ${
+                isMyTeamOrange ? 'text-orange-500' : 'text-blue-500' }`}>
                 我方:
               </span>
               {([1, 2, 3] as const).map((k) => {
@@ -225,11 +204,8 @@ export const HudChoreographySlotAndTopBandColumns: React.FC<
 
             {/* Opponent Team 4-6 Checkboxes */}
             <div className="flex items-center gap-1">
-              <span
-                className={`text-[10px] font-bold px-1 rounded ${
-                  isMyTeamOrange ? 'text-blue-500' : 'text-orange-500'
-                }`}
-              >
+              <span className={`text-[10px] font-bold px-1 rounded ${
+                isMyTeamOrange ? 'text-blue-500' : 'text-orange-500' }`}>
                 对方:
               </span>
               {([4, 5, 6] as const).map((k) => {
@@ -324,29 +300,19 @@ export const HudChoreographySlotAndTopBandColumns: React.FC<
                 </button>
               );
             })}
-            <button
-              type="button"
-              onClick={handleToggleOpponentDemoCompact}
+            <button type="button" onClick={handleToggleOpponentDemoCompact}
               className={`px-1.5 py-0.5 rounded text-[10px] cursor-pointer border transition-colors ${
-                opponentDemoCompact
-                  ? 'bg-red-500 text-white border-red-500 font-bold'
-                  : 'border-neutral-400/40 opacity-75'
-              }`}
-              title="Player Live 下对方(4-6)被炸时自动从右侧第1行依次向下紧凑排列 (FIFO Auto-Reorder)"
-            >
+              opponentDemoCompact ? 'bg-red-500 text-white border-red-500 font-bold'
+              : 'border-neutral-400/40 opacity-75' }`}
+              title="Player Live 下对方(4-6)被炸时自动从右侧第1行依次向下紧凑排列 (FIFO Auto-Reorder)">
               敌炸置顶:{opponentDemoCompact ? '开' : '原位'}
             </button>
             {onTogglePersistentDemo && (
-              <button
-                type="button"
-                onClick={onTogglePersistentDemo}
+              <button type="button" onClick={onTogglePersistentDemo}
                 className={`px-1.5 py-0.5 rounded text-[10px] cursor-pointer border transition-colors ${
-                  persistentDemo
-                    ? 'bg-amber-500 text-neutral-950 border-amber-500 font-bold shadow-2xs'
-                    : 'border-neutral-400/40 opacity-75 hover:opacity-100'
-                }`}
-                title="开启爆炸持久化（常驻被炸状态）：被炸槽位不会在 3.0s 后自动消失，方便持续观察与调参（再次点击 #1~#6 可单独开关）"
-              >
+                persistentDemo ? 'bg-amber-500 text-neutral-950 border-amber-500 font-bold shadow-2xs'
+                : 'border-neutral-400/40 opacity-75 hover:opacity-100' }`}
+                title="开启爆炸持久化（常驻被炸状态）：被炸槽位不会在 3.0s 后自动消失，方便持续观察与调参（再次点击 #1~#6 可单独开关）">
                 常驻爆炸:{persistentDemo ? '开(持久)' : '关(3s)'}
               </button>
             )}
@@ -398,63 +364,29 @@ export const HudChoreographySlotAndTopBandColumns: React.FC<
             <div className="flex items-center justify-between gap-2 flex-wrap text-[10px]">
               <label className="flex items-center gap-1" title="调整爆炸 SVG / 红叉的像素尺寸 (10px ~ 28px)">
                 <span className="opacity-75">尺寸:</span>
-                <input
-                  type="range"
-                  min={10}
-                  max={28}
-                  step={1}
-                  value={demoIndicatorConfig.sizePx || 16}
-                  onChange={(e) =>
-                    onUpdateDemoIndicatorConfig({ sizePx: Number(e.target.value) })
-                  }
-                  className="w-14 accent-red-500 cursor-pointer"
-                />
-                <input
-                  type="number"
-                  min={8}
-                  max={32}
-                  step={1}
-                  value={demoIndicatorConfig.sizePx || 16}
-                  onChange={(e) => {
-                    const v = Number(e.target.value);
-                    if (!Number.isNaN(v) && v >= 8 && v <= 36) {
-                      onUpdateDemoIndicatorConfig({ sizePx: v });
-                    }
-                  }}
-                  className="w-10 px-1 py-0.2 rounded border border-red-500/30 bg-transparent text-center font-bold tabular-nums"
-                />
+                <input type="range" min={10} max={28} step={1} value={demoIndicatorConfig.sizePx || 16}
+                  onChange={(e) => onUpdateDemoIndicatorConfig({ sizePx: Number(e.target.value) }) }
+                  className="w-14 accent-red-500 cursor-pointer" />
+                <input type="number" min={8} max={32} step={1} value={demoIndicatorConfig.sizePx || 16}
+                  onChange={(e) => { const v = Number(e.target.value); if (!Number.isNaN(v) && v >= 8 && v <= 36) {
+                  onUpdateDemoIndicatorConfig({ sizePx: v }); } }}
+                  className="w-10 px-1 py-0.2 rounded border border-red-500/30 bg-transparent text-center font-bold tabular-nums" />
                 <span className="opacity-70">px</span>
               </label>
 
               <label className="flex items-center gap-1">
                 <span className="opacity-75">粗细:</span>
-                <input
-                  type="range"
-                  min={1.0}
-                  max={3.0}
-                  step={0.1}
-                  value={demoIndicatorConfig.strokeWidth}
-                  onChange={(e) =>
-                    onUpdateDemoIndicatorConfig({ strokeWidth: Number(e.target.value) })
-                  }
-                  className="w-12 accent-red-500 cursor-pointer"
-                />
+                <input type="range" min={1.0} max={3.0} step={0.1} value={demoIndicatorConfig.strokeWidth}
+                  onChange={(e) => onUpdateDemoIndicatorConfig({ strokeWidth: Number(e.target.value) }) }
+                  className="w-12 accent-red-500 cursor-pointer" />
                 <span className="tabular-nums font-bold">{demoIndicatorConfig.strokeWidth.toFixed(1)}</span>
               </label>
 
               <label className="flex items-center gap-1">
                 <span className="opacity-75">发光:</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={14}
-                  step={1}
-                  value={demoIndicatorConfig.glowBlurPx}
-                  onChange={(e) =>
-                    onUpdateDemoIndicatorConfig({ glowBlurPx: Number(e.target.value) })
-                  }
-                  className="w-12 accent-red-500 cursor-pointer"
-                />
+                <input type="range" min={0} max={14} step={1} value={demoIndicatorConfig.glowBlurPx}
+                  onChange={(e) => onUpdateDemoIndicatorConfig({ glowBlurPx: Number(e.target.value) }) }
+                  className="w-12 accent-red-500 cursor-pointer" />
                 <span className="tabular-nums font-bold">{demoIndicatorConfig.glowBlurPx}px</span>
               </label>
 

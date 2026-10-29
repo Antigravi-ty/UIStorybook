@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
-import {
-  SliderControl,
-  SegmentedSwitch,
-  ColorSwatchInput,
-  TunerToggleRow,
-  TunerSummaryStrip,
-} from '../../primitives';
-import { ParametricTrajectoryChart } from '../../charts';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ColorSwatchInput, TunerToggleRow, TunerSummaryStrip } from '../../primitives/TunerControls';
+import { ParametricTrajectoryChart } from '../../charts/ParametricTrajectoryChart';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

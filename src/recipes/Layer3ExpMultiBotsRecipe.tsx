@@ -4,14 +4,7 @@ import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layou
 import { SegmentedSwitch } from '../primitives/SegmentedSwitch';
 import { SliderControl } from '../primitives/SliderControl';
 import { ToggleSwitch } from '../primitives/ToggleSwitch';
-import {
-  TeamRosterCard,
-  TeamRosterSlotConfig,
-  BotPolicyId,
-  CarColorSwatch,
-  DEFAULT_BLUE_TEAM_SLOTS,
-  DEFAULT_ORANGE_TEAM_SLOTS,
-} from '../compounds';
+import { TeamRosterCard, TeamRosterSlotConfig, BotPolicyId, CarColorSwatch, DEFAULT_BLUE_TEAM_SLOTS, DEFAULT_ORANGE_TEAM_SLOTS } from '../compounds/TeamRosterCard';
 import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 
 export interface Layer3ExpMultiBotsRecipeProps {

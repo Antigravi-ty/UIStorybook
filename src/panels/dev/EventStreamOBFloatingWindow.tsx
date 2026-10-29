@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { SliderControl, SegmentedSwitch, EventFilterMatrix, EventCatalogEntry } from '../../primitives';
-import { EventImpulseScatterChart, CollisionImpulseEvent } from '../../charts';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { EventFilterMatrix, EventCatalogEntry } from '../../primitives/TunerControls';
+import { EventImpulseScatterChart, CollisionImpulseEvent } from '../../charts/EventImpulseScatterChart';
 
 const INITIAL_COLLISION_EVENTS: CollisionImpulseEvent[] = [
   { id: 'ev-1', ageSec: 0.35, value: 1920, type: 'car-ball', label: 'Power Clear (108 KM/H)' },

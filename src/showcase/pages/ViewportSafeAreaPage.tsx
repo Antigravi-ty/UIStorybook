@@ -1,5 +1,5 @@
 import React from 'react';
-import { createScopedSyncedState } from '../stores';
+import { createScopedSyncedState } from '../stores/crossClientSync';
 
 const useState = createScopedSyncedState('page:viewport-safe-area');
 import {
@@ -12,7 +12,9 @@ import {
   Eye,
   CheckCircle2,
 } from 'lucide-react';
-import { GameViewport, SafeAreaHud, useViewportStore, viewportStore } from '../../viewport';
+import { GameViewport } from '../../viewport/GameViewport';
+import { SafeAreaHud } from '../../viewport/SafeAreaHud';
+import { useViewportStore, viewportStore } from '../../viewport/viewportStore';
 import { SliderControl } from '../../primitives/SliderControl';
 import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';

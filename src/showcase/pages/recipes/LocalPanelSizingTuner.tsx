@@ -4,12 +4,7 @@ import { SliderControl } from '../../../primitives/SliderControl';
 import { SegmentedSwitch } from '../../../primitives/SegmentedSwitch';
 import { Badge } from '../../../primitives/Badge';
 import { Button } from '../../../primitives/Button';
-import {
-  useMenuLayoutStore,
-  DEFAULT_PANEL_SIZING,
-  type MenuPanelId,
-  type PanelSizingMode,
-} from '../../../tokens';
+import { useMenuLayoutStore, DEFAULT_PANEL_SIZING, type MenuPanelId, type PanelSizingMode } from '../../../tokens/menuLayoutStore';
 import type { JumpDirectoryItem, JumpDirectoryCategory } from '../../PageJumpDirectory';
 
 export const RECIPES_CATEGORIES: JumpDirectoryCategory[] = [

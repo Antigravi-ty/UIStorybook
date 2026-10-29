@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { LocalPanelSizingTuner } from './LocalPanelSizingTuner';
-import type { MenuPanelId } from '../../../tokens';
+import type { MenuPanelId } from '../../../tokens/menuLayoutStore';
 
 const Layer2RoomHostControlRecipe = lazy(() =>
   import('../../../recipes/Layer2RoomHostControlRecipe').then((m) => ({

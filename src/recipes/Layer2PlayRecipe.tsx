@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Bot, Server, Wifi, PencilRuler, BookOpen, SlidersHorizontal } from 'lucide-react';
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { PlayModeCard } from '../compounds/PlayModeCard';
-import { useMenuLayoutStore } from '../tokens';
+import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
 import {
   usePlayCardStyleStore,
   type PlayCardStyleParams,

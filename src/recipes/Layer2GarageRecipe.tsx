@@ -9,18 +9,17 @@ import {
 import { PanelContainer, PanelHeader, PanelContent, PanelFooter } from '../layout/Panel';
 import { UnderlineTabs, TabItem } from '../primitives/UnderlineTabs';
 import { UnderConstructionPlaceholder } from '../primitives/UnderConstructionPlaceholder';
-import { useMenuLayoutStore } from '../tokens';
-import {
-  GarageCarTab,
-  GarageColorTab,
-  GarageMaterialsTab,
-  GarageAnthemTab,
-  DEFAULT_BLUE_ORDER,
-  DEFAULT_ORANGE_ORDER,
-  type VisualMaterialsConfig,
-} from './garage';
+import { useMenuLayoutStore } from '../tokens/menuLayoutStore';
+import { GarageCarTab } from './garage/GarageCarTab';
+import { GarageColorTab, DEFAULT_BLUE_ORDER, DEFAULT_ORANGE_ORDER } from './garage/GarageColorTab';
+import { GarageMaterialsTab, type VisualMaterialsConfig } from './garage/GarageMaterialsTab';
+import { GarageAnthemTab } from './garage/GarageAnthemTab';
 
-export * from './garage';
+export * from './garage/garageConstants';
+export * from './garage/GarageCarTab';
+export * from './garage/GarageColorTab';
+export * from './garage/GarageMaterialsTab';
+export * from './garage/GarageAnthemTab';
 
 export type GarageTabId =
   | 'car'

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { SliderControl, SegmentedSwitch, ToggleSwitch, ColorSwatchInput } from '../../primitives';
-import { CubicBezierCurveEditor, CubicBezierValue } from '../../charts';
+import { SliderControl } from '../../primitives/SliderControl';
+import { SegmentedSwitch } from '../../primitives/SegmentedSwitch';
+import { ToggleSwitch } from '../../primitives/ToggleSwitch';
+import { ColorSwatchInput } from '../../primitives/TunerControls';
+import { CubicBezierCurveEditor, CubicBezierValue } from '../../charts/CubicBezierCurveEditor';
 import { FloatingWindowToolbar } from '../FloatingWindowToolbar';
 
 /**

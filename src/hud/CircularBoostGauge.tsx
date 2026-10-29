@@ -116,129 +116,34 @@ export interface CircularBoostGaugeProps {
  *    - 84 ~ 96  (<=96) ：翠绿 (#10b981)
  *    - 97 ~ 100 (>96)  ：浅蓝 (#0ea5e9)
  */
+const STEP_12_TIERS: (BoostSegmentColorInfo & { maxVal: number })[] = [
+  { maxVal: 11, color: '#18181b', segmentName: 'black', rangeLabel: '0-11 (Empty · Black)', isFlashing: false, tierIndex: 0 },
+  { maxVal: 23, color: '#ef4444', segmentName: 'red-flash', rangeLabel: '12-23 (Critical · Red Flash)', isFlashing: true, tierIndex: 1 },
+  { maxVal: 35, color: '#ef4444', segmentName: 'red', rangeLabel: '24-35 (Low · Red)', isFlashing: false, tierIndex: 2 },
+  { maxVal: 47, color: '#f97316', segmentName: 'orange', rangeLabel: '36-47 (Low-Mid · Orange)', isFlashing: false, tierIndex: 3 },
+  { maxVal: 59, color: '#eab308', segmentName: 'yellow', rangeLabel: '48-59 (Medium · Yellow)', isFlashing: false, tierIndex: 4 },
+  { maxVal: 71, color: '#84cc16', segmentName: 'lime', rangeLabel: '60-71 (Good · Lime)', isFlashing: false, tierIndex: 5 },
+  { maxVal: 83, color: '#22c55e', segmentName: 'green', rangeLabel: '72-83 (High · Green)', isFlashing: false, tierIndex: 6 },
+  { maxVal: 96, color: '#10b981', segmentName: 'emerald', rangeLabel: '84-96 (Near Full · Emerald)', isFlashing: false, tierIndex: 7 },
+  { maxVal: 100, color: '#0ea5e9', segmentName: 'sky', rangeLabel: '97-100 (Full · Sky)', isFlashing: false, tierIndex: 8 },
+];
+
+const CLASSIC_4_TIERS: (BoostSegmentColorInfo & { maxVal: number })[] = [
+  { maxVal: 24, color: '#ef4444', segmentName: 'red', rangeLabel: '0-24 (Critical · Red)', isFlashing: false, tierIndex: 0 },
+  { maxVal: 60, color: '#f59e0b', segmentName: 'yellow', rangeLabel: '25-60 (Caution · Yellow)', isFlashing: false, tierIndex: 1 },
+  { maxVal: 96, color: '#10b981', segmentName: 'green', rangeLabel: '61-96 (Sufficient · Green)', isFlashing: false, tierIndex: 2 },
+  { maxVal: 100, color: '#0ea5e9', segmentName: 'sky', rangeLabel: '97-100 (Full · Sky)', isFlashing: false, tierIndex: 3 },
+];
+
 export const getBoostSegmentColor = (
   amount: number,
   colorScheme: BoostColorScheme = 'classic-4'
 ): BoostSegmentColorInfo => {
   const val = Math.max(0, Math.min(100, Math.round(amount)));
-
-  if (colorScheme === 'step-12') {
-    if (val < 12) {
-      return {
-        color: '#18181b',
-        segmentName: 'black',
-        rangeLabel: '0-11 (空置·黑)',
-        isFlashing: false,
-        tierIndex: 0,
-      };
-    }
-    if (val < 24) {
-      return {
-        color: '#ef4444',
-        segmentName: 'red-flash',
-        rangeLabel: '12-23 (危急·红闪)',
-        isFlashing: true,
-        tierIndex: 1,
-      };
-    }
-    if (val < 36) {
-      return {
-        color: '#ef4444',
-        segmentName: 'red',
-        rangeLabel: '24-35 (低量·红)',
-        isFlashing: false,
-        tierIndex: 2,
-      };
-    }
-    if (val < 48) {
-      return {
-        color: '#f97316',
-        segmentName: 'orange',
-        rangeLabel: '36-47 (偏低·橙)',
-        isFlashing: false,
-        tierIndex: 3,
-      };
-    }
-    if (val < 60) {
-      return {
-        color: '#eab308',
-        segmentName: 'yellow',
-        rangeLabel: '48-59 (中等·黄)',
-        isFlashing: false,
-        tierIndex: 4,
-      };
-    }
-    if (val < 72) {
-      return {
-        color: '#84cc16',
-        segmentName: 'lime',
-        rangeLabel: '60-71 (良好·黄绿)',
-        isFlashing: false,
-        tierIndex: 5,
-      };
-    }
-    if (val < 84) {
-      return {
-        color: '#22c55e',
-        segmentName: 'green',
-        rangeLabel: '72-83 (充沛·亮绿)',
-        isFlashing: false,
-        tierIndex: 6,
-      };
-    }
-    if (val <= 96) {
-      return {
-        color: '#10b981',
-        segmentName: 'emerald',
-        rangeLabel: '84-96 (高能·翠绿)',
-        isFlashing: false,
-        tierIndex: 7,
-      };
-    }
-    return {
-      color: '#0ea5e9',
-      segmentName: 'sky',
-      rangeLabel: '97-100 (满载·浅蓝)',
-      isFlashing: false,
-      tierIndex: 8,
-    };
-  }
-
-  // Default: 'classic-4'
-  if (val <= 24) {
-    return {
-      color: '#ef4444',
-      segmentName: 'red',
-      rangeLabel: '0-24 (危急·红)',
-      isFlashing: false,
-      tierIndex: 0,
-    };
-  }
-  if (val <= 60) {
-    return {
-      color: '#f59e0b',
-      segmentName: 'yellow',
-      rangeLabel: '25-60 (警戒·黄)',
-      isFlashing: false,
-      tierIndex: 1,
-    };
-  }
-  if (val <= 96) {
-    return {
-      color: '#10b981',
-      segmentName: 'green',
-      rangeLabel: '61-96 (充足·绿)',
-      isFlashing: false,
-      tierIndex: 2,
-    };
-  }
-  return {
-    color: '#0ea5e9',
-    segmentName: 'sky',
-    rangeLabel: '97-100 (充盈·浅蓝)',
-    isFlashing: false,
-    tierIndex: 3,
-  };
+  const table = colorScheme === 'step-12' ? STEP_12_TIERS : CLASSIC_4_TIERS;
+  const found = table.find((t) => val <= t.maxVal) ?? table[table.length - 1];
+  const { maxVal: _m, ...info } = found;
+  return info;
 };
 
 export const STEP_12_TIER_PRESETS: {

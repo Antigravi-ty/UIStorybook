@@ -1,5 +1,5 @@
 import React from 'react';
-import { UI_SPACING, UI_RADIUS } from '../tokens';
+import { UI_SPACING, UI_RADIUS } from '../tokens/spacing';
 
 export type BadgeVariant =
   | 'default'
